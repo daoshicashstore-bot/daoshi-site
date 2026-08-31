@@ -682,7 +682,7 @@
       background: #0f051a;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
       padding: 48px 20px 28px;
-      margin-top: 60px;
+      margin-top: 0;
       position: relative;
       z-index: 2;
     }
@@ -815,18 +815,15 @@
     }
     
     /* ===== PAINEL DE CONTROLE DE VOLUME ===== */
-    .volume-control {
+        .volume-control {
+      /* ARRUMADO: era uma caixa opaca de min-width:280px SEMPRE visivel — com o
+         painel interno fechado (display:none) sobrava uma barra escura vazia ao
+         lado do botao. Agora e' so um wrapper invisivel; o visual da caixa foi
+         para .volume-panel.active, que aparece SO quando aberto. */
       position: fixed;
       bottom: 30px;
       left: 30px;
-      background: rgba(26, 13, 36, 0.95);
-      border: 4px solid var(--purple-vibrant);
-      border-radius: 16px;
-      padding: 20px;
       z-index: 9999;
-      box-shadow: 0 8px 25px rgba(153, 51, 255, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
-      min-width: 280px;
-      backdrop-filter: blur(10px);
     }
     
     .volume-toggle {
@@ -865,6 +862,16 @@
     
     .volume-panel.active {
       display: block;
+      position: absolute;
+      bottom: 74px;                 /* abre ACIMA do botao 🔊 (60px + folga) */
+      left: 0;
+      background: rgba(26, 13, 36, 0.95);
+      border: 4px solid var(--purple-vibrant);
+      border-radius: 16px;
+      padding: 20px;
+      min-width: 280px;
+      box-shadow: 0 8px 25px rgba(153, 51, 255, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+      backdrop-filter: blur(10px);
     }
     
     .volume-header {
