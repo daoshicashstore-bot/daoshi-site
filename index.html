@@ -46,7 +46,7 @@
          era ampliada para cobrir a tela e ficava GIGANTE, dominando o
          conteúdo. O gradiente por cima a mantém como fundo DISCRETO, e os
          cards da loja voltam a ser o que se lê primeiro. */
-      background: linear-gradient(rgba(15,5,26,.82), rgba(15,5,26,.82)),
+      background: linear-gradient(rgba(15,5,26,.74), rgba(15,5,26,.74)),
         url('https://lh3.googleusercontent.com/d/1ECtr_z7YWp_QugVyvTQBWTiV9d88m5zS') center/cover no-repeat fixed;
       min-height: 100vh;
       font-size: 14px;
@@ -681,6 +681,13 @@
       position: relative;
       z-index: 2;
     }
+
+    /* Com um jogo aberto (iframe em tela cheia), o body ganha .no-navbar.
+       O footer do index estava subindo POR CIMA do iframe ao rolar (mesmo
+       z-index, footer depois no DOM). Dentro de um jogo o rodape do site nao
+       tem funcao — escondê-lo enquanto o jogo esta aberto resolve o "footer
+       subindo e cobrindo". Na home ele continua normal. */
+    body.no-navbar footer { display: none !important; }
     
     .footer-content {
       max-width: 1200px;
