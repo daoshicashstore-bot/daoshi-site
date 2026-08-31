@@ -106,3 +106,17 @@ td, th {
 ::-webkit-scrollbar-thumb:hover {
   background: #b366ff;
 }
+
+/* ===== VEU SOBRE A BONECA DE FUNDO (31/08) =====
+   Cada loja de jogo tem body{ background: url(mascote) cover fixed }. Com cover
+   a imagem era ampliada e a boneca ficava GIGANTE, dominando os cards. Este
+   veu discreto (nao troca a imagem — funciona para qualquer jogo) rebaixa a
+   mascote a ambiente e devolve o destaque ao que se compra. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 5, 26, 0.74);
+  z-index: -1;
+  pointer-events: none;
+}
