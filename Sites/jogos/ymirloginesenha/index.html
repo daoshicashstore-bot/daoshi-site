@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loja Daoshi - Ymir Login e Senha</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1lLnjQ3NYt6Bd6WapJ2p0EjzfQJIbB-es">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  
+  
+  <!-- ?? Fix Viewport - Evita Scroll -->
+  <link rel="stylesheet" href="../../shared/viewport-fix.css">
+  <!-- 💰 Arquivo de Configuração de Preços -->
+  <script src="../../shared/firebase-prices.js"></script>
+  <script src="config-precos.js"></script>
+  
+  <style>
+    :root {
+      --bg-dark: #0f0a1a;
+      --bg-card: rgba(61, 27, 45, 0.92);
+      --bg-card-hover: #301d24;
+      --purple: #ff1493;
+      --purple-light: #ff69b4;
+      --purple-dark: #c71585;
+      --gold: #ffd700;
+      --gold-light: #ffbf00;
+      --text-primary: #f5f5f5;
+      --text-secondary: #ff69b4;
+      --border: #ff69b4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --panel-bg: rgba(61, 27, 45, 0.92);
+      --panel-border: #ff69b4;
+      --star-pink: #ff1493;
+      --star-yellow: #ffd700;
+      --star-blue: #ff69b4;
+      --star-purple: #ff1493;
+      
+      --primary-color: #9933ff;
+      --secondary-color: #2d1b3d;
+      --accent-color: #ffd700;
+      --gold-color: #ffd700;
+      --gold-dark: #ffbf00;
+      --text-color: #f5f5f5;
+      --input-bg: rgba(153, 51, 255, 0.2);
+      --input-border: #ffd700;
+      --button-primary: #9933ff;
+      --button-hover: #b366ff;
+      --button-active: #cc66ff;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: none;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+    
+    body {
+      background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                        url('https://lh3.googleusercontent.com/d/1ECtr_z7YWp_QugVyvTQBWTiV9d88m5zS');
+      background-size: cover;
+      background-position: center center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: 'Press Start 2P', cursive;
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(36, 13, 26, 0.90) 0%,
+        rgba(255, 20, 147, 0.3) 30%,
+        rgba(255, 105, 180, 0.3) 60%,
+        rgba(61, 27, 45, 0.90) 100%
+      );
+      z-index: -1;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.05) 0px,
+        rgba(0, 0, 0, 0.05) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 9999;
+      animation: scanlines 8s linear infinite;
+    }
+    
+    @keyframes scanlines {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(10px); }
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      flex-grow: 1;
+    }
+    
+    header {
+      text-align: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    header h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 24px;
+      color: var(--star-yellow);
+      text-shadow: 
+        4px 0 0 var(--star-pink),
+        -4px 0 0 var(--star-pink),
+        0 4px 0 var(--star-pink),
+        0 -4px 0 var(--star-pink),
+        4px 4px 0 var(--star-pink),
+        -4px -4px 0 var(--star-pink),
+        4px -4px 0 var(--star-pink),
+        -4px 4px 0 var(--star-pink);
+      animation: float 3s ease-in-out infinite, title-glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes title-glow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 20px rgba(179, 102, 255, 0.5));
+      }
+      50% { 
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1)) drop-shadow(0 0 35px rgba(179, 102, 255, 0.9));
+      }
+    }
+    
+    header p {
+      color: var(--star-yellow);
+      font-weight: 400;
+      font-size: 10px;
+      margin-top: 15px;
+      text-shadow: 2px 2px 0 var(--star-purple);
+    }
+    
+    .cotacao-display {
+      margin-top: 15px;
+      background: var(--star-purple);
+      padding: 10px 20px;
+      border-radius: 0;
+      font-size: 10px;
+      border: 4px solid var(--star-yellow);
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .cotacao-display {
+      color: #00d9ff;
+    }
+    .cotacao-display .icon { 
+      margin-right: 10px; 
+      color: var(--star-yellow);
+      font-size: 16px;
+    }
+    .cotacao-display .value { 
+      font-weight: 600; 
+      color: var(--gold);
+    }
+
+    .main-layout {
+        display: flex;
+        gap: 20px;
+        flex-grow: 1;
+    }
+
+    .left-column {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .right-column {
+        flex: 1.2;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-shrink: 0;
+    }
+
+    .tab-button {
+      padding: 15px 30px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      border: 4px solid var(--star-yellow);
+      background: var(--star-purple);
+      color: var(--text-color);
+      border-radius: 0;
+      border-bottom: none;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+
+    .tab-button.active {
+      background: var(--star-pink);
+      color: var(--text-color);
+      border-color: var(--star-yellow);
+      transform: translateY(0px);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 20px var(--star-yellow);
+      animation: pulse-border 1.5s infinite;
+    }
+    
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 20px var(--star-yellow); }
+      50% { box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 30px var(--star-yellow); }
+    }
+
+    @keyframes shimmer-effect {
+      0% { transform: translateX(-150%) skewX(-30deg); }
+      100% { transform: translateX(150%) skewX(-30deg); }
+    }
+
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+      animation: shimmer-effect 2.5s infinite linear;
+    }
+    
+    .tab-content {
+        flex-grow: 1;
+        margin-top: -12px;
+    }
+    
+    .tab-pane {
+        height: 100%;
+        display: none;
+    }
+    .tab-pane.active {
+        display: block;
+    }
+    
+    .panel {
+      background: var(--panel-bg);
+      border-radius: 0;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+      border: 4px solid var(--panel-border);
+      backdrop-filter: none;
+      padding: 20px;
+      animation: fadeIn 0.6s ease forwards;
+      height: auto;
+      position: relative;
+    }
+    
+    .panel::before {
+      content: '⭐';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      animation: star-spin 4s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255, 237, 78, 0.8));
+    }
+    
+    .panel::after {
+      content: '💫';
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 20px;
+      animation: star-spin-reverse 5s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255, 110, 199, 0.8));
+    }
+    
+    @keyframes star-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes star-spin-reverse {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+    
+    .tab-content .panel {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+    
+    .panel-content-wrapper {
+        display: grid;
+        grid-template-columns: 1.5fr 2fr;
+        gap: 20px;
+    }
+
+    .login-section {
+        grid-column: 2;
+    }
+
+    .panel-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      font-weight: 400;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+      color: var(--star-yellow);
+      display: inline-block;
+      position: relative;
+      padding: 5px 10px;
+      background: var(--star-purple);
+      border: 3px solid var(--star-yellow);
+    }
+    
+    h2::after {
+      content: '✨';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+    }
+    
+    h3 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 11px;
+      font-weight: 400;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      color: var(--star-yellow);
+      text-align: center;
+      border-bottom: 3px solid var(--panel-border);
+      padding-bottom: 10px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    
+    .form-group { margin-bottom: 15px; }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 400;
+      color: var(--star-yellow);
+      font-size: 9px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      color: #00d9ff;
+      border: 3px solid var(--input-border);
+      border-radius: 0;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    
+    input[type="number"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--star-pink);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 15px var(--star-pink);
+    }
+    
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    
+    .result-group {
+      margin: 15px 0;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 0;
+      border: 3px solid var(--star-blue);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    
+    .result-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 10px; 
+      font-size: 9px;
+    }
+    .result-item:last-child { margin-bottom: 0; }
+    .result-label { 
+      font-weight: 400;
+      color: var(--star-yellow);
+    }
+    .result-value { 
+      font-weight: 400; 
+      color: var(--star-pink);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .result-value small { 
+      font-size: 0.8em; 
+      opacity: 0.9;
+      color: var(--star-blue);
+    }
+    
+    .pacote-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    
+    .btn { 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 15px 20px; 
+      background: var(--button-primary); 
+      color: white; 
+      border: 3px solid var(--star-yellow); 
+      border-radius: 0; 
+      font-family: 'Press Start 2P', cursive; 
+      font-size: 10px; 
+      font-weight: 400; 
+      cursor: pointer; 
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.5); 
+      position: relative; 
+      overflow: hidden; 
+      width: 100%;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .btn:hover { 
+      background: var(--button-hover); 
+      transform: translate(-2px, -2px); 
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+    }
+    .btn:active { 
+      background: var(--button-active); 
+      transform: translate(2px, 2px); 
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .btn svg { width: 14px; height: 14px; margin-right: 10px; }
+    
+    .summary-and-payment { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    .payment-methods { display: flex; flex-direction: column; gap: 15px; }
+    .payment-method { 
+      padding: 15px; 
+      background: rgba(0, 0, 0, 0.5); 
+      border-radius: 0; 
+      border: 3px solid var(--star-blue); 
+      position: relative;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    .payment-method-title { 
+      display: flex; 
+      align-items: center; 
+      font-size: 11px; 
+      margin-bottom: 12px; 
+      color: var(--star-yellow);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .payment-method-title span { margin-left: 8px; }
+    .payment-details { 
+      font-size: 9px;
+      line-height: 1.8;
+    }
+    .payment-details strong { 
+      color: var(--star-pink);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .copy-payment-btn { 
+      position: absolute; 
+      top: 12px; 
+      right: 12px; 
+      background: var(--button-primary); 
+      border: 2px solid var(--star-yellow); 
+      border-radius: 0; 
+      width: 35px; 
+      height: 35px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    }
+    .copy-payment-btn:hover { 
+      background: var(--button-hover); 
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    }
+    .copy-payment-btn svg { width: 15px; height: 15px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+    .copy-payment-btn img { width: 15px; height: 15px; display: block; }
+    
+    .total-grand { 
+      font-size: 11px; 
+      font-weight: 400; 
+      margin-bottom: 15px; 
+      text-align: center; 
+      color: var(--star-yellow); 
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .total-grand span { 
+      display: block; 
+      margin-top: 8px; 
+      font-size: 14px;
+      color: var(--star-pink);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    }
+    .total-grand span small { 
+      font-size: 0.7em; 
+      opacity: 0.9;
+      color: var(--star-blue);
+    }
+
+    .tooltip { 
+      position: fixed; 
+      background: var(--star-purple); 
+      color: white; 
+      padding: 12px 18px; 
+      border-radius: 0; 
+      font-size: 9px; 
+      z-index: 1000; 
+      pointer-events: none; 
+      opacity: 0; 
+      transition: opacity 0.3s; 
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+      border: 3px solid var(--star-yellow);
+    }
+    .particles-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -2; }
+    .particle { position: absolute; background: var(--star-pink); border-radius: 50%; opacity: 0.6; }
+    .sound-control { 
+      position: fixed; 
+      bottom: 15px; 
+      right: 270px; 
+      z-index: 1000;
+      background: var(--star-purple);
+      padding: 10px;
+      border-radius: 0;
+      border: 3px solid var(--star-yellow);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @media (max-width: 1024px) {
+        .main-layout {
+            flex-direction: column;
+        }
+        .panel-content-wrapper, .summary-and-payment {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        body { 
+          padding: 10px;
+          font-size: 9px;
+        }
+        header h1 { 
+          font-size: 16px;
+        }
+        header p {
+          font-size: 8px;
+        }
+        .tab-button { 
+          font-size: 9px; 
+          padding: 12px 20px;
+        }
+        .panel { 
+          padding: 15px;
+        }
+        .pacote-section { 
+          grid-template-columns: 1fr 1fr;
+        }
+        h2 {
+          font-size: 11px;
+        }
+        h3 {
+          font-size: 9px;
+        }
+        label {
+          font-size: 8px;
+        }
+        .star-gif {
+          width: 160px;
+          bottom: 10px;
+          right: 10px;
+        }
+        .sound-control {
+          right: 180px;
+        }
+        .volume-slider {
+          right: 240px;
+        }
+    }
+
+    .invisible-button { 
+      position: absolute; 
+      top: 15px; 
+      left: 15px; 
+      width: 30px; 
+      height: 30px; 
+      background: transparent; 
+      border: none; 
+      cursor: pointer; 
+      z-index: 10; 
+      padding: 0; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 0;
+      opacity: 0;
+    }
+    .invisible-button::after { 
+      content: "🌸"; 
+      font-size: 18px; 
+      opacity: 0;
+    }
+    .invisible-button:hover::after { 
+      opacity: 0.3;
+      animation: spin 0.5s linear;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .sound-icon { width: 20px; height: 20px; fill: var(--star-yellow); }
+    .muted .sound-icon .wave { opacity: 0.3; }
+    .muted .sound-icon .line { opacity: 1; }
+    .volume-slider { 
+      position: fixed; 
+      bottom: 15px; 
+      right: 330px; 
+      background: var(--star-purple); 
+      padding: 10px 15px; 
+      border-radius: 0; 
+      z-index: 1000; 
+      display: flex; 
+      align-items: center; 
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5); 
+      border: 3px solid var(--star-yellow); 
+      transform: translateX(200px); 
+      opacity: 0; 
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .volume-slider.active { transform: translateX(0); opacity: 1; }
+    .volume-slider input { width: 80px; margin: 0 8px; }
+    .volume-label { 
+      color: var(--star-yellow); 
+      font-size: 8px; 
+      margin-right: 6px;
+    }
+    
+    .star-gif {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      width: 240px;
+      height: auto;
+      z-index: 1000;
+      pointer-events: none;
+      filter: 
+        drop-shadow(0 0 15px rgba(153, 51, 255, 0.8)) 
+        drop-shadow(0 0 25px rgba(255, 215, 0, 0.6));
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>⭐ Daoshi Store ⭐</h1>
+      <p>✨ Legends of Ymir - Login e Senha ✨</p>
+      <div class="cotacao-display">
+        <span class="icon">💫</span>
+        <span id="cotacao">Carregando cotação...</span>
+      </div>
+    </header>
+
+    <div class="main-layout">
+        <div class="left-column">
+            <div class="tab-buttons">
+              <button class="tab-button active" onclick="showTab('ymp')">💠 YMP 💠</button>
+            </div>
+            <div class="tab-content">
+              <div id="ympTab" class="tab-pane active">
+                    <div class="panel">
+                        <div class="panel-content-wrapper">
+                            <div>
+                                <h3>Passo 1: Selecione os Pacotes YMP</h3>
+                                <div class="pacote-section">
+                                    <div class="form-group"><label for="ymp499">499 YMP</label><input type="number" id="ymp499" value="0" oninput="updatePackQuantidades(499, this.value);"></div>
+                                    <div class="form-group"><label for="ymp999">999 YMP</label><input type="number" id="ymp999" value="0" oninput="updatePackQuantidades(999, this.value);"></div>
+                                    <div class="form-group"><label for="ymp2999">2999 YMP</label><input type="number" id="ymp2999" value="0" oninput="updatePackQuantidades(2999, this.value);"></div>
+                                    <div class="form-group"><label for="ymp4999">4999 YMP</label><input type="number" id="ymp4999" value="0" oninput="updatePackQuantidades(4999, this.value);"></div>
+                                    <div class="form-group"><label for="ymp9999">9999 YMP</label><input type="number" id="ymp9999" value="0" oninput="updatePackQuantidades(9999, this.value);"></div>
+                                </div>
+                            </div>
+                            <div class="login-section">
+                                <h3>Passo 2: Informações da Conta</h3>
+                                <div class="form-group"><label for="loginTWD">Login / Email:</label><input type="text" id="loginTWD" placeholder="Digite o login"></div>
+                                <div class="form-group"><label for="passwordTWD">Senha:</label><input type="text" id="passwordTWD" placeholder="Digite a senha"></div>
+                                <div class="form-group"><label for="nicknameTWD">Nickname:</label><input type="text" id="nicknameTWD" placeholder="Digite o nickname"></div>
+                                <div class="form-group"><label for="serverTWD">Servidor:</label><input type="text" id="serverTWD" placeholder="Digite o servidor"></div>
+                                <div class="form-group"><label for="metodoLoginTWD">Método de Login:</label><input type="text" id="metodoLoginTWD" placeholder="Google / Facebook / Apple / Steam"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>🌸 Resumo e Pagamento 🌸</h2>
+                </div>
+                <div class="summary-and-payment">
+                    <div class="summary">
+                        <h3>Resumo do Pedido</h3>
+                        <div class="result-group">
+                            <div class="result-item">
+                                <div class="result-label">Total YMP:</div>
+                                <div class="result-value" id="summaryTWDDisplay">R$0.00</div>
+                            </div>
+                            <hr style="border-color: var(--panel-border); margin: 8px 0;">
+                            <div class="total-grand">
+                                Total Geral a Pagar
+                                <span id="summaryTotalDisplay">R$0.00</span>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="copySmartClipboard(event)">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          Copiar Resumo do Pedido
+                        </button>
+                        <button class="invisible-button" onclick="copyForCardPayment(event)" title="Opção para pagamento com cartão"></button>
+                    </div>
+                    <div class="payment-methods">
+                        <h3>Formas de Pagamento</h3>
+                        <div class="payment-method">
+                            <div class="payment-method-title"><span>Pix</span></div>
+                            <div class="payment-details">
+                                <p><strong>CELULAR:</strong> <span id="pixCelular">14988231270</span></p>
+                                <p><strong>Nome:</strong> <span id="pixNome">DAOSHI TRADE</span></p>
+                            </div>
+                            <button class="copy-payment-btn" onclick="copyPaymentDetail('pix', event)" title="Copiar Chave Pix" aria-label="Copiar Chave Pix">
+                              <img src="../copy-icon.svg" alt="" aria-hidden="true">
+                            </button>
+                        </div>
+                        <div class="payment-method">
+                            <div class="payment-method-title"><span>Binance</span></div>
+                            <div class="payment-details"><p><strong>ID:</strong> <span id="binanceId">1202540648</span></p></div>
+                            <button class="copy-payment-btn" onclick="copyPaymentDetail('binance', event)" title="Copiar E-mail Binance" aria-label="Copiar E-mail Binance">
+                              <img src="../copy-icon.svg" alt="" aria-hidden="true">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="particles-container" id="particles"></div>
+  <div class="tooltip" id="tooltip"></div>
+  <img src="https://media.giphy.com/media/bzawYMvJVw0KPA0u7M/giphy.gif" alt="Star Butterfly" class="star-gif">
+
+<script>
+    const CONFIG = window.YMIRLOGINESENHA_CONFIG || {
+          defaultExchangeRate: 5.30,
+          cardFeePercentage: 0.06,
+          packages: {
+              499: { price: 4.40 },
+              999: { price: 8.80 },
+              2999: { price: 26.40 },
+              4999: { price: 44.00 },
+              9999: { price: 88.00 }
+          }
+    };
+    let exchangeRate = CONFIG.defaultExchangeRate || 5.30;
+    let packQuantidades = { 499: 0, 999: 0, 2999: 0, 4999: 0, 9999: 0 };
+    
+    const carrinhoSound = new Audio('../carrinho.mp3');
+    carrinhoSound.volume = 0.7;
+    
+    function playCarrinhoSound() {
+        carrinhoSound.currentTime = 0;
+        carrinhoSound.play().catch(err => console.log('Erro ao tocar som:', err));
+    }
+    
+    window.onload = function() {
+      updateAllTotals();
+      setupEventListeners();
+      atualizarCotacaoDolar();
+    };
+    
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+        document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+    }
+    
+    function setupEventListeners() {
+        document.querySelectorAll('input').forEach(input => {
+            if (input.type === 'number') {
+                input.addEventListener('focus', () => { if (input.value === '0') input.value = ''; });
+                input.addEventListener('blur', () => { if (input.value === '') input.value = '0'; });
+            }
+        });
+    }
+    
+    function showTooltip(message, event) {
+        const tooltip = document.getElementById("tooltip");
+        tooltip.textContent = message;
+        const rect = event.target.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+        tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+        tooltip.style.opacity = "1";
+        setTimeout(() => { tooltip.style.opacity = "0"; }, 2000);
+    }
+    
+    function updatePackQuantidades(pack, quantidade) {
+        packQuantidades[pack] = parseInt(quantidade) || 0;
+        updateAllTotals();
+    }
+
+    function updateAllTotals() {
+        let totalDPack = 0;
+        Object.keys(packQuantidades).forEach(pack => {
+            if (CONFIG.packages && CONFIG.packages[pack]) {
+                totalDPack += (packQuantidades[pack] || 0) * CONFIG.packages[pack].price;
+            }
+        });
+
+      updateSummary(totalDPack);
+    }
+
+    function updateSummary(totalDPack) {
+        const totalRPack = totalDPack * exchangeRate;
+      const totalGeralR = totalRPack;
+      const totalGeralD = totalDPack;
+
+        document.getElementById("summaryTWDDisplay").innerHTML = `R$${totalRPack.toFixed(2)} <small>/ $${totalDPack.toFixed(2)}</small>`;
+        document.getElementById("summaryTotalDisplay").innerHTML = `R$${totalGeralR.toFixed(2)} <small>/ $${totalGeralD.toFixed(2)}</small>`;
+    }
+    
+    async function atualizarCotacaoDolar() {
+      const cotacaoEl = document.getElementById('cotacao');
+      if (!cotacaoEl) {
+        console.error('Elemento #cotacao não encontrado!');
+        return;
+      }
+      
+      cotacaoEl.innerHTML = `<span class="value">⏳ Buscando cotação...</span>`;
+      
+      try {
+        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        exchangeRate = parseFloat(data.price);
+        
+        if (isNaN(exchangeRate)) throw new Error('Valor inválido recebido');
+        
+        cotacaoEl.innerHTML = `Cotação USDT/BRL: <span class="value">R$${exchangeRate.toFixed(2)}</span>`;
+      } catch (error) {
+        console.error('Erro ao buscar cotação:', error);
+        exchangeRate = CONFIG.defaultExchangeRate || 5.30;
+        cotacaoEl.innerHTML = `Cotação USDT/BRL: <span class="value">R$${exchangeRate.toFixed(2)} (offline)</span>`;
+      }
+      
+      updateAllTotals();
+    }
+    
+    function copyContent(text, message, event) {
+        if (!text) { showTooltip("Nada para copiar!", event); return; }
+        navigator.clipboard.writeText(text).then(() => {
+            showTooltip(message, event);
+        }).catch(err => {
+            console.error('Falha ao copiar: ', err);
+            showTooltip("Erro ao copiar!", event);
+        });
+    }
+    
+    function copyPaymentDetail(method, event) {
+        playCarrinhoSound();
+        let textToCopy = '';
+        let message = '';
+        if (method === 'pix') {
+            const pixCelular = document.getElementById('pixCelular').innerText;
+            const pixNome = document.getElementById('pixNome').innerText;
+            textToCopy = `PIX: ${pixCelular}\nNome: ${pixNome}`; 
+            message = 'Informações do Pix copiadas!';
+        } else if (method === 'binance') {
+            textToCopy = document.getElementById('binanceEmail').innerText;
+            message = 'E-mail da Binance copiado!';
+        }
+        copyContent(textToCopy, message, event);
+    }
+    
+    function getFormValues() {
+        const data = {
+        hasTWD: false,
+            twdTexto: '', totalTWDR: 0, totalTWDD: 0,
+        login: document.getElementById('loginTWD').value,
+        password: document.getElementById('passwordTWD').value,
+        nickname: document.getElementById('nicknameTWD').value,
+        server: document.getElementById('serverTWD').value,
+        metodoLogin: document.getElementById('metodoLoginTWD').value
+        };
+
+        Object.keys(packQuantidades).forEach(p => {
+            const qtd = packQuantidades[p];
+            if (qtd > 0 && CONFIG.packages && CONFIG.packages[p]) {
+                data.hasTWD = true;
+                const preco = CONFIG.packages[p].price;
+                const subtotalD = qtd * preco;
+                data.twdTexto += `  - ${p} YMP: ${qtd} un.\n`;
+                data.totalTWDD += subtotalD;
+            }
+        });
+        data.totalTWDR = data.totalTWDD * exchangeRate;
+        return data;
+    }
+    
+    function copySmartClipboard(event) {
+        playCarrinhoSound();
+        const data = getFormValues();
+        if (!data.hasTWD) {
+          showTooltip("Preencha TWD!", event);
+            return;
+        }
+        
+        // CABEÇALHO COM NOME DO JOGO
+        let texto = "⭐ RESUMO DO PEDIDO DAOSHI ⭐\n";
+        texto += "🎮 JOGO: YMIR LOGIN E SENHA\n";
+        texto += "---------------------------------\n";
+
+        if (data.hasTWD) {
+            texto += `💠 YMP\n${data.twdTexto}`;
+            texto += `  - Valor: R$${data.totalTWDR.toFixed(2)} / $${data.totalTWDD.toFixed(2)}\n---------------------------------\n`;
+        }
+        
+        // DADOS DA CONTA - APENAS CAMPOS PREENCHIDOS
+        const loginFields = [];
+        if (data.login) loginFields.push(`Login: ${data.login}`);
+        if (data.password) loginFields.push(`Senha: ${data.password}`);
+        if (data.nickname) loginFields.push(`Nick: ${data.nickname}`);
+        if (data.server) loginFields.push(`Servidor: ${data.server}`);
+        if (data.metodoLogin) loginFields.push(`Método: ${data.metodoLogin}`);
+        
+        if (loginFields.length > 0) {
+            texto += `👤 DADOS DA CONTA\n\`\`\`\n${loginFields.join('\n')}\n\`\`\`\n---------------------------------\n`;
+        }
+        
+        const totalGeralR = data.totalTWDR;
+        const totalGeralD = data.totalTWDD;
+        texto += `💰 TOTAL GERAL: R$${totalGeralR.toFixed(2)} / $${totalGeralD.toFixed(2)}\n`;
+        const pixCelular = document.getElementById('pixCelular').innerText;
+        const pixNome = document.getElementById('pixNome').innerText;
+        const binanceEmail = document.getElementById('binanceEmail').innerText;
+        texto += "---------------------------------\n";
+        texto += "🌸 INFORMAÇÕES DE PAGAMENTO 🌸\n";
+        texto += `PIX (Celular): ${pixCelular}\n`;
+        texto += `Nome: ${pixNome}\n\n`;
+        texto += `Binance (Email): ${binanceEmail}\n`;
+        copyContent(texto, "Resumo copiado!", event);
+    }
+    
+    function copyForCardPayment(event) {
+        const data = getFormValues();
+      if (!data.hasTWD) {
+            showTooltip("Preencha algo para pagar com cartão!", event);
+            return;
+        }
+      const totalGeralR = data.totalTWDR;
+      const totalGeralD = data.totalTWDD;
+        const totalComTaxa = totalGeralR * (1 + CONFIG.cardFeePercentage);
+        
+        let texto = "⭐ Pedido para Pagamento no Cartão ⭐\n---------------------------------\n";
+      texto += `- Itens: Ymir Login e Senha (YMP)\n`;
+        texto += `Valor do Pedido: R$${totalGeralR.toFixed(2)} / $${totalGeralD.toFixed(2)}\n`;
+        texto += `Taxa do Cartão (${(CONFIG.cardFeePercentage * 100).toFixed(0)}%): R$${(totalComTaxa - totalGeralR).toFixed(2)}\n`;
+        texto += `TOTAL A PAGAR: R$${totalComTaxa.toFixed(2)}\n\n`;
+        texto += "Link de Pagamento (Mercado Pago):\nhttps://link.mercadopago.com.br/daoshistore";
+        
+        texto += "\n\n";
+        texto += "⚠️ INFORMAÇÕES IMPORTANTES ⚠️\n";
+        texto += "---------------------------------\n";
+        texto += "💳 Pagamentos no Cartão de Crédito\n\n";
+        texto += "• O cartão deve ser, obrigatoriamente, do próprio comprador.\n";
+        texto += `• Pagamentos têm acréscimo de ${(CONFIG.cardFeePercentage * 100).toFixed(0)}% de juros.\n\n`;
+        texto += "🔒 Para segurança da transação, é necessário informar:\n";
+        texto += "  - Nome completo:\n";
+        texto += "  - CPF:\n";
+        texto += "  - Telefone (WhatsApp):\n";
+        texto += "  - Rede social ativa:\n\n";
+        texto += "❗️Atenção: Em casos de suspeita de fraude ou tentativa de golpe, temos processos internos e legais para identificar e responsabilizar o comprador.";
+        
+        copyContent(texto, "Informações para cartão copiadas!", event);
+    }
+</script>
+</body>
+</html>
+

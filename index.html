@@ -1,0 +1,1991 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⭐ Daoshi Store - Loja Premium de Games</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1lLnjQ3NYt6Bd6WapJ2p0EjzfQJIbB-es">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  <!-- Arquivo de Configuração -->
+  <script src="config.js"></script>
+  
+  <style>
+    /* ===== PIXEL ART RETRO - DAOSHI STORE - PALETA ROXA/DOURADA ===== */
+    
+    :root {
+      --purple-dark: #0f051a;
+      --purple-deep: #1a0d24;
+      --purple-medium: #2d1b3d;
+      --purple-vibrant: #9933ff;
+      --purple-light: #b366ff;
+      --magenta: #ff1493;
+      --pink: #ff69b4;
+      --hot-pink: #ff1493;
+      --gold: #ffd700;
+      --gold-amber: #ffbf00;
+      --yellow: #ffc107;
+      --text-color: #f5f5f5;
+      --font-retro: 'Press Start 2P', cursive;
+      --font-main: 'Inter', sans-serif;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: all 0.3s ease;
+    }
+    
+    body {
+      font-family: var(--font-main);
+      color: var(--text-color);
+      background: url('https://lh3.googleusercontent.com/d/1ECtr_z7YWp_QugVyvTQBWTiV9d88m5zS') center/cover no-repeat fixed;
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.6;
+      overflow-x: hidden;
+      padding-top: 80px; /* Espaço para navbar fixa */
+    }
+    
+    /* Remove padding quando navbar está escondida */
+    body.no-navbar {
+      padding-top: 0;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(26, 13, 36, 0.92) 0%,
+        rgba(153, 51, 255, 0.35) 30%,
+        rgba(179, 102, 255, 0.35) 60%,
+        rgba(45, 27, 61, 0.92) 100%
+      );
+      z-index: -1;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0px,
+        rgba(0, 0, 0, 0.1) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 9999;
+      animation: scanlines 8s linear infinite;
+    }
+    
+    @keyframes scanlines {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(10px); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.08); }
+      60% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    /* ===== NAVIGATION BAR ===== */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      background: rgba(15, 5, 26, 0.95);
+      backdrop-filter: blur(10px);
+      border-bottom: 2px solid var(--gold);
+      padding: 12px 0;
+      z-index: 1000;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* Esconder navbar quando estiver em um jogo */
+    .navbar.hidden {
+      transform: translateY(-100%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .nav-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .nav-logo {
+      font-family: var(--font-retro);
+      font-size: 16px;
+      color: var(--gold);
+      text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+      cursor: pointer;
+    }
+    
+    .nav-menu {
+      display: flex;
+      gap: 10px;
+      list-style: none;
+    }
+    
+    .nav-link {
+      padding: 10px 20px;
+      color: var(--text-color);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    
+    .nav-link:hover, .nav-link.active {
+      background: rgba(153, 51, 255, 0.2);
+      border-color: var(--purple-light);
+      color: var(--gold);
+    }
+    
+    /* ===== HOME BUTTON (aparece nos jogos) ===== */
+    .home-button {
+      position: fixed;
+      top: 90px;
+      right: 30px;
+      background: var(--purple-vibrant);
+      border: 1px solid var(--gold);
+      border-radius: 12px;
+      padding: 14px 24px;
+      cursor: pointer;
+      z-index: 10000;
+      display: none;
+      font-size: 13px;
+      color: white;
+      font-weight: 700;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s ease;
+    }
+    
+    .home-button.active {
+      display: block;
+    }
+    
+    .home-button:hover {
+      background: var(--magenta);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255, 20, 147, 0.4);
+    }
+    
+    /* ===== SECTIONS ===== */
+    .section {
+      display: none;
+      min-height: calc(100vh - 80px);
+      padding: 40px 20px;
+    }
+    
+    .section.active {
+      display: block;
+      animation: sectionFadeIn 0.5s ease-out;
+    }
+    
+    @keyframes sectionFadeIn {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    
+    /* ===== HERO SECTION ===== */
+    .hero {
+      text-align: center;
+      padding: 80px 20px;
+      margin-bottom: 40px;
+      background: radial-gradient(circle at center, rgba(153, 51, 255, 0.15) 0%, transparent 70%);
+    }
+    
+    .hero-logo {
+      font-size: 80px;
+      margin-bottom: 20px;
+      filter: drop-shadow(0 0 20px var(--purple-vibrant));
+      animation: float 4s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-15px); }
+    }
+    
+    .hero h1 {
+      font-family: var(--font-retro);
+      font-size: 42px;
+      color: var(--gold);
+      text-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+      margin-bottom: 20px;
+      letter-spacing: 2px;
+    }
+    
+    .hero-tagline {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--pink);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    .hero-subtitle {
+      font-size: 15px;
+      color: #ccc;
+      margin-bottom: 40px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .hero-cta {
+      display: inline-block;
+      padding: 16px 32px;
+      background: var(--purple-vibrant);
+      border: 2px solid var(--gold);
+      border-radius: 12px;
+      color: var(--text-color);
+      font-size: 14px;
+      font-weight: 800;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+      margin: 10px;
+      text-transform: uppercase;
+    }
+    
+    .hero-cta:hover {
+      background: var(--magenta);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px rgba(255, 20, 147, 0.4);
+    }
+    
+    /* ===== STATS BAR ===== */
+    .stats-bar {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 60px;
+    }
+    
+    .stat-item {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 25px;
+      text-align: center;
+      backdrop-filter: blur(5px);
+    }
+    
+    .stat-number {
+      font-family: var(--font-retro);
+      font-size: 20px;
+      color: var(--gold);
+      margin-bottom: 10px;
+    }
+    
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--pink);
+      text-transform: uppercase;
+    }
+    
+    /* ===== GAMES GRID ===== */
+    .section-title {
+      font-family: var(--font-retro);
+      font-size: 24px;
+      color: var(--gold);
+      text-align: center;
+      margin-bottom: 50px;
+      text-shadow: 0 0 15px rgba(255, 215, 0, 0.2);
+    }
+    
+    .games-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-bottom: 60px;
+    }
+    
+    /* Seção de Mini Games separada */
+    .minigames-section {
+      margin-bottom: 80px;
+      padding: 50px 30px;
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(153, 51, 255, 0.3);
+      border-radius: 32px;
+      position: relative;
+      backdrop-filter: blur(10px);
+    }
+    
+    .minigames-section::before {
+      content: '🎮';
+      position: absolute;
+      top: -40px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 50px;
+      filter: drop-shadow(0 0 20px var(--purple-vibrant));
+      animation: bounce 3s ease-in-out infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-15px); }
+    }
+    
+    .section-divider {
+      text-align: center;
+      margin: 80px 0 50px;
+      font-family: var(--font-retro);
+      font-size: 24px;
+      color: var(--gold);
+      position: relative;
+    }
+    
+    .section-divider::before,
+    .section-divider::after {
+      content: '✦';
+      margin: 0 20px;
+      color: var(--purple-light);
+      animation: starPulse 2s ease-in-out infinite;
+    }
+    
+    @keyframes starPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(1.3); }
+    }
+    
+    .game-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 35px 25px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .game-card:hover {
+      transform: translateY(-12px);
+      border-color: var(--purple-light);
+      background: rgba(255, 255, 255, 0.06);
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 30px rgba(153, 51, 255, 0.2);
+    }
+    
+    /* Card destacado para mini games */
+    .game-card.featured {
+      background: rgba(153, 51, 255, 0.05);
+      border: 1px solid var(--gold);
+    }
+    
+    @keyframes starSpin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .game-icon {
+      width: 120px;
+      height: 120px;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .game-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.5));
+      transform: scale(var(--icon-scale, 1));
+      transition: transform 0.3s ease;
+    }
+    
+    /* Compatibilidade com configuração antiga */
+    .game-icon img.icon-large {
+      --icon-scale: 1.2;
+    }
+    
+    .game-title {
+      font-family: var(--font-retro);
+      font-size: 18px;
+      color: var(--gold);
+      margin-bottom: 15px;
+    }
+    
+    .game-description {
+      font-size: 14px;
+      color: #bbb;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    
+    .game-features {
+      list-style: none;
+      width: 100%;
+      margin-bottom: 25px;
+      text-align: left;
+    }
+    
+    .game-features li {
+      font-size: 12px;
+      color: #999;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .game-features li::before {
+      content: '✓';
+      color: var(--gold);
+      font-weight: bold;
+    }
+    
+    .game-btn {
+      width: 100%;
+      padding: 14px;
+      background: rgba(153, 51, 255, 0.1);
+      border: 1px solid var(--purple-light);
+      border-radius: 12px;
+      color: var(--text-color);
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+    
+    .game-card:hover .game-btn {
+      background: var(--purple-vibrant);
+      border-color: var(--gold);
+      color: white;
+      box-shadow: 0 0 20px rgba(153, 51, 255, 0.4);
+    }
+    
+    /* ===== ABOUT SECTION ===== */
+    .about-content {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 50px;
+      margin-bottom: 60px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .about-content h3 {
+      font-family: var(--font-retro);
+      font-size: 20px;
+      color: var(--gold);
+      margin-bottom: 25px;
+      text-align: center;
+    }
+    
+    .about-content p {
+      font-size: 16px;
+      line-height: 1.8;
+      margin-bottom: 30px;
+      color: #ccc;
+      text-align: center;
+      max-width: 800px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 30px;
+      margin-top: 40px;
+    }
+    
+    .feature-box {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+    
+    .feature-box:hover {
+      background: rgba(153, 51, 255, 0.05);
+      border-color: var(--purple-light);
+      transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+      font-size: 40px;
+      margin-bottom: 20px;
+      display: block;
+    }
+    
+    .feature-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    
+    .feature-text {
+      font-size: 14px;
+      color: #999;
+      line-height: 1.6;
+    }
+    
+    
+    /* ===== CONTACT/SOCIAL ===== */
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+    }
+    
+    .social-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 40px;
+      text-align: center;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+    }
+    
+    .social-card:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: var(--purple-light);
+      transform: translateY(-10px);
+    }
+    
+    .social-icon-large {
+      font-size: 60px;
+      margin-bottom: 25px;
+      display: block;
+    }
+    
+    .social-icon-large img {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 20px rgba(153, 51, 255, 0.4));
+    }
+    
+    .social-card h3 {
+      font-family: var(--font-retro);
+      font-size: 16px;
+      color: var(--gold);
+      margin-bottom: 15px;
+    }
+    
+    .social-card p {
+      font-size: 14px;
+      color: #999;
+      margin-bottom: 25px;
+      line-height: 1.6;
+    }
+    
+    .social-link {
+      display: inline-block;
+      padding: 14px 30px;
+      background: var(--purple-vibrant);
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      transition: all 0.3s ease;
+    }
+    
+    .social-link:hover {
+      background: var(--magenta);
+      transform: scale(1.05);
+      box-shadow: 0 10px 20px rgba(255, 20, 147, 0.3);
+    }
+    
+    /* ===== GAME IFRAME SECTION ===== */
+    .game-frame-container {
+      width: 100%;
+      height: 100vh;
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      overflow: hidden;
+      opacity: 1;
+      transform: none;
+      padding: 0;
+      margin: 0;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+    }
+    
+    .game-frame-container iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+      transform: none;
+      transform-origin: top center;
+      background: transparent;
+      display: block;
+    }
+    
+    /* ===== FOOTER ===== */
+    footer {
+      background: rgba(15, 5, 26, 0.8);
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 60px 20px 30px;
+      margin-top: 80px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .footer-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    
+    .footer-section h3 {
+      font-family: var(--font-retro);
+      font-size: 14px;
+      color: var(--gold);
+      margin-bottom: 20px;
+    }
+    
+    .footer-section p, .footer-section a {
+      font-size: 14px;
+      color: #888;
+      line-height: 1.8;
+      display: block;
+      margin: 10px 0;
+      text-decoration: none;
+      transition: color 0.3s ease;
+    }
+    
+    .footer-section a:hover {
+      color: var(--gold);
+    }
+    
+    .footer-bottom {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 13px;
+      color: #666;
+    }
+    
+    .heart {
+      color: var(--magenta);
+      animation: heartbeat 1.5s ease-in-out infinite;
+      display: inline-block;
+    }
+    
+    @keyframes heartbeat {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+    }
+    
+    /* ===== DECORATIVE GIF (HIDDEN - Only shown inside game iframes) ===== */
+    .star-gif {
+      display: none !important;
+    }
+    
+    /* ===== DISCORD BUTTON FIXO ===== */
+    .discord-fixed {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      width: 60px;
+      height: 60px;
+      background: #5865F2;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 9999;
+      box-shadow: 0 10px 25px rgba(88, 101, 242, 0.4);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    
+    .discord-fixed img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+    
+    .discord-fixed:hover {
+      transform: scale(1.1) translateY(-5px);
+      background: #4752C4;
+      box-shadow: 0 15px 35px rgba(88, 101, 242, 0.5);
+    }
+    
+    @keyframes discordPulse {
+      0%, 100% { 
+        transform: scale(1);
+        box-shadow: 0 8px 25px rgba(88, 101, 242, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+      }
+      50% { 
+        transform: scale(1.08);
+        box-shadow: 0 12px 35px rgba(88, 101, 242, 0.9), 0 0 50px rgba(255, 215, 0, 0.7);
+      }
+    }
+    
+    /* Tooltip do Discord */
+    .discord-fixed::before {
+      content: 'Junte-se ao Discord!';
+      position: absolute;
+      right: 85px;
+      background: rgba(88, 101, 242, 0.95);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      font-size: 11px;
+      font-weight: 600;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.3s ease;
+      border: 2px solid var(--gold);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    }
+    
+    .discord-fixed:hover::before {
+      opacity: 1;
+      right: 90px;
+    }
+    
+    /* ===== PAINEL DE CONTROLE DE VOLUME ===== */
+    .volume-control {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      background: rgba(26, 13, 36, 0.95);
+      border: 4px solid var(--purple-vibrant);
+      border-radius: 16px;
+      padding: 20px;
+      z-index: 9999;
+      box-shadow: 0 8px 25px rgba(153, 51, 255, 0.6), 0 0 30px rgba(255, 215, 0, 0.4);
+      min-width: 280px;
+      backdrop-filter: blur(10px);
+    }
+    
+    .volume-toggle {
+      position: fixed;
+      bottom: 30px;
+      left: 30px;
+      width: 60px;
+      height: 60px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10000;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      font-size: 24px;
+    }
+    
+    .volume-toggle:hover {
+      transform: scale(1.1);
+      background: rgba(255, 255, 255, 0.1);
+      border-color: var(--purple-light);
+    }
+    
+    .volume-toggle.active {
+      background: var(--purple-vibrant);
+      border-color: var(--gold);
+    }
+    
+    .volume-panel {
+      display: none;
+    }
+    
+    .volume-panel.active {
+      display: block;
+    }
+    
+    .volume-header {
+      font-family: var(--font-retro);
+      font-size: 12px;
+      color: var(--gold);
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    
+    .volume-item {
+      margin-bottom: 20px;
+    }
+    
+    .volume-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #ccc;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .volume-icon {
+      font-size: 16px;
+    }
+    
+    .volume-slider {
+      width: 100%;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+    
+    .volume-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 18px;
+      height: 18px;
+      background: var(--gold);
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+    }
+    
+    .volume-value {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--gold);
+      text-align: center;
+      margin-top: 8px;
+    }
+    
+    .volume-mute-btn {
+      width: 100%;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border-radius: 10px;
+      margin-top: 10px;
+      transition: all 0.3s ease;
+    }
+    
+    .volume-mute-btn:hover {
+      background: rgba(153, 51, 255, 0.2);
+      border-color: var(--purple-light);
+    }
+    
+    .volume-mute-btn.muted {
+      background: rgba(255, 51, 102, 0.2);
+      border-color: #ff3366;
+    }
+    
+    /* ===== START SCREEN ===== */
+    .start-screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #0f051a;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 999999;
+      cursor: pointer;
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    }
+    
+    .start-screen::before {
+      content: '';
+      position: absolute;
+      width: 150%;
+      height: 150%;
+      background: radial-gradient(circle at center, rgba(153, 51, 255, 0.15) 0%, transparent 50%);
+      animation: pulseBg 4s ease-in-out infinite;
+    }
+    
+    @keyframes pulseBg {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 0.8; }
+    }
+    
+    .start-screen::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      animation: scanlines-start 8s linear infinite;
+    }
+    
+    @keyframes scanlines-start {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(10px); }
+    }
+    
+    .start-screen.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    
+    .start-text {
+      font-family: var(--font-retro);
+      font-size: 80px;
+      background: linear-gradient(to bottom, var(--gold), var(--gold-amber));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.3));
+      animation: float-start 4s ease-in-out infinite;
+      letter-spacing: 10px;
+      user-select: none;
+      position: relative;
+      z-index: 1;
+    }
+    
+    @keyframes float-start {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-20px); }
+    }
+    
+    .start-subtitle {
+      font-family: var(--font-main);
+      font-size: 18px;
+      font-weight: 700;
+      color: #ccc;
+      margin-top: 40px;
+      text-transform: uppercase;
+      letter-spacing: 4px;
+      animation: blink-start 1.5s ease-in-out infinite;
+      position: relative;
+      z-index: 1;
+    }
+    
+    @keyframes blink-start {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    
+    @keyframes blink-start {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.3; }
+    }
+    
+    .start-gif-left,
+    .start-gif-right {
+      position: absolute;
+      width: 150px;
+      height: auto;
+      top: 45%;
+      transform: translateY(-50%);
+      filter: 
+        drop-shadow(0 0 20px rgba(255, 215, 0, 0.6))
+        drop-shadow(0 0 30px rgba(179, 102, 255, 0.5));
+      image-rendering: pixelated;
+      z-index: 1;
+    }
+    
+    .start-gif-left {
+      left: 15%;
+    }
+    
+    .start-gif-right {
+      right: 15%;
+      transform: translateY(-50%) scaleX(-1);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- START SCREEN -->
+  <div class="start-screen" id="startScreen">
+    <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExczA1eGIycGFwem9wMTl6d2EwYjN2ZGdmejA1YXphc3U5ZTlmbnU1eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/yRk0iqByluerppVrFv/giphy.gif" alt="" class="start-gif-left">
+    <div class="start-text">START</div>
+    <div class="start-subtitle">>>> PRESS TO BEGIN <<<</div>
+    <img src="https://media4.giphy.com/media/v1.Y2lkPTc5MGI3NjExczA1eGIycGFwem9wMTl6d2EwYjN2ZGdmejA1YXphc3U5ZTlmbnU1eiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/yRk0iqByluerppVrFv/giphy.gif" alt="" class="start-gif-right">
+  </div>
+
+  <!-- Particles -->
+  <div class="particles-container" id="particles"></div>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo" onclick="showSection('home')">⭐ DAOSHI STORE ⭐</div>
+      <ul class="nav-menu">
+        <li class="nav-link active" onclick="showSection('home')" data-section="home">🏠 Início</li>
+        <li class="nav-link" onclick="showSection('games')" data-section="games">🎮 Jogos</li>
+        <li class="nav-link" onclick="showSection('minigames')" data-section="minigames">🕹️ Minigames</li>
+        <li class="nav-link" onclick="showSection('about')" data-section="about">📖 Sobre</li>
+        <li class="nav-link" onclick="showSection('contact')" data-section="contact">💬 Contato</li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Home Button (aparece nos jogos) -->
+  <button class="home-button" id="homeButton" onclick="returnHome()">
+    🏠 VOLTAR AO INÍCIO
+  </button>
+
+  <!-- HOME SECTION -->
+  <div class="section active" id="home">
+    <div class="container">
+      
+      <!-- Hero -->
+      <div class="hero">
+        <div class="hero-logo">⭐💎⭐</div>
+        <h1>DAOSHI STORE</h1>
+        <p class="hero-tagline">✨ A Loja Premium de Games que Você Confia ✨</p>
+        <p class="hero-subtitle" id="heroSubtitle">🎮 5 Jogos • Melhores Preços • Entrega Instantânea • Suporte 24/7 🚀</p>
+        <button class="hero-cta" onclick="showSection('games')">🎮 VER JOGOS</button>
+        <button class="hero-cta" onclick="showSection('contact')">💬 FALE CONOSCO</button>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="stats-bar">
+        <div class="stat-item">
+          <div class="stat-number">5.000+</div>
+          <div class="stat-label">Clientes Satisfeitos</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">50.000+</div>
+          <div class="stat-label">Transações Realizadas</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">5</div>
+          <div class="stat-label">Jogos Disponíveis</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-number">24/7</div>
+          <div class="stat-label">Suporte Online</div>
+        </div>
+      </div>
+
+      <!-- Featured Games Preview -->
+      <h2 class="section-title">🎮 NOSSOS JOGOS 🎮</h2>
+      <div class="games-grid" id="homeGamesGrid">
+        <!-- Carregado dinamicamente -->
+      </div>
+
+      <!-- Seção de Minigames com Borda Dourada -->
+      <div class="section-divider">🕹️ MINIGAMES EXCLUSIVOS 🕹️</div>
+      <div class="minigames-section">
+        <div class="games-grid" id="homeMinigamesGrid">
+          <!-- Carregado dinamicamente -->
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- GAMES SECTION -->
+  <div class="section" id="games">
+    <div class="container">
+      <h2 class="section-title">🎮 TODOS OS JOGOS 🎮</h2>
+      <div class="games-grid">
+        <div class="game-card" onclick="loadGame('mir4')">
+          <div class="game-icon"><img src="https://i.imgur.com/XrXphs0.png" alt="MIR4" class="icon-large"></div>
+          <h3 class="game-title">MIR4</h3>
+          <p class="game-description">O melhor serviço de Gold e Top Up para MIR4!</p>
+          <ul class="game-features">
+            <li>Calculadora de Gold Automática</li>
+            <li>Conversão Dollar/Real em Tempo Real</li>
+            <li>Múltiplas Formas de Pagamento</li>
+            <li>Entrega Instantânea</li>
+            <li>Suporte Dedicado</li>
+          </ul>
+          <button class="game-btn">⚔️ Acessar MIR4</button>
+        </div>
+        <div class="game-card" onclick="loadGame('nightcrows')">
+          <div class="game-icon"><img src="https://i.imgur.com/LLGJGNI.png" alt="NIGHTCROWS" class="icon-large"></div>
+          <h3 class="game-title">NIGHTCROWS</h3>
+          <p class="game-description">Compre Diamonds para Nightcrows com segurança!</p>
+          <ul class="game-features">
+            <li>Compra Rápida de Diamonds</li>
+            <li>Preços Competitivos</li>
+            <li>Sistema de Pagamento Seguro</li>
+            <li>Entrega Garantida</li>
+            <li>Suporte 24/7</li>
+          </ul>
+          <button class="game-btn">🦇 Acessar Nightcrows</button>
+        </div>
+                  <div class="game-card" onclick="loadGame('sealm')">
+            <div class="game-icon"><img src="https://i.imgur.com/aDF7tqi.png" alt="SEAL M" class="icon-large"></div>
+            <h3 class="game-title">SEAL M</h3>
+            <p class="game-description">Top Up seguro e r�pido para Seal M!</p>
+            <ul class="game-features">
+              <li>Pacotes de Cash</li>
+              <li>Pre�os Competitivos</li>
+              <li>Sistema de Pagamento Seguro</li>
+              <li>Entrega Garantida</li>
+              <li>Suporte 24/7</li>
+            </ul>
+            <button class="game-btn">? Acessar Seal M</button>
+          </div>
+          <div class="game-card" onclick="loadGame('odin')">
+          <div class="game-icon"><img src="https://i.imgur.com/aLsQf6y.png" alt="ODIN" class="icon-large"></div>
+          <h3 class="game-title">ODIN: VALHALLA</h3>
+          <p class="game-description">Top Up de Diamonds para Odin Valhalla Rising!</p>
+          <ul class="game-features">
+            <li>Pacotes de Diamonds</li>
+            <li>Cálculo Automático de Valores</li>
+            <li>Desconto em Grandes Compras</li>
+            <li>Pagamento Facilitado</li>
+            <li>Entrega Imediata</li>
+          </ul>
+          <button class="game-btn">⚡ Acessar Odin</button>
+        </div>
+        <div class="game-card" onclick="loadGame('wemix')">
+          <div class="game-icon"><img src="https://i.imgur.com/YTGq40y.png" alt="WEMIX"></div>
+          <h3 class="game-title">WEMIX</h3>
+          <p class="game-description">Conversão de WEMIX para Real facilitada!</p>
+          <ul class="game-features">
+            <li>Conversor WEMIX/BRL</li>
+            <li>Taxas Transparentes</li>
+            <li>Cotação em Tempo Real</li>
+            <li>Transferência Rápida</li>
+            <li>Sistema Seguro</li>
+          </ul>
+          <button class="game-btn">💎 Acessar Wemix</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MINIGAMES SECTION -->
+  <div class="section" id="minigames">
+    <div class="container">
+      <h2 class="section-title">🕹️ MINIGAMES EXCLUSIVOS 🕹️</h2>
+      <div class="games-grid">
+        <div class="game-card featured" onclick="loadGame('typing')">
+          <div class="game-icon">
+            <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExenJsZ3h2ejgxeTN4enRwazcyYTllYzI1aW1uaTh1czdzZjJnd3YzcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/IAkgiYMQzCzzMas62O/giphy.gif" alt="Typing Game">
+          </div>
+          <h3 class="game-title">Daoshi Typing</h3>
+          <p class="game-description">Teste sua velocidade de digitação e compete no ranking global!</p>
+          <ul class="game-features">
+            <li>500+ Palavras Brasileiras</li>
+            <li>Ranking Online Global</li>
+            <li>Sistema de Contas</li>
+            <li>Estatísticas Detalhadas</li>
+            <li>Histórico Completo</li>
+          </ul>
+          <button class="game-btn">⌨️ Jogar Typing Game</button>
+        </div>
+        <div class="game-card featured" onclick="loadGame('snake')">
+          <div class="game-icon">
+            <img src="https://i.imgur.com/ZKBivNM.png" alt="Daoshi Snake">
+          </div>
+          <h3 class="game-title">Daoshi Snake</h3>
+          <p class="game-description">Mini-game exclusivo com reflexos de cor, tanques e projéteis que podem ser devolvidos!</p>
+          <ul class="game-features">
+            <li>Sistema de Progressão com Augments</li>
+            <li>Tanques Boss a cada 2 minutos</li>
+            <li>Dificuldade Crescente</li>
+            <li>Poderes Especiais (tecla K)</li>
+            <li>Visual Neon Retrô</li>
+          </ul>
+          <button class="game-btn">🐍 Jogar Snake</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ABOUT SECTION -->
+  <div class="section" id="about">
+    <div class="container">
+      <h2 class="section-title">📖 SOBRE NÓS 📖</h2>
+      <div class="about-content">
+        <h3>💜 Quem Somos</h3>
+        <p>A DAOSHI STORE é a sua loja premium de confiança para serviços de games. Com anos de experiência no mercado, oferecemos as melhores soluções para jogadores que buscam qualidade, segurança e preços justos.</p>
+        <p>Trabalhamos com os principais jogos do momento, oferecendo Gold, Diamonds, Top Up e muito mais. Nossa missão é proporcionar a melhor experiência de compra para a comunidade gamer.</p>
+        
+        <div class="features-grid">
+          <div class="feature-box">
+            <div class="feature-icon">🚀</div>
+            <div class="feature-title">ENTREGA RÁPIDA</div>
+            <p class="feature-text">Receba seus itens instantaneamente após a confirmação do pagamento</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🔒</div>
+            <div class="feature-title">100% SEGURO</div>
+            <p class="feature-text">Transações protegidas e dados criptografados para sua segurança</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">💰</div>
+            <div class="feature-title">MELHOR PREÇO</div>
+            <p class="feature-text">Preços competitivos e justos para todos os jogadores</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">💬</div>
+            <div class="feature-title">SUPORTE 24/7</div>
+            <p class="feature-text">Equipe sempre disponível para ajudar você</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">⭐</div>
+            <div class="feature-title">5.000+ CLIENTES</div>
+            <p class="feature-text">Milhares de jogadores confiam em nossos serviços</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">✅</div>
+            <div class="feature-title">GARANTIA TOTAL</div>
+            <p class="feature-text">Devolução garantida em caso de problemas</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🎮</div>
+            <div class="feature-title">MARKETPLACE</div>
+            <p class="feature-text">Participe dos nossos grupos no WhatsApp e Facebook, com comunidades ativas de diversos jogos! Anuncie seus produtos e encontre compradores de forma rápida e segura.</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-icon">🤝</div>
+            <div class="feature-title">INTERMEDIAÇÃO</div>
+            <p class="feature-text">Realizamos intermediações para diversos tipos de serviços! Com a Daoshi Store você garante que nenhuma das partes seja prejudicada e que o processo seja seguro.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT SECTION -->
+  <div class="section" id="contact">
+    <div class="container">
+      <h2 class="section-title">💬 ENTRE EM CONTATO 💬</h2>
+      <div class="social-grid">
+        <div class="social-card">
+          <div class="social-icon-large">💬</div>
+          <h3>Discord</h3>
+          <p>Junte-se à nossa comunidade no Discord! Suporte 24/7, promoções exclusivas e muito mais!</p>
+          <a href="https://discord.gg/daoshi" target="_blank" class="social-link">
+            Entrar no Discord
+          </a>
+        </div>
+        <div class="social-card">
+          <div class="social-icon-large">📸</div>
+          <h3>Instagram</h3>
+          <p>Siga-nos no Instagram para novidades, promoções e atualizações sobre os jogos!</p>
+          <a href="https://www.instagram.com/daoshi.store/" target="_blank" class="social-link">
+            Seguir no Instagram
+          </a>
+        </div>
+        <div class="social-card">
+          <div class="social-icon-large">📘</div>
+          <h3>Facebook</h3>
+          <p>Curta nossa página no Facebook e fique por dentro de todas as novidades da loja!</p>
+          <a href="https://www.facebook.com/profile.php?id=61581292253937" target="_blank" class="social-link">
+            Curtir no Facebook
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME SECTIONS (Generated Dynamically) -->
+  <div id="dynamic-game-sections"></div>
+
+  <!-- Footer -->
+  <footer>
+    <div class="footer-content">
+      <div class="footer-section">
+        <h3>⭐ DAOSHI STORE</h3>
+        <p>A sua loja premium de games. Qualidade, segurança e os melhores preços do mercado!</p>
+      </div>
+      <div class="footer-section">
+        <h3>🎮 JOGOS</h3>
+        <a href="#" onclick="loadGame('mir4'); return false;">MIR4</a>
+        <a href="#" onclick="loadGame('nightcrows'); return false;">Nightcrows</a>
+        <a href="#" onclick="loadGame('odin'); return false;">Odin: Valhalla</a>
+        <a href="#" onclick="loadGame('wemix'); return false;">WEMIX</a>
+      </div>
+      <div class="footer-section">
+        <h3>📞 CONTATO</h3>
+        <a href="https://discord.gg/daoshi" target="_blank">Discord</a>
+        <a href="https://www.instagram.com/daoshi.store/" target="_blank">Instagram</a>
+        <a href="https://www.facebook.com/profile.php?id=61581292253937" target="_blank">Facebook</a>
+      </div>
+      <div class="footer-section">
+        <h3>ℹ️ INFORMAÇÕES</h3>
+        <a href="#" onclick="showSection('about'); return false;">Sobre Nós</a>
+        <a href="#" onclick="showSection('contact'); return false;">Fale Conosco</a>
+        <p>Suporte 24/7</p>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>⭐ DAOSHI STORE - Sua Loja Premium de Games ⭐</p>
+      <p>Feito com <span class="heart">💜</span> para a comunidade gamer</p>
+      <p>© 2025 Daoshi Store • Todos os direitos reservados</p>
+    </div>
+  </footer>
+
+  <!-- Decorative GIF -->
+  <img src="https://media.giphy.com/media/bzawYMvJVw0KPA0u7M/giphy.gif" alt="Star Butterfly" class="star-gif">
+  
+  <!-- Discord Button Fixo -->
+  <a href="https://discord.gg/daoshi" target="_blank" class="discord-fixed" title="Junte-se ao Discord!">
+    <img src="https://i.imgur.com/7Dmdj3I.png" alt="Discord">
+  </a>
+
+  <!-- Controle de Volume -->
+  <div class="volume-toggle" id="volumeToggle" onclick="toggleVolumePanel()">
+    🔊
+  </div>
+  
+  <div class="volume-control" id="volumeControl">
+    <div class="volume-panel" id="volumePanel">
+      <div class="volume-header">🎵 CONTROLES 🎵</div>
+      
+      <div class="volume-item">
+        <div class="volume-label">
+          <span class="volume-icon">🎵</span>
+          <span>Música</span>
+        </div>
+        <input type="range" min="0" max="100" value="70" class="volume-slider" id="musicVolume" oninput="updateMusicVolume(this.value)">
+        <div class="volume-value" id="musicValue">70%</div>
+      </div>
+      
+      <div class="volume-item">
+        <div class="volume-label">
+          <span class="volume-icon">🔘</span>
+          <span>Botões</span>
+        </div>
+        <input type="range" min="0" max="100" value="50" class="volume-slider" id="buttonVolume" oninput="updateButtonVolume(this.value)">
+        <div class="volume-value" id="buttonValue">50%</div>
+      </div>
+      
+      <button class="volume-mute-btn" id="muteBtn" onclick="toggleMuteAll()">
+        🔇 MUTAR TUDO
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ===== START SCREEN =====
+    document.addEventListener('DOMContentLoaded', function() {
+      loadSavedVolumes();
+      setupStartScreen();
+      carregarConteudoDinamico();
+      addSoundToButtons();
+    });
+    
+    function setupStartScreen() {
+      const startScreen = document.getElementById('startScreen');
+      const startAudio = new Audio('Sites/sounds/start.mp3');
+      const clickAudio = new Audio('Sites/sounds/start2.mp3');
+      musicParte1 = new Audio('Sites/sounds/parte1.mp3');
+      musicParte2 = new Audio('Sites/sounds/parte2.mp3');
+      
+      startAudio.volume = 1.0;
+      clickAudio.volume = 1.0;
+      musicParte1.volume = musicVolume;
+      musicParte2.volume = musicVolume;
+      
+      // Toca o áudio automaticamente quando a tela aparece
+      const playPromise = startAudio.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log('Autoplay bloqueado, aguardando interação do usuário');
+        });
+      }
+      
+      // Remove a tela ao clicar E toca o start2 + inicia música
+      startScreen.addEventListener('click', function(e) {
+        // Toca o som de clique (start2)
+        clickAudio.currentTime = 0;
+        clickAudio.play().catch(err => console.log('Erro ao tocar áudio:', err));
+        
+        // Inicia a parte 1 da música
+        if (!isMuted) {
+          musicParte1.play().catch(err => console.log('Erro ao tocar parte1:', err));
+        }
+        
+        // Quando parte 1 terminar, toca parte 2 em loop
+        musicParte1.addEventListener('ended', function() {
+          if (!isMuted) {
+            musicParte2.play().catch(err => console.log('Erro ao tocar parte2:', err));
+          }
+        }, { once: true });
+        
+        // Loop da parte 2 (quando ela terminar, toca novamente instantaneamente)
+        musicParte2.addEventListener('ended', function() {
+          musicParte2.currentTime = 0;
+          if (!isMuted) {
+            musicParte2.play().catch(err => console.log('Erro no loop parte2:', err));
+          }
+        });
+        
+        setTimeout(() => {
+          startScreen.classList.add('hidden');
+          // Remove do DOM após a animação
+          setTimeout(() => {
+            startScreen.remove();
+          }, 500);
+        }, 100);
+      });
+    }
+    
+    // ===== SISTEMA DE SONS =====
+    const buttonSound = new Audio('Sites/sounds/botão.mp3');
+    const carrinhoSound = new Audio('Sites/sounds/carrinho.mp3');
+    buttonSound.volume = 0.5;
+    carrinhoSound.volume = 0.7;
+    
+    // Variáveis globais de volume
+    let musicVolume = 0.7;
+    let buttonVolume = 0.5;
+    let isMuted = false;
+    let musicParte1, musicParte2;
+    
+    // Carregar volumes salvos do localStorage
+    function loadSavedVolumes() {
+      const savedMusicVolume = localStorage.getItem('daoshi_music_volume');
+      const savedButtonVolume = localStorage.getItem('daoshi_button_volume');
+      const savedMuted = localStorage.getItem('daoshi_muted');
+      
+      if (savedMusicVolume !== null) {
+        musicVolume = parseFloat(savedMusicVolume);
+        document.getElementById('musicVolume').value = musicVolume * 100;
+        document.getElementById('musicValue').textContent = Math.round(musicVolume * 100) + '%';
+      }
+      
+      if (savedButtonVolume !== null) {
+        buttonVolume = parseFloat(savedButtonVolume);
+        document.getElementById('buttonVolume').value = buttonVolume * 100;
+        document.getElementById('buttonValue').textContent = Math.round(buttonVolume * 100) + '%';
+      }
+      
+      if (savedMuted !== null) {
+        isMuted = savedMuted === 'true';
+        if (isMuted) {
+          document.getElementById('muteBtn').classList.add('muted');
+          document.getElementById('muteBtn').innerHTML = '🔊 DESMUTAR';
+        }
+      }
+      
+      // Aplicar volumes
+      buttonSound.volume = isMuted ? 0 : buttonVolume;
+      carrinhoSound.volume = isMuted ? 0 : buttonVolume;
+    }
+    
+    // Atualizar volume da música
+    function updateMusicVolume(value) {
+      musicVolume = value / 100;
+      document.getElementById('musicValue').textContent = value + '%';
+      localStorage.setItem('daoshi_music_volume', musicVolume);
+      
+      if (!isMuted) {
+        if (musicParte1) musicParte1.volume = musicVolume;
+        if (musicParte2) musicParte2.volume = musicVolume;
+      }
+    }
+    
+    // Atualizar volume dos botões
+    function updateButtonVolume(value) {
+      buttonVolume = value / 100;
+      document.getElementById('buttonValue').textContent = value + '%';
+      localStorage.setItem('daoshi_button_volume', buttonVolume);
+      
+      if (!isMuted) {
+        buttonSound.volume = buttonVolume;
+        carrinhoSound.volume = buttonVolume;
+      }
+    }
+    
+    // Alternar mudo geral
+    function toggleMuteAll() {
+      isMuted = !isMuted;
+      localStorage.setItem('daoshi_muted', isMuted);
+      
+      const muteBtn = document.getElementById('muteBtn');
+      
+      if (isMuted) {
+        muteBtn.classList.add('muted');
+        muteBtn.innerHTML = '🔊 DESMUTAR';
+        
+        // Mutar tudo
+        buttonSound.volume = 0;
+        carrinhoSound.volume = 0;
+        if (musicParte1) musicParte1.volume = 0;
+        if (musicParte2) musicParte2.volume = 0;
+      } else {
+        muteBtn.classList.remove('muted');
+        muteBtn.innerHTML = '🔇 MUTAR TUDO';
+        
+        // Restaurar volumes
+        buttonSound.volume = buttonVolume;
+        carrinhoSound.volume = buttonVolume;
+        if (musicParte1) musicParte1.volume = musicVolume;
+        if (musicParte2) musicParte2.volume = musicVolume;
+      }
+    }
+    
+    // Alternar painel de volume
+    function toggleVolumePanel() {
+      const panel = document.getElementById('volumePanel');
+      const toggle = document.getElementById('volumeToggle');
+      
+      panel.classList.toggle('active');
+      toggle.classList.toggle('active');
+    }
+    
+    function playButtonSound() {
+      if (!isMuted && buttonVolume > 0) {
+        buttonSound.currentTime = 0;
+        buttonSound.volume = buttonVolume;
+        buttonSound.play().catch(err => console.log('Erro ao tocar som:', err));
+      }
+    }
+    
+    function playCarrinhoSound() {
+      if (!isMuted && buttonVolume > 0) {
+        carrinhoSound.currentTime = 0;
+        carrinhoSound.volume = buttonVolume;
+        carrinhoSound.play().catch(err => console.log('Erro ao tocar som:', err));
+      }
+    }
+    
+    function addSoundToButtons() {
+      // Sons em botões normais e links de navegação
+      document.querySelectorAll('button, .btn, .game-card, .nav-link').forEach(btn => {
+        btn.addEventListener('click', playButtonSound);
+      });
+      
+      // Adicionar sons aos iframes quando carregarem
+      document.querySelectorAll('iframe').forEach(iframe => {
+        iframe.addEventListener('load', function() {
+          try {
+            const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+            
+            // Som de botão APENAS em botões que NÃO são de copiar
+            iframeDoc.querySelectorAll('button').forEach(btn => {
+              const onclickStr = btn.getAttribute('onclick') || '';
+              const classList = btn.className || '';
+              
+              // Se NÃO for botão de copiar, adiciona som de botão
+              if (!onclickStr.includes('copy') && !classList.includes('copy')) {
+                btn.addEventListener('click', playButtonSound);
+              }
+            });
+          } catch (e) {
+            // Erro de CORS esperado para iframes de domínios externos
+            console.log('Não foi possível acessar iframe (CORS)');
+          }
+        });
+      });
+    }
+    
+    // ===== CARREGAMENTO DINÂMICO DO CONTEÚDO =====
+    
+    function carregarConteudoDinamico() {
+      const config = SITE_CONFIG;
+      
+      // Atualizar título da página
+      document.title = `⭐ ${config.loja.nome} - Loja Premium de Games`;
+      
+      // Atualizar logo da navbar
+      const navLogo = document.querySelector('.nav-logo');
+      if (navLogo) navLogo.innerHTML = `⭐ ${config.loja.nome} ⭐`;
+      
+      // Atualizar hero section (com contagem automática de jogos)
+      document.querySelector('.hero-logo').textContent = config.loja.logo;
+      document.querySelector('.hero h1').textContent = config.loja.nome;
+      document.querySelector('.hero-tagline').textContent = config.loja.tagline;
+      
+      // Substituir número de jogos no subtitle dinamicamente
+      const subtitleComJogos = config.loja.subtitle.replace(/\d+\s+Jogos?/gi, `${config.jogos.length} Jogos`);
+      document.querySelector('.hero-subtitle').textContent = subtitleComJogos;
+      
+      // Atualizar estatísticas (contagem de jogos automática)
+      const statsBar = document.querySelector('.stats-bar');
+      if (statsBar) {
+        statsBar.innerHTML = config.stats.map(stat => {
+          // Se for estatística de jogos, conta automaticamente
+          const numero = stat.label.includes('Jogos') ? config.jogos.length : stat.numero;
+          return `
+            <div class="stat-item">
+              <div class="stat-number">${numero}</div>
+              <div class="stat-label">${stat.label}</div>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Atualizar cards de jogos (preview na home)
+      const gamesGridHome = document.getElementById('homeGamesGrid');
+      if (gamesGridHome) {
+        // Filtrar apenas jogos (excluir minigames)
+        const gamesOnly = config.jogos.filter(j => j.category !== 'minigame');
+        
+        gamesGridHome.innerHTML = gamesOnly.map(jogo => {
+          const rawScale = jogo.iconScale !== undefined ? jogo.iconScale : (jogo.iconeGrande ? 1.1 : 1);
+          const parsedScale = parseFloat(rawScale);
+          const iconScale = Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 1;
+          const iconStyle = iconScale !== 1 ? `style="--icon-scale:${iconScale}"` : '';
+          const cardClass = jogo.tipo === 'game' ? 'game-card featured' : 'game-card';
+          return `
+          <div class="${cardClass}" onclick="loadGame('${jogo.id}')">
+            <div class="game-icon">
+              <img src="${jogo.icone}" alt="${jogo.nome}" ${iconStyle}>
+            </div>
+            <h3 class="game-title">${jogo.nomeCurto || jogo.nome}</h3>
+            <p class="game-description">${jogo.descricaoCurta}</p>
+            <button class="game-btn">${jogo.emoji} ${config.botoes.acessar}</button>
+          </div>
+        `;
+        }).join('');
+      }
+
+      // Atualizar cards de MINIGAMES na home
+      const minigamesGridHome = document.getElementById('homeMinigamesGrid');
+      if (minigamesGridHome) {
+        const minigamesOnly = config.jogos.filter(j => j.category === 'minigame');
+        
+        minigamesGridHome.innerHTML = minigamesOnly.map(jogo => {
+          return `
+          <div class="game-card featured" onclick="loadGame('${jogo.id}')">
+            <div class="game-icon">
+              <img src="${jogo.icone}" alt="${jogo.nome}">
+            </div>
+            <h3 class="game-title">${jogo.nomeCurto || jogo.nome}</h3>
+            <p class="game-description">${jogo.descricaoCurta}</p>
+            <button class="game-btn">${jogo.emoji} Jogar</button>
+          </div>
+          `;
+        }).join('');
+      }
+      
+      // Atualizar cards de jogos (seção completa)
+      const gamesGridFull = document.querySelector('#games .games-grid');
+      if (gamesGridFull) {
+        // Filtrar apenas jogos (excluir minigames)
+        const gamesOnly = config.jogos.filter(j => j.category !== 'minigame');
+
+        gamesGridFull.innerHTML = gamesOnly.map(jogo => {
+          const rawScale = jogo.iconScale !== undefined ? jogo.iconScale : (jogo.iconeGrande ? 1.1 : 1);
+          const parsedScale = parseFloat(rawScale);
+          const iconScale = Number.isFinite(parsedScale) && parsedScale > 0 ? parsedScale : 1;
+          const iconStyle = iconScale !== 1 ? `style="--icon-scale:${iconScale}"` : '';
+          const cardClass = jogo.tipo === 'game' ? 'game-card featured' : 'game-card';
+          return `
+          <div class="${cardClass}" onclick="loadGame('${jogo.id}')">
+            <div class="game-icon">
+              <img src="${jogo.icone}" alt="${jogo.nome}" ${iconStyle}>
+            </div>
+            <h3 class="game-title">${jogo.nome}</h3>
+            <p class="game-description">${jogo.descricaoLonga}</p>
+            <ul class="game-features">
+              ${jogo.features.map(feature => `<li>${feature}</li>`).join('')}
+            </ul>
+            <button class="game-btn">${jogo.emoji} ${config.botoes.acessar} ${jogo.nome}</button>
+          </div>
+        `;
+        }).join('');
+      }
+
+      // Atualizar cards de MINIGAMES
+      const minigamesGrid = document.querySelector('#minigames .games-grid');
+      if (minigamesGrid) {
+        const minigamesOnly = config.jogos.filter(j => j.category === 'minigame');
+        
+        if (minigamesOnly.length > 0) {
+          minigamesGrid.innerHTML = minigamesOnly.map(jogo => {
+            return `
+            <div class="game-card featured" onclick="loadGame('${jogo.id}')">
+              <div class="game-icon">
+                <img src="${jogo.icone}" alt="${jogo.nome}">
+              </div>
+              <h3 class="game-title">${jogo.nome}</h3>
+              <p class="game-description">${jogo.descricaoCurta}</p>
+              <ul class="game-features">
+                ${jogo.features.map(feature => `<li>${feature}</li>`).join('')}
+              </ul>
+              <button class="game-btn">${jogo.emoji} Jogar ${jogo.nomeCurto || jogo.nome}</button>
+            </div>
+            `;
+          }).join('');
+        }
+      }
+      
+      
+      // Atualizar seção sobre
+      const aboutContent = document.querySelector('.about-content');
+      if (aboutContent) {
+        aboutContent.querySelector('p').textContent = config.loja.descricao;
+        aboutContent.querySelectorAll('p')[1].textContent = config.loja.missao;
+      }
+      
+      // Atualizar features
+      const featuresGrid = document.querySelector('.features-grid');
+      if (featuresGrid) {
+        featuresGrid.innerHTML = config.features.map(feat => `
+          <div class="feature-box">
+            <div class="feature-icon">${feat.icone}</div>
+            <div class="feature-title">${feat.titulo}</div>
+            <p class="feature-text">${feat.texto}</p>
+          </div>
+        `).join('');
+      }
+      
+      // Atualizar redes sociais
+      const socialGrid = document.querySelector('.social-grid');
+      if (socialGrid) {
+        socialGrid.innerHTML = config.social.map(social => {
+          // Verificar se o ícone é URL ou emoji
+          const iconeHTML = social.icone.startsWith('http') 
+            ? `<img src="${social.icone}" alt="${social.nome}">`
+            : social.icone;
+          
+          return `
+            <div class="social-card">
+              <div class="social-icon-large">${iconeHTML}</div>
+              <h3>${social.nome}</h3>
+              <p>${social.descricao}</p>
+              <a href="${social.url}" target="_blank" class="social-link">
+                ${social.textoBotao}
+              </a>
+            </div>
+          `;
+        }).join('');
+      }
+      
+      // Atualizar footer
+      const footerSections = document.querySelectorAll('.footer-section');
+      if (footerSections[0]) {
+        footerSections[0].querySelector('p').textContent = config.footer.descricao;
+      }
+      if (footerSections[1]) {
+        footerSections[1].innerHTML = `
+          <h3>🎮 JOGOS</h3>
+          ${config.jogos.map(jogo => `
+            <a href="#" onclick="loadGame('${jogo.id}'); return false;">${jogo.nome}</a>
+          `).join('')}
+        `;
+      }
+      if (footerSections[2]) {
+        footerSections[2].innerHTML = `
+          <h3>📞 CONTATO</h3>
+          ${config.social.map(social => `
+            <a href="${social.url}" target="_blank">${social.nome}</a>
+          `).join('')}
+        `;
+      }
+      
+      // Atualizar footer bottom
+      const footerBottom = document.querySelector('.footer-bottom');
+      if (footerBottom) {
+        footerBottom.innerHTML = `
+          <p>⭐ ${config.loja.nome} - Sua Loja Premium de Games ⭐</p>
+          <p>${config.footer.mensagem}</p>
+          <p>${config.footer.copyright}</p>
+        `;
+      }
+      
+      // Gerar seções dos jogos dinamicamente
+      const gameSectionsContainer = document.getElementById('dynamic-game-sections');
+      if (gameSectionsContainer) {
+        gameSectionsContainer.innerHTML = ''; // Limpa container
+        
+        config.jogos.forEach(jogo => {
+          const section = document.createElement('div');
+          section.className = 'section';
+          section.id = jogo.id;
+          
+          section.innerHTML = `
+            <div class="game-frame-container">
+              <iframe src="${jogo.url}" loading="lazy"></iframe>
+            </div>
+          `;
+          
+          gameSectionsContainer.appendChild(section);
+        });
+      }
+      
+      // Atualizar botão de voltar
+      const homeButton = document.getElementById('homeButton');
+      if (homeButton) {
+        homeButton.innerHTML = config.botoes.voltarInicio;
+      }
+    }
+    
+    // ===== NAVIGATION SYSTEM =====
+    
+    function resetAllIframes() {
+      // Reset all game iframes to their original state
+      const iframes = document.querySelectorAll('.game-frame-container iframe');
+      iframes.forEach(iframe => {
+        // Store the original src
+        const originalSrc = iframe.src;
+        // Reset by removing and re-adding the src
+        iframe.src = '';
+        setTimeout(() => {
+          iframe.src = originalSrc;
+        }, 100);
+      });
+    }
+    
+    function showSection(sectionName) {
+      // Remove active class from all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Remove active class from nav links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Add active class to selected section
+      document.getElementById(sectionName).classList.add('active');
+      
+      // Add active class to corresponding nav link
+      const navLink = document.querySelector(`[data-section="${sectionName}"]`);
+      if (navLink) navLink.classList.add('active');
+      
+      // Hide home button for main sections
+      document.getElementById('homeButton').classList.remove('active');
+      
+      // Reset all iframes when returning to a main section
+      if (sectionName === 'home' || sectionName === 'games' || sectionName === 'about' || sectionName === 'contact') {
+        resetAllIframes();
+      }
+      
+      // Scroll to top
+      window.scrollTo(0, 0);
+    }
+    
+    function loadGame(gameName) {
+      // Hide all sections
+      document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+      });
+      
+      // Show game section
+      document.getElementById(gameName).classList.add('active');
+      
+      // Remove active from nav links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      
+      // Show home button
+      document.getElementById('homeButton').classList.add('active');
+      
+      // Reset the specific game iframe
+      const gameIframe = document.querySelector(`#${gameName} iframe`);
+      if (gameIframe) {
+        const originalSrc = gameIframe.src;
+        gameIframe.src = '';
+        setTimeout(() => {
+          gameIframe.src = originalSrc;
+        }, 50);
+      }
+      
+      // Scroll to top
+      window.scrollTo(0, 0);
+    }
+    
+    function returnHome() {
+      // Mostrar navbar novamente
+      document.querySelector('.navbar').classList.remove('hidden');
+      document.body.classList.remove('no-navbar');
+      showSection('home');
+    }
+    
+    // Função para esconder navbar quando mostra um jogo
+    function hideNavbarForGame() {
+      const navbar = document.querySelector('.navbar');
+      navbar.classList.add('hidden');
+      document.body.classList.add('no-navbar');
+    }
+    
+    // Adicionar evento aos cards de jogos para esconder navbar
+    document.addEventListener('DOMContentLoaded', function() {
+      // Quando clicar em qualquer jogo, esconde a navbar
+      document.querySelectorAll('.game-card').forEach(card => {
+        card.addEventListener('click', function() {
+          // Pequeno delay para permitir a navegação acontecer
+          setTimeout(hideNavbarForGame, 100);
+        });
+      });
+    });
+    
+    // ===== PARTICLES ANIMATION (DISABLED) =====
+    // Particles removed per user request
+    
+    // ===== SMOOTH SCROLL =====
+    
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+      anchor.addEventListener('click', function (e) {
+        const href = this.getAttribute('href');
+        if (href && href !== '#') {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) {
+            target.scrollIntoView({ behavior: 'smooth' });
+          }
+        }
+      });
+    });
+    
+    // ===== CONSOLE MESSAGE =====
+    
+    console.log('%c⭐ DAOSHI STORE ⭐', 'color: #ffd700; font-size: 24px; font-weight: bold; text-shadow: 2px 2px #9933ff;');
+    console.log('%c🎮 Sua loja premium de games! 🎮', 'color: #9933ff; font-size: 16px;');
+    console.log('%cVisite: discord.gg/daoshi', 'color: #b366ff; font-size: 12px;');
+  </script>
+
+</body>
+</html>
+

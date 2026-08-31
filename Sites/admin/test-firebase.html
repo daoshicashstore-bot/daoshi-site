@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔥 Teste Firebase - Daoshi Store</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f5f7fa;
+            border-radius: 10px;
+        }
+
+        .test-section h3 {
+            color: #2d3436;
+            margin-bottom: 15px;
+        }
+
+        .log {
+            background: #2d3436;
+            color: #00ff00;
+            padding: 15px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .log-entry {
+            margin: 5px 0;
+        }
+
+        .log-success {
+            color: #00ff00;
+        }
+
+        .log-error {
+            color: #ff0000;
+        }
+
+        .log-info {
+            color: #00bfff;
+        }
+
+        .log-warning {
+            color: #ffa500;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .status {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .status.connected {
+            background: #00b894;
+            color: white;
+        }
+
+        .status.disconnected {
+            background: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔥 Teste de Conexão Firebase</h1>
+        
+        <div class="test-section">
+            <h3>
+                📡 Status da Conexão: 
+                <span class="status disconnected" id="status">Verificando...</span>
+            </h3>
+        </div>
+
+        <div class="test-section">
+            <h3>🧪 Testes</h3>
+            <button onclick="testConnection()">🔍 Testar Conexão</button>
+            <button onclick="testReadConfig()">📖 Ler Configuração</button>
+            <button onclick="testWriteConfig()">✍️ Escrever Teste</button>
+            <button onclick="clearLog()">🗑️ Limpar Log</button>
+        </div>
+
+        <div class="test-section">
+            <h3>📝 Log de Testes</h3>
+            <div class="log" id="log"></div>
+        </div>
+    </div>
+
+    <script src="../shared/firebase-config-orders.js"></script>
+    <script>
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const entry = document.createElement('div');
+            entry.className = 'log-entry log-' + type;
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(entry);
+            log.scrollTop = log.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLog() {
+            document.getElementById('log').innerHTML = '';
+        }
+
+        // Verificar status de conexão
+        if (window.db) {
+            addLog('✅ Firebase SDK carregado com sucesso!', 'success');
+            addLog('📍 Database URL: ' + window.db.ref().toString(), 'info');
+            
+            window.db.ref('.info/connected').on('value', (snapshot) => {
+                const statusEl = document.getElementById('status');
+                if (snapshot.val() === true) {
+                    statusEl.textContent = 'Conectado';
+                    statusEl.className = 'status connected';
+                    addLog('🟢 Conectado ao Firebase em tempo real', 'success');
+                } else {
+                    statusEl.textContent = 'Desconectado';
+                    statusEl.className = 'status disconnected';
+                    addLog('🔴 Desconectado do Firebase', 'error');
+                }
+            });
+        } else {
+            addLog('❌ ERRO: Firebase não foi carregado!', 'error');
+            document.getElementById('status').textContent = 'Erro';
+        }
+
+        async function testConnection() {
+            addLog('🔍 Testando conexão com Firebase...', 'info');
+            try {
+                const testRef = window.db.ref('.info/serverTimeOffset');
+                const snapshot = await testRef.once('value');
+                const offset = snapshot.val();
+                addLog(`✅ Conexão OK! Server Time Offset: ${offset}ms`, 'success');
+            } catch (error) {
+                addLog(`❌ Erro na conexão: ${error.message}`, 'error');
+            }
+        }
+
+        async function testReadConfig() {
+            addLog('📖 Lendo configurações do Firebase...', 'info');
+            try {
+                // Ler prioridade de Gold
+                const goldSnapshot = await window.db.ref('config/goldPriority').once('value');
+                if (goldSnapshot.exists()) {
+                    const goldData = goldSnapshot.val();
+                    addLog(`✅ Gold Priority: ${JSON.stringify(goldData)}`, 'success');
+                } else {
+                    addLog('⚠️ Gold Priority não existe ainda', 'warning');
+                }
+
+                // Ler prioridade de Top Up
+                const topupSnapshot = await window.db.ref('config/topupPriority').once('value');
+                if (topupSnapshot.exists()) {
+                    const topupData = topupSnapshot.val();
+                    addLog(`✅ TopUp Priority: ${JSON.stringify(topupData)}`, 'success');
+                } else {
+                    addLog('⚠️ TopUp Priority não existe ainda', 'warning');
+                }
+
+                // Contar pedidos
+                const ordersSnapshot = await window.db.ref('orders').once('value');
+                const ordersCount = ordersSnapshot.exists() ? Object.keys(ordersSnapshot.val()).length : 0;
+                addLog(`📦 Total de pedidos no Firebase: ${ordersCount}`, 'info');
+
+            } catch (error) {
+                addLog(`❌ Erro ao ler: ${error.message}`, 'error');
+            }
+        }
+
+        async function testWriteConfig() {
+            addLog('✍️ Escrevendo dados de teste...', 'info');
+            try {
+                const testData = {
+                    timestamp: Date.now(),
+                    test: 'Teste de escrita - ' + new Date().toLocaleString()
+                };
+
+                await window.db.ref('config/testWrite').set(testData);
+                addLog('✅ Dados escritos com sucesso!', 'success');
+                addLog(`📄 Dados: ${JSON.stringify(testData)}`, 'info');
+
+                // Ler de volta para confirmar
+                const snapshot = await window.db.ref('config/testWrite').once('value');
+                const readData = snapshot.val();
+                addLog(`✅ Confirmado! Dados lidos: ${JSON.stringify(readData)}`, 'success');
+
+            } catch (error) {
+                addLog(`❌ Erro ao escrever: ${error.message}`, 'error');
+                addLog(`📋 Detalhes do erro: ${JSON.stringify(error)}`, 'error');
+            }
+        }
+
+        // Iniciar teste automático
+        addLog('🚀 Iniciando testes automáticos...', 'info');
+        setTimeout(() => {
+            testConnection();
+            setTimeout(() => testReadConfig(), 1000);
+        }, 1000);
+    </script>
+</body>
+</html>

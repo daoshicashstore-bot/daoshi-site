@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>📺 Preços Premium - Retrô Vintage 📺</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1lLnjQ3NYt6Bd6WapJ2p0EjzfQJIbB-es">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    /* ===== PIXEL ART RETRO - EFEITO VINTAGE SÉPIA ===== */
+    
+    :root {
+      /* Paleta Universal Roxa/Dourada */
+      --purple-dark: #1a0d24;
+      --purple-deep: #2d1b3d;
+      --purple-medium: #4a2d5a;
+      --purple-vibrant: #9933ff;
+      --purple-light: #b366ff;
+      --magenta: #cc66ff;
+      --gold: #ffd700;
+      --gold-amber: #ffbf00;
+      --yellow: #ffc107;
+      
+      --primary-color: #9933ff;
+      --secondary-color: #2d1b3d;
+      --accent-color: #ffd700;
+      --text-color: #f5f5f5;
+      --panel-bg: rgba(45, 27, 61, 0.92);
+      --panel-border: #b366ff;
+      --discord-color: #cc66ff;
+      --button-hover: #b366ff;
+      --gold-color: #ffd700;
+      --diamond-color: #f5f5f5;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: none !important;
+      animation-timing-function: steps(4, end) !important;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+    
+    body {
+      background-image: url('https://lh3.googleusercontent.com/d/13mcKYGZFBEVkIJ2FBCzm1tDKyEXBnuuO');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      line-height: 1.6;
+      color: var(--text-color);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+      filter: sepia(30%) saturate(1.2) hue-rotate(-10deg);
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(26, 13, 36, 0.90) 0%,
+        rgba(153, 51, 255, 0.3) 30%,
+        rgba(179, 102, 255, 0.3) 60%,
+        rgba(45, 27, 61, 0.90) 100%
+      );
+      z-index: -1;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(139, 69, 19, 0.15) 0px,
+        rgba(139, 69, 19, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 9999;
+      animation: vintage-scanlines 8s linear infinite;
+      opacity: 0.7;
+    }
+    
+    @keyframes vintage-scanlines {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(10px); }
+    }
+    
+    /* Efeito de ruído vintage */
+    @keyframes vintage-noise {
+      0%, 100% { opacity: 0.03; }
+      50% { opacity: 0.06; }
+    }
+    
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+    
+    header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 20px;
+      position: relative;
+    }
+    
+    header h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 24px;
+      font-weight: 400;
+      margin-bottom: 20px;
+      color: var(--vintage-amber);
+      text-shadow: 
+        4px 0 0 var(--vintage-brown),
+        -4px 0 0 var(--vintage-brown),
+        0 4px 0 var(--vintage-brown),
+        0 -4px 0 var(--vintage-brown),
+        4px 4px 0 var(--vintage-rust),
+        -4px -4px 0 var(--vintage-rust),
+        4px -4px 0 var(--vintage-rust),
+        -4px 4px 0 var(--vintage-rust);
+      letter-spacing: 2px;
+      animation: vintage-float 3s ease-in-out infinite, vintage-glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes vintage-float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-8px); }
+    }
+    
+    @keyframes vintage-glow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 10px rgba(218, 165, 32, 0.7)) drop-shadow(0 0 20px rgba(255, 191, 0, 0.5));
+      }
+      50% { 
+        filter: drop-shadow(0 0 20px rgba(255, 191, 0, 1)) drop-shadow(0 0 30px rgba(218, 165, 32, 0.8));
+      }
+    }
+    
+    header p {
+      font-size: 10px;
+      max-width: 700px;
+      margin: 0 auto;
+      color: var(--vintage-beige);
+      font-weight: 400;
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+    }
+    
+    .panels-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+    
+    .panel {
+      background: var(--panel-bg);
+      border-radius: 0;
+      overflow: hidden;
+      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.6);
+      border: 4px solid var(--panel-border);
+      backdrop-filter: none;
+      transform: translateY(0);
+      position: relative;
+    }
+    
+    .panel::before {
+      content: '📺';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      z-index: 10;
+      animation: vintage-flicker 3s ease-in-out infinite;
+      filter: drop-shadow(0 0 10px rgba(218, 165, 32, 0.8)) drop-shadow(0 0 15px rgba(255, 191, 0, 0.6));
+    }
+    
+    @keyframes vintage-flicker {
+      0%, 100% { opacity: 0.9; }
+      50% { opacity: 1; }
+    }
+    
+    .panel:hover {
+      transform: translateY(0);
+      box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.8), 0 0 20px rgba(218, 165, 32, 0.6);
+    }
+    
+    .panel-header {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .panel-header img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+      border-radius: 0;
+      filter: sepia(50%) saturate(1.3) brightness(0.9) contrast(1.1);
+      image-rendering: pixelated;
+    }
+    
+    .panel-header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 50%;
+      background: linear-gradient(to top, var(--panel-bg), transparent);
+    }
+    
+    .panel-title {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      padding: 20px;
+      z-index: 2;
+      text-align: center;
+    }
+    
+    .panel-title h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      font-weight: 400;
+      margin: 0;
+      color: var(--vintage-amber);
+      text-shadow: 3px 3px 0 rgba(0, 0, 0, 0.7);
+    }
+    
+    .panel-content {
+      padding: 25px;
+    }
+    
+    .price-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    
+    .price-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      padding: 10px;
+      border-bottom: 3px solid rgba(210, 105, 30, 0.3);
+      font-size: 9px;
+      background: rgba(0, 0, 0, 0.3);
+    }
+    
+    .price-item:last-child {
+      border-bottom: none;
+    }
+    
+    .price-name {
+      flex: 1;
+      color: var(--vintage-beige);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+    }
+    
+    .price-values {
+      display: flex;
+      gap: 15px;
+      font-weight: 400;
+    }
+    
+    .price-usd {
+      color: var(--vintage-gold);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+    }
+    
+    .price-brl {
+      color: var(--vintage-orange);
+      text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
+    }
+    
+    .special-item {
+      position: relative;
+      padding-left: 25px;
+    }
+    
+    .special-item::before {
+      content: '💎';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 1rem;
+    }
+    
+    .gold-item::before {
+      content: '☀️';
+    }
+    
+    .panel-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 25px;
+    }
+    
+    .copy-btn {
+      background: linear-gradient(180deg, var(--vintage-amber) 0%, var(--secondary-color) 100%);
+      color: var(--vintage-brown);
+      border: 4px solid var(--vintage-gold);
+      border-radius: 0;
+      padding: 12px;
+      font-size: 9px;
+      font-family: 'Press Start 2P', cursive;
+      font-weight: 400;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+      text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.3);
+    }
+    
+    .copy-btn:hover {
+      background: linear-gradient(180deg, var(--vintage-gold) 0%, var(--vintage-amber) 100%);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8), 0 0 20px rgba(218, 165, 32, 0.6);
+    }
+    
+    .copy-btn:active {
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+      transform: translate(2px, 2px);
+    }
+    
+    .copy-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .discord-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(180deg, var(--vintage-orange) 0%, var(--vintage-brown) 100%);
+      color: var(--vintage-cream);
+      text-decoration: none;
+      padding: 12px;
+      border-radius: 0;
+      border: 4px solid var(--vintage-sepia);
+      font-family: 'Press Start 2P', cursive;
+      font-size: 9px;
+      font-weight: 400;
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.6);
+      text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.8);
+    }
+    
+    .discord-btn:hover {
+      background: linear-gradient(180deg, var(--vintage-sepia) 0%, var(--vintage-orange) 100%);
+      box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.8), 0 0 20px rgba(210, 105, 30, 0.6);
+    }
+    
+    .discord-btn:active {
+      box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.6);
+      transform: translate(2px, 2px);
+    }
+    
+    .discord-btn img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      filter: sepia(30%) saturate(1.2);
+    }
+    
+    #cotacao {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.7);
+      padding: 10px 20px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      color: var(--text-color);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    #cotacao::before {
+      content: '💱';
+      font-size: 1.1rem;
+    }
+    
+    .loading {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .loading::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background: linear-gradient(90deg, var(--accent-color), transparent);
+      animation: loading 1.5s infinite;
+    }
+    
+    @keyframes loading {
+      0% { width: 0; left: 0; }
+      50% { width: 100%; left: 0; }
+      100% { width: 0; left: 100%; }
+    }
+    
+    .tooltip {
+      position: fixed;
+      background: rgba(0,0,0,0.9);
+      color: white;
+      padding: 10px 15px;
+      border-radius: 5px;
+      font-size: 0.9rem;
+      z-index: 1000;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.3s;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
+    
+    .highlight {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .diamond {
+      color: var(--diamond-color);
+      text-shadow: 0 0 5px rgba(185, 242, 255, 0.5);
+    }
+    
+    .gold {
+      color: var(--gold-color);
+      text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    }
+    
+    footer {
+      text-align: center;
+      padding: 30px 0;
+      margin-top: 50px;
+      font-size: 0.9rem;
+      color: rgba(255,255,255,0.7);
+    }
+    
+    /* ===== GIF COM PALETA ROXA/DOURADA ===== */
+    .vintage-gif {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      width: 240px;
+      height: auto;
+      z-index: 1000;
+      pointer-events: none;
+      filter: 
+        drop-shadow(0 0 15px rgba(153, 51, 255, 0.8)) 
+        drop-shadow(0 0 25px rgba(255, 215, 0, 0.6));
+      image-rendering: pixelated;
+      animation: purple-glow 4s ease-in-out infinite;
+    }
+    
+    @keyframes purple-glow {
+      0%, 100% { 
+        opacity: 0.95; 
+        filter: 
+          drop-shadow(0 0 15px rgba(153, 51, 255, 0.8)) 
+          drop-shadow(0 0 25px rgba(255, 215, 0, 0.6));
+      }
+      50% { 
+        opacity: 1; 
+        filter: 
+          drop-shadow(0 0 25px rgba(179, 102, 255, 1)) 
+          drop-shadow(0 0 35px rgba(255, 215, 0, 0.9));
+      }
+    }
+    
+    /* Responsividade */
+    @media (max-width: 1200px) {
+      .panels-container {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    
+    @media (max-width: 768px) {
+      body {
+        font-size: 8px;
+      }
+      
+      .panels-container {
+        grid-template-columns: 1fr;
+      }
+      
+      header h1 {
+        font-size: 16px;
+      }
+      
+      header p {
+        font-size: 8px;
+      }
+      
+      .vintage-gif {
+        width: 160px;
+        right: 10px;
+        bottom: 10px;
+      }
+      
+      .original-h1 {
+        font-size: 2.5rem;
+      }
+      
+      .container {
+        padding: 20px 15px;
+      }
+    }
+    
+    /* Animações */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .panel {
+      animation: fadeIn 0.6s ease forwards;
+    }
+    
+    .panel:nth-child(1) { animation-delay: 0.1s; }
+    .panel:nth-child(2) { animation-delay: 0.3s; }
+    .panel:nth-child(3) { animation-delay: 0.5s; }
+    .panel:nth-child(4) { animation-delay: 0.7s; }
+    
+    /* Efeitos de brilho */
+    .glow {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 70%);
+      pointer-events: none;
+      z-index: 10;
+      opacity: 0;
+      mix-blend-mode: screen;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Daoshi Store</h1>
+      <p>BORA CASHAR???</p>
+    </header>
+    </header>
+    
+    <div class="panels-container">
+      <div class="panel" id="panelNightCrows">
+        <div class="panel-header">
+          <img src="https://lh3.googleusercontent.com/d/1SCBo-Midzz2D6vcn5gs09-UPYVA319Co" alt="Night Crows">
+          <div class="panel-title">
+            <h2>Night Crows</h2>
+          </div>
+        </div>
+        <div class="panel-content">
+          <ul class="price-list">
+            <li class="price-item special-item">
+              <span class="price-name">Diamantes (1k)</span>
+              <div class="price-values">
+                <span class="price-usd">$6.00</span>
+                <span class="price-brl convert" data-usdt="3.95">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 5$</span>
+              <div class="price-values">
+                <span class="price-usd">$4.00</span>
+                <span class="price-brl convert" data-usdt="4.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 8$</span>
+              <div class="price-values">
+                <span class="price-usd">$6.40</span>
+                <span class="price-brl convert" data-usdt="6.40">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 10$</span>
+              <div class="price-values">
+                <span class="price-usd">$8.00</span>
+                <span class="price-brl convert" data-usdt="8.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 20$</span>
+              <div class="price-values">
+                <span class="price-usd">$16.00</span>
+                <span class="price-brl convert" data-usdt="16.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 30$</span>
+              <div class="price-values">
+                <span class="price-usd">$24.00</span>
+                <span class="price-brl convert" data-usdt="24.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 50$</span>
+              <div class="price-values">
+                <span class="price-usd">$40.00</span>
+                <span class="price-brl convert" data-usdt="40.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 100$</span>
+              <div class="price-values">
+                <span class="price-usd">$80.00</span>
+                <span class="price-brl convert" data-usdt="80.00">--</span>
+              </div>
+            </li>
+          </ul>
+          <div class="panel-actions">
+            <button class="copy-btn" onclick="copyPanel('panelNightCrows')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copiar preços
+            </button>
+            <a href="https://discord.com/channels/1184339622696853626/1258989068239503380" target="_blank" class="discord-btn">
+              <img src="https://lh3.googleusercontent.com/d/1ppwhjBwFu8WTKdFeJBzAPL5fg9zPxfpB" alt="Ícone Discord">
+              <span>Comprar agora</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel" id="panelNightCrowsTWD">
+        <div class="panel-header">
+          <img src="https://lh3.googleusercontent.com/d/1GRiix7L28noZLZN8n92kEjJCEnffr4vc" alt="Night Crows TWD">
+          <div class="panel-title">
+            <h2>Night Crows TWD</h2>
+          </div>
+        </div>
+        <div class="panel-content">
+          <ul class="price-list">
+            <li class="price-item">
+              <span class="price-name">Pack 500 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$13.70</span>
+                <span class="price-brl convert" data-usdt="13.70">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 800 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$21.92</span>
+                <span class="price-brl convert" data-usdt="21.92">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 1.000 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$27.40</span>
+                <span class="price-brl convert" data-usdt="27.40">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 1.200 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$32.88</span>
+                <span class="price-brl convert" data-usdt="32.88">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 3.000 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$82.20</span>
+                <span class="price-brl convert" data-usdt="82.20">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 3.500 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$95.89</span>
+                <span class="price-brl convert" data-usdt="95.89">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 5.000 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$137.00</span>
+                <span class="price-brl convert" data-usdt="137.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 7.000 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$191.80</span>
+                <span class="price-brl convert" data-usdt="191.80">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 10.000 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$274.00</span>
+                <span class="price-brl convert" data-usdt="274.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 28.000 TWD</span>
+              <div class="price-values">
+                <span class="price-usd">$822.00</span>
+                <span class="price-brl convert" data-usdt="822.00">--</span>
+              </div>
+            </li>
+          </ul>
+          <div class="panel-actions">
+            <button class="copy-btn" onclick="copyPanel('panelNightCrowsTWD')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copiar preços
+            </button>
+            <a href="https://discord.com/channels/1184339622696853626/1258989068239503380" target="_blank" class="discord-btn">
+              <img src="https://lh3.googleusercontent.com/d/1ppwhjBwFu8WTKdFeJBzAPL5fg9zPxfpB" alt="Ícone Discord">
+              <span>Comprar agora</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel" id="panelMir4Webshop">
+        <div class="panel-header">
+          <img src="https://lh3.googleusercontent.com/d/12JUkRdgB7zGf6HsurBr7BipKsbKNary4" alt="Mir4 WebShop">
+          <div class="panel-title">
+            <h2>Mir4 WebShop</h2>
+          </div>
+        </div>
+        <div class="panel-content">
+          <ul class="price-list">
+            <li class="price-item">
+              <span class="price-name">Pack 30$</span>
+              <div class="price-values">
+                <span class="price-usd">$33.50</span>
+                <span class="price-brl convert" data-usdt="32.50">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 50$</span>
+              <div class="price-values">
+                <span class="price-usd">$55.00</span>
+                <span class="price-brl convert" data-usdt="53.50">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 100$</span>
+              <div class="price-values">
+                <span class="price-usd">$110.00</span>
+                <span class="price-brl convert" data-usdt="107.00">--</span>
+              </div>
+            </li>
+          </ul>
+          <div class="panel-actions">
+            <button class="copy-btn" onclick="copyPanel('panelMir4Webshop')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copiar preços
+            </button>
+            <a href="https://discord.com/channels/1184339622696853626/1372318088787267655" target="_blank" class="discord-btn">
+              <img src="https://lh3.googleusercontent.com/d/1ppwhjBwFu8WTKdFeJBzAPL5fg9zPxfpB" alt="Ícone Discord">
+              <span>Comprar agora</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel" id="panelMir4">
+        <div class="panel-header">
+          <img src="https://lh3.googleusercontent.com/d/17TAluRM37QgDqjIw_lXxQliQoBWou1Jc" alt="Mir4">
+          <div class="panel-title">
+            <h2>Mir4</h2>
+          </div>
+        </div>
+        <div class="panel-content">
+          <ul class="price-list">
+            <li class="price-item special-item gold-item">
+              <span class="price-name">Gold 100 - 999</span>
+              <div class="price-values">
+                <span class="price-usd">$3.50</span>
+                <span class="price-brl">R$21.00</span>
+              </div>
+            </li>
+            <li class="price-item special-item gold-item">
+              <span class="price-name">Gold 1k - 4999</span>
+              <div class="price-values">
+                <span class="price-usd">$3.50</span>
+                <span class="price-brl">R$20.00</span>
+              </div>
+            </li>
+            <li class="price-item special-item gold-item">
+              <span class="price-name">Gold 5k - 9999</span>
+              <div class="price-values">
+                <span class="price-usd">$3.50</span>
+                <span class="price-brl">R$20.00</span>
+              </div>
+            </li>
+            <li class="price-item special-item gold-item">
+              <span class="price-name">Gold 10k - 19999</span>
+              <div class="price-values">
+                <span class="price-usd">$3.50</span>
+                <span class="price-brl">R$20.00</span>
+              </div>
+            </li>
+            <li class="price-item special-item gold-item">
+              <span class="price-name">Gold 20k+</span>
+              <div class="price-values">
+                <span class="price-usd">$3.50</span>
+                <span class="price-brl">R$18.40</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 1$</span>
+              <div class="price-values">
+                <span class="price-usd">$0.90</span>
+                <span class="price-brl convert" data-usdt="0.90">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 3$</span>
+              <div class="price-values">
+                <span class="price-usd">$2.55</span>
+                <span class="price-brl convert" data-usdt="2.55">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 5$</span>
+              <div class="price-values">
+                <span class="price-usd">$4.20</span>
+                <span class="price-brl convert" data-usdt="4.20">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 10$</span>
+              <div class="price-values">
+                <span class="price-usd">$7.49</span>
+                <span class="price-brl convert" data-usdt="7.49">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 30$</span>
+              <div class="price-values">
+                <span class="price-usd">$22.50</span>
+                <span class="price-brl convert" data-usdt="22.50">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 50$</span>
+              <div class="price-values">
+                <span class="price-usd">$38.99</span>
+                <span class="price-brl convert" data-usdt="38.99">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">Pack 100$</span>
+              <div class="price-values">
+                <span class="price-usd">$74.98</span>
+                <span class="price-brl convert" data-usdt="74.98">--</span>
+              </div>
+            </li>
+          </ul>
+          <div class="panel-actions">
+            <button class="copy-btn" onclick="copyPanel('panelMir4')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copiar preços
+            </button>
+            <a href="https://discord.com/channels/1184339622696853626/1372318088787267655" target="_blank" class="discord-btn">
+              <img src="https://lh3.googleusercontent.com/d/1ppwhjBwFu8WTKdFeJBzAPL5fg9zPxfpB" alt="Ícone Discord">
+              <span>Comprar agora</span>
+            </a>
+          </div>
+        </div>
+      </div>
+      
+      <div class="panel" id="panelYmirPoints">
+        <div class="panel-header">
+          <img src="https://i.imgur.com/Bna4U0c.png" alt="Ymir Points">
+          <div class="panel-title">
+            <h2>Ymir Points</h2>
+          </div>
+        </div>
+        <div class="panel-content">
+          <ul class="price-list">
+            <li class="price-item">
+              <span class="price-name">💠 300+15 Ymir Points</span>
+              <div class="price-values">
+                <span class="price-usd">$2.70</span>
+                <span class="price-brl convert" data-usdt="2.70">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">💠 500+25 Ymir Points</span>
+              <div class="price-values">
+                <span class="price-usd">$4.50</span>
+                <span class="price-brl convert" data-usdt="4.50">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">💠 1000+50 Ymir Points</span>
+              <div class="price-values">
+                <span class="price-usd">$9.00</span>
+                <span class="price-brl convert" data-usdt="9.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">💠 3000+150 Ymir Points</span>
+              <div class="price-values">
+                <span class="price-usd">$27.00</span>
+                <span class="price-brl convert" data-usdt="27.00">--</span>
+              </div>
+            </li>
+            <li class="price-item">
+              <span class="price-name">💠 5000+250 Ymir Points</span>
+              <div class="price-values">
+                <span class="price-usd">$45.00</span>
+                <span class="price-brl convert" data-usdt="45.00">--</span>
+              </div>
+            </li>
+          </ul>
+          <div class="panel-actions">
+            <button class="copy-btn" onclick="copyPanel('panelYmirPoints')">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copiar preços
+            </button>
+            <a href="https://discord.com/channels/1184339622696853626/1372318088787267655" target="_blank" class="discord-btn">
+              <img src="https://lh3.googleusercontent.com/d/1ppwhjBwFu8WTKdFeJBzAPL5fg9zPxfpB" alt="Ícone Discord">
+              <span>Comprar agora</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <footer>
+      <p>Atualizado em <span id="current-date"></span></p>
+    </footer>
+  </div>
+  
+  <div id="cotacao" class="loading">Carregando cotação...</div>
+  <div class="tooltip" id="tooltip"></div>
+  <div class="glow" id="glow"></div>
+  
+  <script>
+    // Atualizar data atual
+    const dateOptions = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('current-date').textContent = new Date().toLocaleDateString('pt-BR', dateOptions);
+    
+    // Função para atualizar cotação
+    async function atualizarCotacao() {
+      try {
+        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL');
+        if (!response.ok) throw new Error("Erro na requisição");
+        const data = await response.json();
+        const taxa = parseFloat(data.price);
+        
+        const cotacaoElement = document.getElementById('cotacao');
+        cotacaoElement.innerHTML = `Taxa USD-BRL: R$ ${taxa.toFixed(4)}`;
+        cotacaoElement.classList.remove('loading');
+        
+        const elems = document.querySelectorAll('.convert');
+        elems.forEach(el => {
+          const usdt = parseFloat(el.getAttribute('data-usdt'));
+          if (!isNaN(usdt)) {
+            const brl = usdt * taxa;
+            el.innerText = `R$${brl.toFixed(2)}`;
+          }
+        });
+      } catch (error) {
+        console.error('Erro ao atualizar cotação:', error);
+        document.getElementById('cotacao').innerHTML = 'Erro ao carregar cotação';
+        document.getElementById('cotacao').classList.remove('loading');
+      }
+    }
+    
+    // Função para copiar preços
+    function copyPanel(panelId) {
+      const panel = document.getElementById(panelId);
+      let text = panel.querySelector('.panel-title h2').innerText + "\n\n";
+      const itens = panel.querySelectorAll('.price-list .price-item');
+      
+      itens.forEach(item => {
+        const name = item.querySelector('.price-name').innerText;
+        const usd = item.querySelector('.price-usd').innerText;
+        const brl = item.querySelector('.price-brl').innerText;
+        text += `${name} = ${usd} | ${brl}\n`;
+      });
+      
+      navigator.clipboard.writeText(text)
+        .then(() => {
+          showTooltip('Preços copiados com sucesso!');
+        })
+        .catch(err => {
+          showTooltip('Erro ao copiar: ' + err);
+        });
+    }
+    
+    // Função para exibir tooltip
+    function showTooltip(message) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.textContent = message;
+      tooltip.style.opacity = '1';
+      
+      // Posicionar no centro da tela
+      tooltip.style.top = '50%';
+      tooltip.style.left = '50%';
+      tooltip.style.transform = 'translate(-50%, -50%)';
+      
+      // Esconder após 2 segundos
+      setTimeout(() => {
+        tooltip.style.opacity = '0';
+      }, 2000);
+    }
+    
+    // Efeito de brilho ao passar o mouse
+    document.addEventListener('mousemove', (e) => {
+      const glow = document.getElementById('glow');
+      const x = e.clientX;
+      const y = e.clientY;
+      
+      glow.style.left = `${x - 25}px`;
+      glow.style.top = `${y - 25}px`;
+      glow.style.opacity = '0.7';
+      
+      setTimeout(() => {
+        glow.style.opacity = '0';
+      }, 100);
+    });
+    
+    // Inicializar
+    window.addEventListener('load', () => {
+      atualizarCotacao();
+      // Atualizar cotação a cada 5 minutos
+      setInterval(atualizarCotacao, 300000);
+    });
+  </script>
+  
+  <!-- Vintage GIF -->
+  <img src="https://media.giphy.com/media/bzawYMvJVw0KPA0u7M/giphy.gif" alt="Vintage Theme" class="vintage-gif">
+  
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

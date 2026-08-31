@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌷 Jardim Fiscal da Daoshi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+<style>
+  :root{
+    --rose:#c2185b; --pink:#f48fb1; --lav:#b39ddb; --mint:#81c784;
+    --coral:#ff6f91; --green:#8bc34a; --magenta:#ec407a;
+    --ink:#5d4456; --soft:#6f5566;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{min-height:100%}
+  body{
+    font-family:'Quicksand',sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 600px at 10% -10%, #ffe3f0 0%, transparent 55%),
+      radial-gradient(1000px 600px at 110% 10%, #efe3ff 0%, transparent 55%),
+      radial-gradient(900px 700px at 50% 120%, #e3f7e8 0%, transparent 55%),
+      linear-gradient(135deg,#fdeef5 0%,#f4ecff 45%,#eaf8ef 100%);
+    background-attachment:fixed;
+    overflow-x:hidden;
+    position:relative;
+    padding:32px 18px 90px;
+  }
+
+  /* 🌸 pétalas caindo */
+  .petal{position:fixed;top:-60px;font-size:26px;pointer-events:none;z-index:0;
+    animation:fall linear infinite;opacity:.85;filter:drop-shadow(0 3px 4px rgba(180,120,160,.25))}
+  @keyframes fall{
+    0%{transform:translateY(-60px) rotate(0deg)}
+    100%{transform:translateY(105vh) rotate(360deg)}
+  }
+  @keyframes sway{0%,100%{margin-left:0}50%{margin-left:32px}}
+
+  .wrap{position:relative;z-index:2;max-width:1180px;margin:0 auto}
+
+  header{text-align:center;margin-bottom:30px}
+  header h1{
+    font-family:'Dancing Script',cursive;font-size:clamp(38px,6vw,62px);
+    color:var(--rose);line-height:1.05;
+    text-shadow:0 2px 0 #fff,0 6px 18px rgba(194,24,91,.18)}
+  header .flowers{font-size:clamp(28px,5vw,40px);margin:2px 0 10px}
+  header p{max-width:760px;margin:0 auto;font-size:16.5px;line-height:1.6;color:var(--soft)}
+  header p b{color:var(--rose)}
+  .privacy-note{max-width:640px;margin:14px auto 0;font-size:13px;line-height:1.5;
+    color:#715a68;background:rgba(255,255,255,.55);border:1px solid rgba(200,160,190,.45);
+    border-radius:12px;padding:9px 14px}
+  .privacy-note b{color:var(--rose)}
+
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;margin-top:30px}
+  @media(max-width:880px) and (min-width:601px){.grid{grid-template-columns:1fr 1fr}}
+  @media(max-width:600px){.grid{grid-template-columns:1fr}}
+
+  @media (prefers-reduced-motion: reduce){
+    .petal{animation:none;display:none}
+    .box,.save-btn{transition:none}
+    .cloud-status.saving .dot{animation:none}
+    .dev-reply{animation:none}
+  }
+
+  .box{
+    position:relative;border-radius:22px;padding:22px 20px 20px;
+    background:rgba(255,255,255,.55);
+    border:1.5px solid rgba(255,255,255,.85);
+    box-shadow:0 14px 40px rgba(170,110,150,.18), inset 0 1px 0 rgba(255,255,255,.9);
+    backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px);
+    transition:transform .25s ease, box-shadow .25s ease;
+    display:flex;flex-direction:column}
+  .box:hover{transform:translateY(-5px);box-shadow:0 22px 55px rgba(170,110,150,.28)}
+  .box::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;border-radius:22px 22px 0 0}
+  .box.b1::before{background:linear-gradient(90deg,var(--green),#cddc39)}
+  .box.b2::before{background:linear-gradient(90deg,var(--pink),var(--lav))}
+  .box.b3::before{background:linear-gradient(90deg,var(--coral),var(--magenta))}
+
+  .box .emoji{font-size:38px;line-height:1;margin-bottom:6px}
+  .box h2{font-family:'Dancing Script',cursive;font-size:30px;margin-bottom:2px}
+  .box.b1 h2{color:#5a8f1e}
+  .box.b2 h2{color:#9c5fb5}
+  .box.b3 h2{color:#d63a6b}
+  .box .sub{font-size:13px;font-weight:600;color:var(--soft);margin-bottom:8px}
+
+  .hint{
+    font-size:12.5px;font-style:italic;line-height:1.45;color:#6f5566;
+    background:rgba(255,255,255,.55);border:1px dashed rgba(180,140,170,.5);
+    border-radius:12px;padding:9px 11px;margin-bottom:12px}
+  .hint b{font-style:normal;color:var(--magenta)}
+
+  textarea{
+    width:100%;flex:1;min-height:230px;resize:vertical;
+    font-family:'Quicksand',sans-serif;font-size:15px;line-height:1.6;color:var(--ink);
+    background:rgba(255,255,255,.7);
+    border:1.5px solid rgba(200,160,190,.4);border-radius:14px;
+    padding:13px 14px;outline:none;transition:border .2s, box-shadow .2s}
+  textarea::placeholder{color:#8f7585}
+  textarea:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(244,143,177,.22);background:#fff}
+
+  .save-wrap{text-align:center;margin-top:34px}
+  .save-btn{
+    font-family:'Quicksand',sans-serif;font-weight:700;font-size:18px;color:#fff;
+    border:none;cursor:pointer;padding:16px 42px;border-radius:50px;
+    background:linear-gradient(135deg,#ff7eb3 0%,#b66bd6 55%,#8a6bd6 100%);
+    box-shadow:0 12px 30px rgba(180,90,180,.4), inset 0 1px 0 rgba(255,255,255,.4);
+    transition:transform .15s ease, box-shadow .15s ease}
+  .save-btn:hover{transform:translateY(-3px) scale(1.03);box-shadow:0 18px 40px rgba(180,90,180,.5)}
+  .save-btn:active{transform:translateY(0) scale(.99)}
+  .save-note{margin-top:12px;font-size:13.5px;color:var(--soft)}
+  .save-note b{color:var(--magenta)}
+
+  footer{text-align:center;margin-top:34px;font-size:13px;color:#8a7384}
+  footer .heart{color:var(--rose)}
+
+  .cloud-status{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:600;
+    color:var(--soft);background:rgba(255,255,255,.6);border:1px solid rgba(200,160,190,.45);
+    border-radius:50px;padding:8px 16px;margin-top:14px;transition:all .3s}
+  .cloud-status .dot{width:9px;height:9px;border-radius:50%;background:#c9b8c4;transition:background .3s}
+  .cloud-status.ok{color:#3f8a5c} .cloud-status.ok .dot{background:#7bd88f}
+  .cloud-status.saving{color:#a87e1f} .cloud-status.saving .dot{background:#ffd166;animation:pulse 1s infinite}
+  .cloud-status.err{color:#c44a36} .cloud-status.err .dot{background:#ff7e7e}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .link-btn{background:none;border:none;color:var(--rose);font-family:'Quicksand',sans-serif;
+    font-weight:700;font-size:13.5px;cursor:pointer;text-decoration:underline;margin-top:16px;display:inline-block}
+  .link-btn:hover{color:#9c1346}
+
+  /* 💬 conversa com o dev */
+  .convo{margin-top:26px;border-radius:22px;padding:22px 20px 20px;position:relative;
+    background:rgba(255,255,255,.55);border:1.5px solid rgba(255,255,255,.85);
+    box-shadow:0 14px 40px rgba(170,110,150,.18), inset 0 1px 0 rgba(255,255,255,.9);
+    backdrop-filter:blur(9px);-webkit-backdrop-filter:blur(9px)}
+  .convo::before{content:"";position:absolute;inset:0 0 auto 0;height:6px;border-radius:22px 22px 0 0;
+    background:linear-gradient(90deg,var(--lav),#ffd166,var(--pink))}
+  .convo-title{font-family:'Dancing Script',cursive;font-size:30px;color:#7e51a6;margin-bottom:4px}
+  .convo-sub{font-size:13px;font-weight:600;color:var(--soft);margin-bottom:14px}
+  .dev-reply{background:linear-gradient(135deg,#fff6fb,#f1ecff);border:1.5px solid #e3d2ef;
+    border-radius:16px;padding:14px 16px;margin-bottom:16px;animation:popIn .4s ease}
+  .dev-reply-head{font-weight:700;color:#7e51a6;font-size:14px;margin-bottom:6px;
+    display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .dev-reply-time{font-weight:600;color:var(--soft);font-size:12px}
+  .dev-reply-text{white-space:pre-wrap;line-height:1.6;color:var(--ink);font-size:15px}
+  .convo-label{display:block;font-weight:700;color:var(--ink);font-size:14.5px;margin-bottom:8px}
+  .convo-input{min-height:90px}
+  @keyframes popIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+  /* toast */
+  #toast{position:fixed;left:50%;bottom:30px;transform:translateX(-50%) translateY(120px);
+    background:linear-gradient(135deg,#fff,#fff0f7);color:var(--rose);
+    border:1.5px solid var(--pink);border-radius:16px;padding:14px 22px;font-weight:600;
+    box-shadow:0 14px 40px rgba(194,24,91,.25);z-index:50;opacity:0;
+    transition:transform .4s cubic-bezier(.2,1.3,.4,1), opacity .4s;max-width:88vw;text-align:center}
+  #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="flowers">🌷 🌸 🌺</div>
+      <h1>Jardim Fiscal da Daoshi</h1>
+      <p>Oi Ysa! 🌸 Escreve aqui pra gente o que a Daoshi precisa pra começar a emitir
+      nota fiscal automática — do <b>mais simples</b> (à esquerda) ao <b>mais importante</b>
+      (à direita). Pode escrever à vontade nas 3 caixinhas e clicar em <b>Salvar</b> —
+      fica guardado automaticamente e eu já vejo daqui. 💛</p>
+      <div class="privacy-note">🔒 É só pra você <b>descrever os passos</b> — não precisa
+      colar CPF nem dados reais de cliente aqui, tá? 🌸</div>
+    </header>
+
+    <div class="grid">
+      <!-- BOX 1 -->
+      <section class="box b1">
+        <div class="emoji">🌱</div>
+        <h2>O comecinho</h2>
+        <div class="sub">As coisas mais simples / primeiros passos</div>
+        <div class="hint">
+          <b>Exemplo:</b> o que a gente já tem pronto (CNPJ ativo, regime tributário),
+          qual o primeiro passo mais fácil, o que dá pra resolver rapidinho…
+        </div>
+        <textarea class="box-input" aria-label="O comecinho — coisas mais simples e primeiros passos" placeholder="Escreve aqui o comecinho… 🌱"></textarea>
+      </section>
+
+      <!-- BOX 2 -->
+      <section class="box b2">
+        <div class="emoji">🌸</div>
+        <h2>O meio do caminho</h2>
+        <div class="sub">O intermediário / o que providenciar no meio</div>
+        <div class="hint">
+          <b>Exemplo:</b> certificado digital (A1), inscrição municipal, cadastro no
+          sistema da prefeitura, qual a alíquota do ISS, o CNAE certo do serviço…
+        </div>
+        <textarea class="box-input" aria-label="O meio do caminho — o intermediário, o que providenciar no meio" placeholder="Escreve aqui o intermediário… 🌸"></textarea>
+      </section>
+
+      <!-- BOX 3 -->
+      <section class="box b3">
+        <div class="emoji">🌺</div>
+        <h2>O mais importante</h2>
+        <div class="sub">O que mais pesa e o que pode demorar</div>
+        <div class="hint">
+          <b>Exemplo:</b> a licença/credenciamento da prefeitura (precisa pedir? demora
+          ~30 dias?), prazos importantes, <b>quais</b> dados a nota exige (ex.: pede o CPF
+          do cliente?), o que não pode faltar de jeito nenhum…
+        </div>
+        <textarea class="box-input" aria-label="O mais importante — o que mais pesa e o que pode demorar" placeholder="Escreve aqui o mais importante… 🌺"></textarea>
+      </section>
+    </div>
+
+    <section class="convo">
+      <div class="convo-title">💬 Conversa com a IA</div>
+      <div class="convo-sub">Aqui a gente conversa: a IA te deixa recadinhos e você pode perguntar o que quiser 🌸</div>
+
+      <div id="dev-reply" class="dev-reply" style="display:none">
+        <div class="dev-reply-head">🌷 Recadinho da IA <span id="dev-reply-time" class="dev-reply-time"></span></div>
+        <div id="dev-reply-text" class="dev-reply-text"></div>
+      </div>
+
+      <label class="convo-label" for="pergunta-input">❓ Quer me perguntar alguma coisa? Escreve aqui 👇</label>
+      <textarea id="pergunta-input" class="box-input convo-input" aria-label="Sua pergunta pra IA"
+        placeholder="Ex.: o certificado A1 a gente tira aonde? Quanto custa? 🌸"></textarea>
+    </section>
+
+    <div class="save-wrap">
+      <button class="save-btn" onclick="salvar()">💾 Salvar</button>
+      <div class="save-note">
+        Ao clicar, fica <b>salvo automaticamente</b> e eu já consigo ver daqui — não precisa mandar nada! 💛<br>
+        (Pode fechar e voltar quando quiser que o que você escreveu continua aqui. 🌼)
+      </div>
+      <div id="cloud-status" class="cloud-status"><span class="dot"></span><span id="cloud-text">Abrindo seu jardim… 🌱</span></div>
+      <div>
+        <button class="link-btn" onclick="baixarCopia()">📥 Baixar uma cópia do arquivo</button>
+      </div>
+    </div>
+
+    <footer>
+      Feito com <span class="heart">❤</span> pela Daoshi Store · 🌸
+    </footer>
+  </div>
+
+  <div id="toast"></div>
+
+<script>
+  // 🌸 pétalas caindo (geradas via JS pra ficarem variadas)
+  (function plantPetals(){
+    const flowers = ['🌸','🌷','🌺','🌼','💮','🌹'];
+    const n = window.innerWidth < 700 ? 10 : 18;
+    for(let i=0;i<n;i++){
+      const p = document.createElement('div');
+      p.className = 'petal';
+      p.textContent = flowers[Math.floor(Math.random()*flowers.length)];
+      p.style.left = Math.random()*100 + 'vw';
+      p.style.fontSize = (16 + Math.random()*22) + 'px';
+      const dur = 9 + Math.random()*11;
+      p.style.animationDuration = dur + 's';
+      p.style.animationDelay = (-Math.random()*dur) + 's';
+      p.style.opacity = (0.55 + Math.random()*0.4).toFixed(2);
+      document.body.appendChild(p);
+    }
+  })();
+
+  function toast(msg){
+    const t = document.getElementById('toast');
+    t.innerHTML = msg;
+    t.classList.add('show');
+    clearTimeout(t._tmr);
+    t._tmr = setTimeout(()=>t.classList.remove('show'), 5000);
+  }
+
+  // ── status da nuvem (pílula embaixo do botão) ──
+  function setStatus(state, text){
+    const el = document.getElementById('cloud-status');
+    const tx = document.getElementById('cloud-text');
+    if(!el || !tx) return;
+    el.className = 'cloud-status' + (state ? ' ' + state : '');
+    tx.textContent = text;
+  }
+
+  // ── boxes ── (as 3 do grid + a pergunta dela pro dev)
+  function gridBoxes(){ return document.querySelectorAll('section.box textarea.box-input'); }
+  function getBoxes(){
+    const ta = gridBoxes();
+    const perg = document.getElementById('pergunta-input');
+    return {
+      comecinho:(ta[0]?.value||''), meio:(ta[1]?.value||''), importante:(ta[2]?.value||''),
+      pergunta:(perg?.value||'')
+    };
+  }
+  // só preenche caixa que estiver VAZIA (não clobbera o que ela já digitou nem
+  // o texto embutido numa cópia baixada)
+  function fillBoxesIfEmpty(data){
+    if(!data) return;
+    const ta = gridBoxes();
+    ['comecinho','meio','importante'].forEach((k,i) => { if(ta[i] && !ta[i].value && data[k]) ta[i].value = data[k]; });
+    const perg = document.getElementById('pergunta-input');
+    if(perg && !perg.value && data.pergunta) perg.value = data.pergunta;
+  }
+
+  // ── Firebase (mesmo projeto do painel — chave pública, nada secreto) ──
+  const firebaseConfig = {
+    apiKey: "AIzaSyD6vn4IagySnIJ-0knlelyZmIWNV7qJnKk",
+    authDomain: "daoshi-bot.firebaseapp.com",
+    databaseURL: "https://daoshi-bot-default-rtdb.firebaseio.com",
+    projectId: "daoshi-bot",
+    storageBucket: "daoshi-bot.firebasestorage.app",
+    messagingSenderId: "472062549464",
+    appId: "1:472062549464:web:086c1c07d63a11ce3ca6ad"
+  };
+  const REF_ATUAL = 'botConfig/jardimFiscal/atual';
+  const REF_RESPOSTA = 'botConfig/jardimFiscal/resposta'; // recadinho do dev (me → ela)
+  // Uma cópia baixada vem com data-copia="1" no <html> e SEM o SDK do Firebase
+  // (removido em baixarCopia): ela é INERTE — não lê nem grava na nuvem, então
+  // nunca sobrescreve o que está salvo online.
+  const IS_COPIA = document.documentElement.hasAttribute('data-copia');
+  let db = null;
+  try {
+    if (!IS_COPIA && typeof firebase !== 'undefined') { firebase.initializeApp(firebaseConfig); db = firebase.database(); }
+  } catch(e){ console.warn('Firebase init falhou:', e?.message); }
+
+  function fmtBR(ts){
+    try { return new Date(ts).toLocaleString('pt-BR', {timeZone:'America/Sao_Paulo', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'}); }
+    catch(_) { return ''; }
+  }
+
+  // ── carrega o que já foi escrito (leitura única; não fica ouvindo pra não
+  // sobrescrever enquanto ela digita) ──
+  function loadFromCloud(){
+    if(IS_COPIA){ setStatus('ok','📄 Esta é a sua cópia salva (offline)'); return; }
+    if(!db){ setStatus('err','Sem internet agora — escreve à vontade e clica em Salvar que eu baixo um arquivinho 💛'); return; }
+    setStatus('saving','Abrindo seu jardim… 🌱');
+    db.ref(REF_ATUAL).once('value')
+      .then(snap => {
+        const data = snap.val();
+        if(data){
+          fillBoxesIfEmpty(data);
+          setStatus('ok', 'Tudo certo' + (data.savedAt ? ' · última edição ' + fmtBR(data.savedAt) : '') + ' 🌸');
+        } else {
+          setStatus('ok','Pronto pra escrever 🌱');
+        }
+      })
+      .catch(err => { console.warn(err); setStatus('err','Não consegui abrir o que tinha salvo — pode escrever que salva normal 💛'); });
+  }
+
+  function salvar(){
+    const data = getBoxes();
+    if(!data.comecinho && !data.meio && !data.importante && !data.pergunta){
+      toast('🌼 Escreve alguma coisinha primeiro 💛'); return;
+    }
+    // Numa cópia offline (ou sem internet) não tem nuvem — re-baixa o arquivo.
+    if(IS_COPIA || !db){
+      baixarCopia();
+      setStatus(IS_COPIA ? 'ok' : 'err', IS_COPIA ? '📄 Cópia atualizada baixada' : 'Sem internet — baixei o arquivo, me manda ele 💛');
+      toast(IS_COPIA
+        ? '📥 Essa é a sua cópia — pra salvar online, abre o link que te mandei 💛'
+        : '📥 Sem internet pra salvar online — baixei o arquivo, é só me mandar! 💛');
+      return;
+    }
+
+    const entry = Object.assign({}, data, { savedAt: Date.now(), savedAtBR: fmtBR(Date.now()) });
+    const btn = document.querySelector('.save-btn');
+    if(btn){ btn.disabled = true; btn.textContent = '💾 Salvando…'; }
+    setStatus('saving','Salvando… 🌸');
+    db.ref(REF_ATUAL).set(entry)
+      .then(() => {
+        setStatus('ok','Salvo ✓ às ' + fmtBR(entry.savedAt) + ' — já consigo ver daqui 💛');
+        toast('🌸 Salvo! Não precisa mandar nada, eu já vejo daqui. 💛');
+      })
+      .catch(err => {
+        console.warn('Falha ao salvar online:', err);
+        baixarCopia();
+        setStatus('err','Não consegui salvar online — baixei o arquivo, me manda ele');
+        toast('⚠️ Deu probleminha pra salvar online — baixei o arquivo, é só me mandar 💛');
+      })
+      .finally(() => { if(btn){ btn.disabled = false; btn.textContent = '💾 Salvar'; } });
+  }
+
+  // ── baixa uma cópia .html com o texto embutido (backup / round-trip) ──
+  // A cópia é INERTE: marca data-copia e remove o SDK do Firebase, então ao
+  // reabrir não lê nem grava na nuvem (não sobrescreve o que está salvo).
+  function baixarCopia(){
+    document.querySelectorAll('textarea.box-input').forEach(t => { t.textContent = t.value; });
+    const clone = document.documentElement.cloneNode(true);
+    clone.setAttribute('data-copia','1');
+    clone.querySelectorAll('.petal').forEach(p => p.remove());
+    clone.querySelectorAll('script[src*="firebasejs"]').forEach(s => s.remove());
+    const html = '<!DOCTYPE html>\n' + clone.outerHTML;
+    const blob = new Blob([html], { type: 'text/html;charset=utf-8' });
+    const d = new Date();
+    const pad = x => String(x).padStart(2,'0');
+    const nome = `daoshi-jardim-fiscal-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.html`;
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = nome;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+    toast('📥 Baixei a cópia <b>' + nome + '</b> 🌼');
+  }
+
+  // ── recadinho do dev (me → ela), ao vivo ──
+  function renderDevReply(r){
+    const wrap = document.getElementById('dev-reply');
+    const txt  = document.getElementById('dev-reply-text');
+    const tm   = document.getElementById('dev-reply-time');
+    if(!wrap || !txt) return;
+    if(r && r.text){
+      txt.textContent = r.text;
+      if(tm) tm.textContent = r.updatedAt ? '· ' + fmtBR(r.updatedAt) : '';
+      wrap.style.display = 'block';
+    } else {
+      wrap.style.display = 'none';
+    }
+  }
+
+  // dispara o load assim que a página abre
+  loadFromCloud();
+  // escuta o recadinho do dev em tempo real (só na página viva, não na cópia)
+  if(db && !IS_COPIA){
+    try { db.ref(REF_RESPOSTA).on('value', s => renderDevReply(s.val())); } catch(_){}
+  }
+</script>
+</body>
+</html>

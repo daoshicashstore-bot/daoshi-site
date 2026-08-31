@@ -1,0 +1,50 @@
+﻿# Ignorar instalação do Cursor
+/cursor/
+
+# Ignorar node_modules
+**/node_modules/
+
+# Ignorar arquivos temporários
+*.tmp
+*.log
+*.bak
+
+# Ignorar arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Ignorar builds
+**/dist/
+**/.angular/
+
+# Ignorar pasta duplicada do repositório
+/SiteDaoshi-main/
+
+# Ignorar arquivos de teste
+update-api-all.py
+Sites/Mir4/test-api.html
+
+# Ignorar logs de tickets
+discord-bot/ticket-logs/
+
+# State runtime do BinanceMailWatcher (UIDs já vistos) — não commitar
+discord-bot/binance-mail-state.json
+
+# Arquivos sensíveis (tokens/chaves)
+bot.txt
+bot-test.txt
+daoshi.txt
+mininix.txt
+
+# Dados pessoais de clientes — NUNCA commitar
+clientes-completo.*
+clientes-migrar.json
+clientes-raw-firebase.json
+exportar-todos-clientes.js
+discord-bot/scripts/backfill-cargos-jogos.report.json
+discord-bot/scripts/backups/
+
+# Notas locais e config do Claude Code
+CLAUDE.md
+referencia-*.md
+.claude/

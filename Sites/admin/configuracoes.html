@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⚙️ Configuração - Daoshi Store</title>
+    
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --bg-hover: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --gold: #fbbf24;
+            --topup: #8b5cf6;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg-dark);
+            min-height: 100vh;
+            color: var(--text-primary);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            padding: 24px 30px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .header-info h1 {
+            font-size: 1.6em;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .header-info p {
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .header-tip {
+            background: rgba(255,255,255,0.15);
+            padding: 10px 18px;
+            border-radius: 10px;
+            font-size: 0.85em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        .section-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+
+        .section-header {
+            padding: 18px 24px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-header.gold {
+            background: linear-gradient(90deg, rgba(251,191,36,0.15) 0%, transparent 100%);
+            border-left: 4px solid var(--gold);
+        }
+
+        .section-header.topup {
+            background: linear-gradient(90deg, rgba(139,92,246,0.15) 0%, transparent 100%);
+            border-left: 4px solid var(--topup);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+
+        .section-title .icon { font-size: 1.3em; }
+
+        .save-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9em;
+        }
+
+        .save-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .save-btn.gold { background: #b45309; }
+        .save-btn.gold:hover { background: #92400e; }
+        .save-btn.topup { background: #7c3aed; }
+        .save-btn.topup:hover { background: #6d28d9; }
+
+        .provider-list {
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .provider-item {
+            background: var(--bg-hover);
+            border-radius: 10px;
+            padding: 14px 18px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: grab;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .provider-item:hover {
+            border-color: var(--primary);
+            transform: translateX(4px);
+        }
+
+        .provider-item.dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .provider-item.priority-first {
+            background: linear-gradient(135deg, rgba(251,191,36,0.2) 0%, rgba(245,158,11,0.1) 100%);
+            border-color: var(--gold);
+        }
+
+        .provider-item.priority-first.topup-item {
+            background: linear-gradient(135deg, rgba(139,92,246,0.2) 0%, rgba(124,58,237,0.1) 100%);
+            border-color: var(--topup);
+        }
+
+        .provider-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .provider-rank {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1em;
+        }
+
+        .provider-item.priority-first .provider-rank {
+            background: var(--gold);
+            color: #000;
+        }
+
+        .provider-item.priority-first.topup-item .provider-rank {
+            background: var(--topup);
+            color: #fff;
+        }
+
+        .provider-name {
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .provider-badge {
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: var(--bg-dark);
+            color: var(--text-secondary);
+            margin-left: 6px;
+        }
+
+        .provider-badge.first {
+            background: var(--gold);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .provider-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-shrink: 0;
+        }
+
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75em;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .status-badge.available {
+            background: rgba(16,185,129,0.15);
+            color: var(--success);
+        }
+
+        .status-badge.full {
+            background: rgba(239,68,68,0.15);
+            color: var(--danger);
+        }
+
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .drag-handle {
+            color: var(--text-secondary);
+            font-size: 1.2em;
+            cursor: grab;
+            padding: 6px;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .drag-handle:hover {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+        }
+
+        /* Ícones de Jogos Exclusivos */
+        .exclusive-games-row {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+        }
+
+        .exclusive-game-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .exclusive-game-icon img {
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            object-fit: cover;
+        }
+
+        .exclusive-game-icon:hover {
+            transform: scale(1.1);
+            border-color: var(--primary);
+        }
+
+        .exclusive-game-icon.active {
+            border-color: var(--success);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .exclusive-game-icon.locked {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .exclusive-game-icon.locked:hover {
+            transform: none;
+        }
+
+        .exclusive-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid var(--bg-card);
+        }
+
+        .exclusive-dot.enabled {
+            background: var(--success);
+            box-shadow: 0 0 6px var(--success);
+        }
+
+        .exclusive-dot.disabled {
+            background: var(--danger);
+        }
+
+        .exclusive-dot.available {
+            background: var(--text-secondary);
+        }
+
+        /* Controle de Limite */
+        .limit-control {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-dark);
+            padding: 4px 8px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .limit-btn {
+            width: 26px;
+            height: 26px;
+            border: none;
+            border-radius: 6px;
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            font-size: 1.1em;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .limit-btn:hover {
+            background: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .limit-btn.minus:hover {
+            background: var(--danger);
+        }
+
+        .limit-btn.plus:hover {
+            background: var(--success);
+        }
+
+        .limit-value {
+            min-width: 20px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.95em;
+            color: var(--text-primary);
+        }
+
+        .dashboards-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .dashboards-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .dashboards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+
+        .dashboard-link {
+            background: var(--bg-hover);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 16px 12px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all 0.2s;
+        }
+
+        .dashboard-link:hover {
+            border-color: var(--primary);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(99,102,241,0.2);
+        }
+
+        .dashboard-link .icon {
+            font-size: 1.8em;
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        .dashboard-link .name {
+            font-weight: 600;
+            font-size: 0.85em;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 14px 22px;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(16,185,129,0.3);
+            opacity: 0;
+            transform: translateY(-20px);
+            transition: all 0.3s;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Sistema de Jogos por Fornecedor */
+        .games-section {
+            background: var(--bg-card);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            margin-bottom: 24px;
+        }
+
+        .games-section .section-header {
+            background: linear-gradient(90deg, rgba(34,197,94,0.15) 0%, transparent 100%);
+            border-left: 4px solid #22c55e;
+        }
+
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+            padding: 20px;
+        }
+
+        .provider-games-card {
+            background: var(--bg-hover);
+            border-radius: 12px;
+            padding: 16px;
+            border: 1px solid var(--border);
+        }
+
+        .provider-games-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .provider-games-header .icon {
+            font-size: 1.5em;
+        }
+
+        .provider-games-header .name {
+            font-weight: 600;
+            font-size: 1.05em;
+        }
+
+        .provider-games-header .type-badge {
+            margin-left: auto;
+            font-size: 0.7em;
+            padding: 3px 8px;
+            border-radius: 20px;
+            background: var(--gold);
+            color: #000;
+            font-weight: 600;
+        }
+
+        .provider-games-header .type-badge.topup {
+            background: var(--topup);
+            color: #fff;
+        }
+
+        .games-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .game-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 12px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .game-toggle:hover {
+            background: var(--bg-card);
+        }
+
+        .game-toggle .game-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .game-toggle .game-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+            background: var(--bg-card);
+        }
+
+        .game-toggle .game-name {
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        .game-toggle .status-indicator {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+
+        .game-toggle .status-indicator.enabled {
+            background: #22c55e;
+            box-shadow: 0 0 8px rgba(34,197,94,0.5);
+        }
+
+        .game-toggle .status-indicator.disabled {
+            background: #ef4444;
+            box-shadow: 0 0 8px rgba(239,68,68,0.5);
+        }
+
+        @media (max-width: 768px) {
+            header { flex-direction: column; text-align: center; }
+            .provider-item { flex-direction: column; gap: 10px; text-align: center; }
+            .provider-left { flex-direction: column; }
+            .provider-right { flex-direction: row; flex-wrap: wrap; justify-content: center; }
+            .limit-control { order: 2; }
+            .drag-handle { order: 3; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-info">
+                <h1>⚙️ Configuração de Fornecedores</h1>
+                <p>Defina a ordem de prioridade e limites</p>
+            </div>
+            <div class="header-tip">
+                💡 Arraste para reordenar • Use +/− para alterar limites
+            </div>
+        </header>
+
+        <div class="main-grid">
+            <!-- GOLD -->
+            <div class="section-card">
+                <div class="section-header gold">
+                    <div class="section-title">
+                        <span class="icon">💰</span>
+                        Fornecedores de Gold
+                    </div>
+                    <button class="save-btn gold" onclick="saveGoldPriority()">💾 Salvar</button>
+                </div>
+                <div class="provider-list" id="gold-providers"></div>
+            </div>
+
+            <!-- TOP UP -->
+            <div class="section-card">
+                <div class="section-header topup">
+                    <div class="section-title">
+                        <span class="icon">💎</span>
+                        Fornecedores de Top Up
+                    </div>
+                    <button class="save-btn topup" onclick="saveTopUpPriority()">💾 Salvar</button>
+                </div>
+                <!-- Controls Row -->
+                <div style="padding: 10px 24px; border-bottom: 1px solid var(--border); background: rgba(0,0,0,0.2); display: flex; align-items: center; justify-content: space-between;">
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                         <label class="switch" style="position: relative; display: inline-block; width: 40px; height: 22px;">
+                            <input type="checkbox" id="rotation-toggle" onchange="toggleRotation()">
+                            <span class="slider round" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; border-radius: 34px;"></span>
+                             <style>
+                                .switch input { opacity: 0; width: 0; height: 0; }
+                                .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; }
+                                input:checked + .slider { background-color: var(--primary); }
+                                input:checked + .slider:before { transform: translateX(18px); }
+                             </style>
+                        </label>
+                        <span style="font-size: 0.9em; font-weight: 600;">🔄 Revezamento Automático (DOG/DAODAO)</span>
+                    </div>
+                     <span style="font-size: 0.8em; color: var(--text-secondary);">Ignora limites quando ativado</span>
+                </div>
+                <div class="provider-list" id="topup-providers"></div>
+            </div>
+        </div>
+
+        <!-- JOGOS POR FORNECEDOR -->
+        <div class="games-section">
+            <div class="section-header">
+                <div class="section-title">
+                    <span class="icon">🎮</span>
+                    Jogos por Fornecedor
+                </div>
+                <span style="color: var(--text-secondary); font-size: 0.85em;">
+                    🟢 Ligado &nbsp; 🔴 Desligado
+                </span>
+            </div>
+            <div class="games-grid" id="provider-games-grid">
+                <!-- Renderizado via JS -->
+            </div>
+        </div>
+
+        <!-- DASHBOARDS -->
+        <div class="dashboards-section">
+            <div class="dashboards-title">🖥️ Acessar Painéis</div>
+            <div class="dashboards-grid">
+                <a href="../providers/dog.html" class="dashboard-link" target="_blank">
+                    <span class="icon">🐶</span><span class="name">DOG</span>
+                </a>
+                <a href="../providers/daodao.html" class="dashboard-link" target="_blank">
+                    <span class="icon">🟢</span><span class="name">DAODAO</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="success-message">✅ Alterações salvas!</div>
+
+    <script src="../shared/firebase-config-orders.js"></script>
+    <script src="configuracoes.js?v=2"></script>
+</body>
+</html>

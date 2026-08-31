@@ -1,0 +1,79 @@
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Build public allowlisted artifact
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          public_dir="${RUNNER_TEMP}/pages-public"
+          rm -rf "${public_dir}"
+          mkdir -p "${public_dir}/Sites"
+
+          # Public storefront entrypoints. Never publish the repository root:
+          # it also contains bot credentials, customer exports and MED files.
+          cp index.html config.js CNAME hub.html "${public_dir}/"
+          cp -a gifs store "${public_dir}/"
+
+          # Explicitly allow only browser assets that are still in production.
+          # Sites/server and every source/backup directory stay private.
+          for site_dir in \
+            admin \
+            CalculadoraSombra \
+            jogos \
+            minigames \
+            providers \
+            Preços \
+            shared \
+            sounds
+          do
+            cp -a "Sites/${site_dir}" "${public_dir}/Sites/"
+          done
+
+          touch "${public_dir}/.nojekyll"
+
+          # Fail closed if a future edit accidentally copies sensitive exports.
+          forbidden_regex='(^|/)(bot(-test)?\.txt|clientes[^/]*\.(csv|json|txt)|daoshi-comprovante[^/]*|daoshi-relatorio[^/]*|ticket-logs|discord-bot|\.env([^/]*)?)($|/)'
+          if find "${public_dir}" -mindepth 1 -print | grep -Eiq "${forbidden_regex}"; then
+            echo "Sensitive file detected in Pages artifact; deployment aborted." >&2
+            exit 1
+          fi
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ${{ runner.temp }}/pages-public
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

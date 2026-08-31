@@ -1,0 +1,1387 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💎 Ymir Marketplace - Dashboard</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+        
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .header h1 {
+            color: #00d4ff;
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 15px;
+            border-radius: 20px;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #888;
+            transition: background 0.3s;
+        }
+        
+        .status-dot.connected { background: #00ff88; }
+        .status-dot.disconnected { background: #ff4444; }
+        
+        .container {
+            padding: 20px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 212, 255, 0.2);
+        }
+        
+        .stat-card .icon {
+            font-size: 35px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #00d4ff;
+        }
+        
+        .stat-card .label {
+            color: #aaa;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 12px 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 10px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .tab.active {
+            background: #00d4ff;
+            color: #000;
+        }
+        
+        /* Tables */
+        .table-container {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .table-header {
+            padding: 15px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .table-header h3 {
+            color: #00d4ff;
+        }
+        
+        .table-content {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        th {
+            background: rgba(0, 0, 0, 0.2);
+            color: #00d4ff;
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+        
+        tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+        
+        /* Status badges */
+        .status {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status.aguardando_pagamento { background: #ff9800; color: #000; }
+        .status.aguardando_print_comprador { background: #e91e63; color: #fff; }
+        .status.aguardando_vendedor { background: #2196f3; color: #fff; }
+        .status.em_andamento { background: #9c27b0; color: #fff; }
+        .status.aguardando_verificacao { background: #00bcd4; color: #000; }
+        .status.entregue { background: #4caf50; color: #fff; }
+        .status.concluido { background: #00e676; color: #000; }
+        .status.finalizado { background: #00e676; color: #000; }
+        .status.cancelado { background: #f44336; color: #fff; }
+        .status.expirado { background: #795548; color: #fff; }
+        .status.pendente { background: #ff9800; color: #000; }
+        .status.aprovado { background: #4caf50; color: #fff; }
+        .status.rejeitado { background: #f44336; color: #fff; }
+        
+        /* Tab content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Filter */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-bar select, .filter-bar input {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 14px;
+        }
+        
+        .filter-bar select option {
+            background: #1a1a2e;
+        }
+        
+        /* Action buttons */
+        .action-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: bold;
+            transition: all 0.2s;
+            margin: 2px;
+        }
+        
+        .action-btn.cancel {
+            background: #f44336;
+            color: #fff;
+        }
+        
+        .action-btn.cancel:hover {
+            background: #d32f2f;
+        }
+        
+        .action-btn.reopen {
+            background: #4caf50;
+            color: #fff;
+        }
+        
+        .action-btn.reopen:hover {
+            background: #388e3c;
+        }
+        
+        .action-btn.view {
+            background: #2196f3;
+            color: #fff;
+        }
+        
+        .action-btn.view:hover {
+            background: #1976d2;
+        }
+        
+        .action-btn.delete-all {
+            background: #ff5252;
+            color: #fff;
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+        
+        .action-btn.delete-all:hover {
+            background: #c62828;
+        }
+        
+        /* Empty state */
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #888;
+        }
+        
+        .empty-state .icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal {
+            background: #1a1a2e;
+            border-radius: 15px;
+            padding: 25px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal h2 {
+            color: #00d4ff;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 24px;
+            cursor: pointer;
+        }
+        
+        .modal-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-detail .label {
+            color: #888;
+        }
+        
+        .modal-detail .value {
+            font-weight: bold;
+        }
+        
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            justify-content: flex-end;
+        }
+        
+        .modal-actions button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .modal-actions .btn-cancel {
+            background: #f44336;
+            color: #fff;
+        }
+        
+        .modal-actions .btn-reopen {
+            background: #4caf50;
+            color: #fff;
+        }
+        
+        .modal-actions .btn-close {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #00d4ff;
+            color: #000;
+            padding: 15px 25px;
+            border-radius: 10px;
+            font-weight: bold;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: 2000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.error {
+            background: #f44336;
+            color: #fff;
+        }
+        
+        .toast.success {
+            background: #4caf50;
+            color: #fff;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header h1 { font-size: 18px; }
+            .stat-card .value { font-size: 22px; }
+            th, td { padding: 8px 10px; font-size: 11px; }
+            .table-content { max-height: 400px; }
+            .action-btn { padding: 4px 8px; font-size: 10px; }
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #00d4ff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>💎 Ymir Diamond Marketplace</h1>
+        <div class="connection-status">
+            <span class="status-dot" id="statusDot"></span>
+            <span id="statusText">Conectando...</span>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="icon">📦</div>
+                <div class="value" id="totalOrders">0</div>
+                <div class="label">Total de Pedidos</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">⏳</div>
+                <div class="value" id="activeOrders">0</div>
+                <div class="label">Pedidos Ativos</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">✅</div>
+                <div class="value" id="completedOrders">0</div>
+                <div class="label">Concluídos</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">❌</div>
+                <div class="value" id="cancelledOrders">0</div>
+                <div class="label">Cancelados</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">👥</div>
+                <div class="value" id="totalVendors">0</div>
+                <div class="label">Vendedores</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💰</div>
+                <div class="value" id="totalVolume">R$ 0</div>
+                <div class="label">Volume Total</div>
+            </div>
+            <div class="stat-card">
+                <div class="icon">💎</div>
+                <div class="value" id="totalDiamonds">0</div>
+                <div class="label">Diamantes Vendidos</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" data-tab="orders">📦 Pedidos Ativos</button>
+            <button class="tab" data-tab="history">📜 Histórico</button>
+            <button class="tab" data-tab="vendors">👥 Vendedores</button>
+            <button class="tab" data-tab="transactions">📝 Transações</button>
+        </div>
+        
+        <!-- Orders Tab (Active) -->
+        <div class="tab-content active" id="tab-orders">
+            <div class="filter-bar">
+                <select id="filterStatus">
+                    <option value="">Todos os Ativos</option>
+                    <option value="aguardando_pagamento">Aguardando Pagamento</option>
+                    <option value="aguardando_print_comprador">Aguardando Print</option>
+                    <option value="aguardando_vendedor">Aguardando Vendedor</option>
+                    <option value="em_andamento">Em Andamento</option>
+                    <option value="aguardando_verificacao">Verificando</option>
+                    <option value="entregue">Entregue</option>
+                </select>
+                <select id="filterRegion">
+                    <option value="">Todas as Regiões</option>
+                    <option value="SA1">SA1</option>
+                    <option value="NAEU1">NAEU1</option>
+                </select>
+                <input type="text" id="searchOrder" placeholder="🔍 Buscar pedido...">
+                <button class="action-btn delete-all" onclick="deleteAllOrders()">🗑️ Apagar Tudo</button>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>📦 Pedidos Ativos</h3>
+                    <span id="ordersCount">0 pedidos</span>
+                </div>
+                <div class="table-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Comprador</th>
+                                <th>Servidor</th>
+                                <th>Quantidade</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Vendedor</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr>
+                                <td colspan="9" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    Carregando pedidos...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- History Tab -->
+        <div class="tab-content" id="tab-history">
+            <div class="filter-bar">
+                <select id="filterHistoryStatus">
+                    <option value="">Todos</option>
+                    <option value="concluido">Concluídos</option>
+                    <option value="cancelado">Cancelados</option>
+                </select>
+                <input type="text" id="searchHistory" placeholder="🔍 Buscar no histórico...">
+                <button class="action-btn delete-all" onclick="deleteAllHistory()">🗑️ Apagar Tudo</button>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>📜 Histórico de Pedidos</h3>
+                    <span id="historyCount">0 pedidos</span>
+                </div>
+                <div class="table-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Comprador</th>
+                                <th>Servidor</th>
+                                <th>Quantidade</th>
+                                <th>Valor</th>
+                                <th>Status</th>
+                                <th>Vendedor</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable">
+                            <tr>
+                                <td colspan="9" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    Carregando histórico...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Vendors Tab -->
+        <div class="tab-content" id="tab-vendors">
+            <div class="filter-bar">
+                <select id="filterVendorStatus">
+                    <option value="">Todos os Status</option>
+                    <option value="pendente">Pendente</option>
+                    <option value="aprovado">Aprovado</option>
+                    <option value="rejeitado">Rejeitado</option>
+                </select>
+                <button class="action-btn delete-all" onclick="deleteAllVendors()">🗑️ Apagar Tudo</button>
+            </div>
+            
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>👥 Vendedores</h3>
+                    <span id="vendorsCount">0 vendedores</span>
+                </div>
+                <div class="table-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Discord</th>
+                                <th>Nome no Jogo</th>
+                                <th>Servidor</th>
+                                <th>Status</th>
+                                <th>Saldo</th>
+                                <th>Vendas</th>
+                                <th>Total</th>
+                                <th>Desde</th>
+                            </tr>
+                        </thead>
+                        <tbody id="vendorsTable">
+                            <tr>
+                                <td colspan="8" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    Carregando vendedores...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Transactions Tab -->
+        <div class="tab-content" id="tab-transactions">
+            <div class="filter-bar">
+                <button class="action-btn delete-all" onclick="deleteAllTransactions()">🗑️ Apagar Tudo</button>
+            </div>
+            <div class="table-container">
+                <div class="table-header">
+                    <h3>📝 Últimas Transações</h3>
+                    <span id="transactionsCount">0 transações</span>
+                </div>
+                <div class="table-content">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pedido</th>
+                                <th>Tipo</th>
+                                <th>Descrição</th>
+                                <th>Valor</th>
+                                <th>Data</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactionsTable">
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    Carregando transações...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order Details Modal -->
+    <div class="modal-overlay" id="orderModal">
+        <div class="modal">
+            <h2>
+                📦 Detalhes do Pedido
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </h2>
+            <div id="modalContent">
+                <!-- Content will be filled dynamically -->
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================
+        // 🔥 FIREBASE CONFIG
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyD6vn4IagySnIJ-0knlelyZmIWNV7qJnKk",
+            authDomain: "daoshi-bot.firebaseapp.com",
+            databaseURL: "https://daoshi-bot-default-rtdb.firebaseio.com",
+            projectId: "daoshi-bot",
+            storageBucket: "daoshi-bot.firebasestorage.app",
+            messagingSenderId: "472062549464",
+            appId: "1:472062549464:web:086c1c07d63a11ce3ca6ad"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const ymirRef = db.ref('ymir-marketplace');
+
+        // ============================================
+        // 📊 DATA STORAGE
+        // ============================================
+        let orders = {};
+        let history = {};
+        let vendors = {};
+        let transactions = {};
+
+        // ============================================
+        // 🔗 CONNECTION STATUS
+        // ============================================
+        const statusDot = document.getElementById('statusDot');
+        const statusText = document.getElementById('statusText');
+
+        db.ref('.info/connected').on('value', (snap) => {
+            if (snap.val() === true) {
+                statusDot.className = 'status-dot connected';
+                statusText.textContent = 'Conectado';
+            } else {
+                statusDot.className = 'status-dot disconnected';
+                statusText.textContent = 'Desconectado';
+            }
+        });
+
+        // ============================================
+        // 📦 ORDERS LISTENER
+        // ============================================
+        ymirRef.child('orders').on('value', (snapshot) => {
+            orders = snapshot.val() || {};
+            updateOrdersTable();
+            updateHistoryTable();
+            updateStats();
+        });
+
+        // ============================================
+        // 📜 HISTORY LISTENER (pedidos finalizados)
+        // ============================================
+        ymirRef.child('history').on('value', (snapshot) => {
+            history = snapshot.val() || {};
+            updateHistoryTable();
+            updateStats();
+        });
+
+        // ============================================
+        // 👥 VENDORS LISTENER
+        // ============================================
+        ymirRef.child('vendors').on('value', (snapshot) => {
+            vendors = snapshot.val() || {};
+            updateVendorsTable();
+            updateStats();
+        });
+
+        // ============================================
+        // 📜 TRANSACTIONS LISTENER
+        // ============================================
+        ymirRef.child('transactions').on('value', (snapshot) => {
+            transactions = snapshot.val() || {};
+            updateTransactionsTable();
+        });
+
+        // ============================================
+        // 📊 UPDATE STATS
+        // ============================================
+        function updateStats() {
+            const ordersList = Object.values(orders);
+            const historyList = Object.values(history);
+            const vendorsList = Object.values(vendors);
+            
+            const activeStatuses = ['aguardando_pagamento', 'aguardando_print_comprador', 'aguardando_vendedor', 'em_andamento', 'aguardando_verificacao', 'entregue'];
+            const activeOrders = ordersList.filter(o => activeStatuses.includes(o.status));
+            
+            // Contar concluídos do histórico + orders
+            const completedFromHistory = historyList.filter(o => o.status === 'concluido' || o.status === 'finalizado');
+            const completedFromOrders = ordersList.filter(o => o.status === 'concluido');
+            const completedOrders = [...completedFromHistory, ...completedFromOrders];
+            
+            // Contar cancelados do histórico + orders
+            const cancelledFromHistory = historyList.filter(o => o.status === 'cancelado');
+            const cancelledFromOrders = ordersList.filter(o => o.status === 'cancelado');
+            const cancelledOrders = [...cancelledFromHistory, ...cancelledFromOrders];
+            
+            const approvedVendors = vendorsList.filter(v => v.status === 'aprovado');
+            
+            const totalVolume = completedOrders.reduce((acc, o) => acc + (o.valor || 0), 0);
+            const totalDiamonds = completedOrders.reduce((acc, o) => acc + (o.quantidade || 0), 0);
+            
+            document.getElementById('totalOrders').textContent = ordersList.length + historyList.length;
+            document.getElementById('activeOrders').textContent = activeOrders.length;
+            document.getElementById('completedOrders').textContent = completedOrders.length;
+            document.getElementById('cancelledOrders').textContent = cancelledOrders.length;
+            document.getElementById('totalVendors').textContent = approvedVendors.length;
+            document.getElementById('totalVolume').textContent = `R$ ${totalVolume.toFixed(2)}`;
+            document.getElementById('totalDiamonds').textContent = totalDiamonds.toLocaleString();
+        }
+
+        // ============================================
+        // 📦 UPDATE ORDERS TABLE (Active only)
+        // ============================================
+        function updateOrdersTable() {
+            const tbody = document.getElementById('ordersTable');
+            const filterStatus = document.getElementById('filterStatus').value;
+            const filterRegion = document.getElementById('filterRegion').value;
+            const searchTerm = document.getElementById('searchOrder').value.toLowerCase();
+            
+            const activeStatuses = ['aguardando_pagamento', 'aguardando_print_comprador', 'aguardando_vendedor', 'em_andamento', 'aguardando_verificacao', 'entregue'];
+            let ordersList = Object.entries(orders)
+                .map(([key, order]) => ({ ...order, _key: key }))
+                .filter(o => activeStatuses.includes(o.status));
+            
+            // Apply filters
+            if (filterStatus) {
+                ordersList = ordersList.filter(o => o.status === filterStatus);
+            }
+            if (filterRegion) {
+                ordersList = ordersList.filter(o => o.regiao === filterRegion);
+            }
+            if (searchTerm) {
+                ordersList = ordersList.filter(o => 
+                    (o.order_id && o.order_id.toLowerCase().includes(searchTerm)) ||
+                    (o.buyer_tag && o.buyer_tag.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            // Sort by date (newest first)
+            ordersList.sort((a, b) => (b.criado_em || 0) - (a.criado_em || 0));
+            
+            document.getElementById('ordersCount').textContent = `${ordersList.length} pedidos`;
+            
+            if (ordersList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <div class="icon">📭</div>
+                            <div>Nenhum pedido ativo</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = ordersList.map(order => `
+                <tr>
+                    <td><strong>${order.order_id || 'N/A'}</strong></td>
+                    <td>${order.buyer_tag || 'N/A'}</td>
+                    <td>${order.servidor || 'N/A'} (${order.regiao || 'N/A'})</td>
+                    <td>💎 ${(order.quantidade || 0).toLocaleString()}</td>
+                    <td>R$ ${(order.valor || 0).toFixed(2)}</td>
+                    <td><span class="status ${order.status || ''}">${formatStatus(order.status)}</span></td>
+                    <td>${order.vendor_tag || '-'}</td>
+                    <td>${formatDate(order.criado_em)}</td>
+                    <td>
+                        <button class="action-btn view" onclick="viewOrder('${order._key}')">👁️</button>
+                        <button class="action-btn cancel" onclick="cancelOrder('${order._key}')">❌</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================
+        // 📜 UPDATE HISTORY TABLE
+        // ============================================
+        function updateHistoryTable() {
+            const tbody = document.getElementById('historyTable');
+            const filterStatus = document.getElementById('filterHistoryStatus').value;
+            const searchTerm = document.getElementById('searchHistory').value.toLowerCase();
+            
+            // Combinar pedidos do histórico (finalizados) + pedidos cancelados/concluídos que ainda estão em orders
+            const historyStatuses = ['concluido', 'cancelado', 'finalizado'];
+            
+            // Pedidos da coleção history
+            let historyList = Object.entries(history)
+                .map(([key, order]) => ({ ...order, _key: key, _source: 'history' }));
+            
+            // Pedidos cancelados/concluídos que ainda estão em orders
+            let ordersHistoryList = Object.entries(orders)
+                .map(([key, order]) => ({ ...order, _key: key, _source: 'orders' }))
+                .filter(o => historyStatuses.includes(o.status));
+            
+            // Combinar sem duplicatas (prioriza history)
+            const historyKeys = new Set(historyList.map(o => o.order_id));
+            ordersHistoryList = ordersHistoryList.filter(o => !historyKeys.has(o.order_id));
+            
+            let ordersList = [...historyList, ...ordersHistoryList];
+            
+            // Apply filters
+            if (filterStatus) {
+                ordersList = ordersList.filter(o => o.status === filterStatus);
+            }
+            if (searchTerm) {
+                ordersList = ordersList.filter(o => 
+                    (o.order_id && o.order_id.toLowerCase().includes(searchTerm)) ||
+                    (o.buyer_tag && o.buyer_tag.toLowerCase().includes(searchTerm))
+                );
+            }
+            
+            // Sort by date (newest first) - usar finalized_at se disponível, senão criado_em
+            ordersList.sort((a, b) => (b.finalized_at || b.criado_em || 0) - (a.finalized_at || a.criado_em || 0));
+            
+            document.getElementById('historyCount').textContent = `${ordersList.length} pedidos`;
+            
+            if (ordersList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="9" class="empty-state">
+                            <div class="icon">📜</div>
+                            <div>Nenhum pedido no histórico</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = ordersList.map(order => `
+                <tr>
+                    <td><strong>${order.order_id || 'N/A'}</strong></td>
+                    <td>${order.buyer_tag || 'N/A'}</td>
+                    <td>${order.servidor || 'N/A'} (${order.regiao || 'N/A'})</td>
+                    <td>💎 ${(order.quantidade || 0).toLocaleString()}</td>
+                    <td>R$ ${(order.valor || 0).toFixed(2)}</td>
+                    <td><span class="status ${order.status || ''}">${formatStatus(order.status)}</span></td>
+                    <td>${order.vendor_tag || '-'}</td>
+                    <td>${formatDate(order.finalized_at || order.criado_em)}</td>
+                    <td>
+                        <button class="action-btn view" onclick="viewOrder('${order._key}', '${order._source}')">👁️</button>
+                        ${order.status === 'cancelado' ? `<button class="action-btn reopen" onclick="reopenOrder('${order._key}', '${order._source}')">🔄</button>` : ''}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================
+        // 👥 UPDATE VENDORS TABLE
+        // ============================================
+        function updateVendorsTable() {
+            const tbody = document.getElementById('vendorsTable');
+            const filterStatus = document.getElementById('filterVendorStatus').value;
+            
+            let vendorsList = Object.values(vendors);
+            
+            if (filterStatus) {
+                vendorsList = vendorsList.filter(v => v.status === filterStatus);
+            }
+            
+            // Sort by date
+            vendorsList.sort((a, b) => (b.criado_em || 0) - (a.criado_em || 0));
+            
+            document.getElementById('vendorsCount').textContent = `${vendorsList.length} vendedores`;
+            
+            if (vendorsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="8" class="empty-state">
+                            <div class="icon">👤</div>
+                            <div>Nenhum vendedor encontrado</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = vendorsList.map(vendor => `
+                <tr>
+                    <td>${vendor.discord_tag || 'N/A'}</td>
+                    <td><strong>${vendor.nome_jogo || 'N/A'}</strong></td>
+                    <td>${vendor.servidor || 'N/A'} (${vendor.regiao || 'N/A'})</td>
+                    <td><span class="status ${vendor.status || ''}">${formatStatus(vendor.status)}</span></td>
+                    <td>R$ ${(vendor.saldo || 0).toFixed(2)}</td>
+                    <td>${vendor.total_vendas || 0}</td>
+                    <td>R$ ${(vendor.total_valor || 0).toFixed(2)}</td>
+                    <td>${formatDate(vendor.criado_em)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================
+        // 📝 UPDATE TRANSACTIONS TABLE
+        // ============================================
+        function updateTransactionsTable() {
+            const tbody = document.getElementById('transactionsTable');
+            
+            let transactionsList = Object.values(transactions);
+            
+            // Sort by date (newest first)
+            transactionsList.sort((a, b) => (b.criado_em || 0) - (a.criado_em || 0));
+            
+            // Limit to 100
+            transactionsList = transactionsList.slice(0, 100);
+            
+            document.getElementById('transactionsCount').textContent = `${transactionsList.length} transações`;
+            
+            if (transactionsList.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            <div class="icon">📝</div>
+                            <div>Nenhuma transação encontrada</div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = transactionsList.map(tx => `
+                <tr>
+                    <td><strong>${tx.order_id || 'N/A'}</strong></td>
+                    <td><span class="status ${tx.tipo || ''}">${tx.tipo || 'N/A'}</span></td>
+                    <td>${tx.descricao || '-'}</td>
+                    <td>${tx.valor ? `R$ ${tx.valor.toFixed(2)}` : '-'}</td>
+                    <td>${formatDate(tx.criado_em)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // ============================================
+        // 🔧 ORDER ACTIONS
+        // ============================================
+        function viewOrder(orderKey, source = 'orders') {
+            const order = source === 'history' ? history[orderKey] : orders[orderKey];
+            if (!order) {
+                showToast('Pedido não encontrado', 'error');
+                return;
+            }
+            
+            const valorVendedor = order.valor_vendedor || (order.quantidade / 1000) * 60;
+            const qtdMarketplace = order.qtd_marketplace || Math.ceil(order.quantidade * 1.053);
+            
+            const content = `
+                <div class="modal-detail">
+                    <span class="label">ID do Pedido</span>
+                    <span class="value">${order.order_id}</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Status</span>
+                    <span class="value"><span class="status ${order.status}">${formatStatus(order.status)}</span></span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Comprador</span>
+                    <span class="value">${order.buyer_tag || 'N/A'}</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Servidor</span>
+                    <span class="value">${order.servidor} (${order.regiao})</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Quantidade</span>
+                    <span class="value">💎 ${(order.quantidade || 0).toLocaleString()} diamantes</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Qtd. Marketplace</span>
+                    <span class="value">🏪 ${qtdMarketplace.toLocaleString()} diamantes</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Valor (Comprador)</span>
+                    <span class="value">R$ ${(order.valor || 0).toFixed(2)}</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Valor (Vendedor)</span>
+                    <span class="value">R$ ${valorVendedor.toFixed(2)}</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Vendedor</span>
+                    <span class="value">${order.vendor_tag || 'Não atribuído'}</span>
+                </div>
+                <div class="modal-detail">
+                    <span class="label">Criado em</span>
+                    <span class="value">${formatDate(order.criado_em)}</span>
+                </div>
+                ${order.finalized_at ? `
+                <div class="modal-detail">
+                    <span class="label">Finalizado em</span>
+                    <span class="value">${formatDate(order.finalized_at)}</span>
+                </div>
+                ` : ''}
+                ${order.cancelled_at ? `
+                <div class="modal-detail">
+                    <span class="label">Cancelado em</span>
+                    <span class="value">${formatDate(order.cancelled_at)}</span>
+                </div>
+                ` : ''}
+                ${order.confirmed_at ? `
+                <div class="modal-detail">
+                    <span class="label">Concluído em</span>
+                    <span class="value">${formatDate(order.confirmed_at)}</span>
+                </div>
+                ` : ''}
+                ${order.finalized_by ? `
+                <div class="modal-detail">
+                    <span class="label">Finalizado por</span>
+                    <span class="value">${order.finalized_by}</span>
+                </div>
+                ` : ''}
+                
+                <div class="modal-actions">
+                    ${source === 'orders' && order.status === 'cancelado' ? 
+                        `<button class="btn-reopen" onclick="reopenOrder('${orderKey}'); closeModal();">🔄 Reabrir Pedido</button>` : 
+                        (source === 'orders' && !['concluido', 'cancelado', 'finalizado'].includes(order.status) ? `<button class="btn-cancel" onclick="cancelOrder('${orderKey}'); closeModal();">❌ Cancelar Pedido</button>` : '')
+                    }
+                    <button class="btn-close" onclick="closeModal()">Fechar</button>
+                </div>
+            `;
+            
+            document.getElementById('modalContent').innerHTML = content;
+            document.getElementById('orderModal').classList.add('active');
+        }
+        
+        function cancelOrder(orderKey) {
+            if (!confirm('Tem certeza que deseja cancelar este pedido?')) return;
+            
+            const order = orders[orderKey];
+            if (!order) {
+                showToast('Pedido não encontrado', 'error');
+                return;
+            }
+            
+            // Update status in Firebase
+            ymirRef.child('orders').child(orderKey).update({
+                status: 'cancelado',
+                cancelled_at: Date.now(),
+                cancelled_reason: 'Cancelado via Dashboard'
+            }).then(() => {
+                // Add transaction
+                ymirRef.child('transactions').push({
+                    order_id: order.order_id,
+                    tipo: 'cancelado',
+                    descricao: 'Cancelado via Dashboard',
+                    criado_em: Date.now()
+                });
+                
+                showToast('Pedido cancelado com sucesso!', 'success');
+            }).catch(err => {
+                console.error('Erro ao cancelar:', err);
+                showToast('Erro ao cancelar pedido', 'error');
+            });
+        }
+        
+        function reopenOrder(orderKey) {
+            if (!confirm('Deseja reabrir este pedido? Ele voltará para "Aguardando Vendedor".')) return;
+            
+            const order = orders[orderKey];
+            if (!order) {
+                showToast('Pedido não encontrado', 'error');
+                return;
+            }
+            
+            // Update status in Firebase
+            ymirRef.child('orders').child(orderKey).update({
+                status: 'aguardando_vendedor',
+                cancelled_at: null,
+                cancelled_reason: null,
+                vendor_id: null,
+                vendor_tag: null,
+                claimed_at: null
+            }).then(() => {
+                // Add transaction
+                ymirRef.child('transactions').push({
+                    order_id: order.order_id,
+                    tipo: 'reaberto',
+                    descricao: 'Reaberto via Dashboard',
+                    criado_em: Date.now()
+                });
+                
+                showToast('Pedido reaberto com sucesso!', 'success');
+            }).catch(err => {
+                console.error('Erro ao reabrir:', err);
+                showToast('Erro ao reabrir pedido', 'error');
+            });
+        }
+        
+        // ============================================
+        // 🗑️ DELETE ALL FUNCTIONS
+        // Seta uma flag no Firebase para o bot saber que deve limpar o SQLite local
+        // ============================================
+        function deleteAllOrders() {
+            const orderCount = Object.keys(orders).filter(key => {
+                const o = orders[key];
+                return ['aguardando_pagamento', 'aguardando_vendedor', 'em_andamento', 'entregue'].includes(o.status);
+            }).length;
+            
+            if (orderCount === 0) {
+                showToast('Não há pedidos ativos para apagar', 'info');
+                return;
+            }
+            
+            if (!confirm(`⚠️ ATENÇÃO: Isso vai apagar ${orderCount} pedidos ativos!\n\nTem certeza que deseja continuar?`)) return;
+            
+            // Setar flag de limpeza antes de deletar
+            ymirRef.child('_cleanup_flags').child('orders_cleared').set({
+                cleared_at: Date.now(),
+                cleared_by: 'dashboard'
+            }).then(() => {
+                return ymirRef.child('orders').remove();
+            }).then(() => {
+                showToast(`${orderCount} pedidos apagados com sucesso!`, 'success');
+            }).catch(err => {
+                console.error('Erro ao apagar pedidos:', err);
+                showToast('Erro ao apagar pedidos', 'error');
+            });
+        }
+        
+        function deleteAllHistory() {
+            const historyCount = Object.keys(orders).filter(key => {
+                const o = orders[key];
+                return ['concluido', 'cancelado'].includes(o.status);
+            }).length;
+            
+            const historyNodes = Object.keys(orders).filter(key => {
+                const o = orders[key];
+                return ['concluido', 'cancelado'].includes(o.status);
+            });
+            
+            if (historyCount === 0) {
+                showToast('Não há pedidos no histórico para apagar', 'info');
+                return;
+            }
+            
+            if (!confirm(`⚠️ ATENÇÃO: Isso vai apagar ${historyCount} pedidos do histórico!\n\nTem certeza que deseja continuar?`)) return;
+            
+            // Remove each history order individually
+            const promises = historyNodes.map(key => ymirRef.child('orders').child(key).remove());
+            
+            Promise.all(promises)
+                .then(() => {
+                    // Also clear the history node
+                    return ymirRef.child('history').remove();
+                })
+                .then(() => {
+                    showToast(`${historyCount} pedidos do histórico apagados!`, 'success');
+                })
+                .catch(err => {
+                    console.error('Erro ao apagar histórico:', err);
+                    showToast('Erro ao apagar histórico', 'error');
+                });
+        }
+        
+        function deleteAllVendors() {
+            const vendorCount = Object.keys(vendors).length;
+            
+            if (vendorCount === 0) {
+                showToast('Não há vendedores para apagar', 'info');
+                return;
+            }
+            
+            if (!confirm(`⚠️ ATENÇÃO: Isso vai apagar ${vendorCount} vendedores e todas as ofertas!\n\nTem certeza que deseja continuar?`)) return;
+            
+            // Setar flag de limpeza antes de deletar
+            ymirRef.child('_cleanup_flags').child('vendors_cleared').set({
+                cleared_at: Date.now(),
+                cleared_by: 'dashboard'
+            }).then(() => {
+                return Promise.all([
+                    ymirRef.child('vendors').remove(),
+                    ymirRef.child('sell_offers').remove(),
+                    ymirRef.child('history_offers').remove()
+                ]);
+            }).then(() => {
+                showToast(`${vendorCount} vendedores apagados com sucesso!`, 'success');
+            }).catch(err => {
+                console.error('Erro ao apagar vendedores:', err);
+                showToast('Erro ao apagar vendedores', 'error');
+            });
+        }
+        
+        function deleteAllTransactions() {
+            const txCount = Object.keys(transactions).length;
+            
+            if (txCount === 0) {
+                showToast('Não há transações para apagar', 'info');
+                return;
+            }
+            
+            if (!confirm(`⚠️ ATENÇÃO: Isso vai apagar ${txCount} transações!\n\nTem certeza que deseja continuar?`)) return;
+            
+            // Setar flag de limpeza antes de deletar
+            ymirRef.child('_cleanup_flags').child('transactions_cleared').set({
+                cleared_at: Date.now(),
+                cleared_by: 'dashboard'
+            }).then(() => {
+                return ymirRef.child('transactions').remove();
+            }).then(() => {
+                showToast(`${txCount} transações apagadas com sucesso!`, 'success');
+            }).catch(err => {
+                console.error('Erro ao apagar transações:', err);
+                showToast('Erro ao apagar transações', 'error');
+            });
+        }
+        
+        function closeModal() {
+            document.getElementById('orderModal').classList.remove('active');
+        }
+        
+        // Close modal on overlay click
+        document.getElementById('orderModal').addEventListener('click', (e) => {
+            if (e.target.id === 'orderModal') closeModal();
+        });
+
+        // ============================================
+        // 🔔 TOAST NOTIFICATION
+        // ============================================
+        function showToast(message, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // ============================================
+        // 🔧 HELPERS
+        // ============================================
+        function formatStatus(status) {
+            const statusMap = {
+                'aguardando_pagamento': 'Aguardando Pag.',
+                'aguardando_print_comprador': 'Aguardando Print',
+                'aguardando_vendedor': 'Aguardando Vendedor',
+                'em_andamento': 'Em Andamento',
+                'aguardando_verificacao': 'Verificando',
+                'entregue': 'Entregue',
+                'concluido': 'Concluído',
+                'finalizado': 'Finalizado',
+                'cancelado': 'Cancelado',
+                'expirado': 'Expirado',
+                'pendente': 'Pendente',
+                'aprovado': 'Aprovado',
+                'rejeitado': 'Rejeitado',
+                'criado': 'Criado',
+                'pago': 'Pago',
+                'claimed': 'Aceito',
+                'reaberto': 'Reaberto'
+            };
+            return statusMap[status] || status || 'N/A';
+        }
+
+        function formatDate(timestamp) {
+            if (!timestamp) return '-';
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('pt-BR') + ' ' + date.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ============================================
+        // 🎯 TABS
+        // ============================================
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                
+                tab.classList.add('active');
+                document.getElementById(`tab-${tab.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // ============================================
+        // 🔍 FILTERS
+        // ============================================
+        document.getElementById('filterStatus').addEventListener('change', updateOrdersTable);
+        document.getElementById('filterRegion').addEventListener('change', updateOrdersTable);
+        document.getElementById('searchOrder').addEventListener('input', updateOrdersTable);
+        document.getElementById('filterHistoryStatus').addEventListener('change', updateHistoryTable);
+        document.getElementById('searchHistory').addEventListener('input', updateHistoryTable);
+        document.getElementById('filterVendorStatus').addEventListener('change', updateVendorsTable);
+
+        console.log('✅ Ymir Marketplace Dashboard v2.0 carregado!');
+    </script>
+</body>
+</html>

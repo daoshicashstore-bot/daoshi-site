@@ -1,0 +1,108 @@
+/* ===== FIX PARA VIEWPORT - EVITA SCROLL ===== */
+/* Aplica em TODOS os sites de jogos para caber na tela */
+
+html, body {
+  height: 100vh !important;
+  max-height: 100vh !important;
+  overflow: hidden !important;
+  padding: 8px !important;
+  margin: 0 !important;
+}
+
+body {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+/* Container principal */
+.container,
+.main-container,
+main {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: calc(100vh - 16px) !important;
+  padding: 10px !important;
+}
+
+/* Reduz espaçamentos gerais */
+h1 {
+  font-size: 18px !important;
+  margin: 8px 0 !important;
+  padding: 0 !important;
+}
+
+h2 {
+  font-size: 14px !important;
+  margin: 6px 0 !important;
+}
+
+h3 {
+  font-size: 12px !important;
+  margin: 5px 0 !important;
+}
+
+/* Painéis e seções */
+.panel,
+.section,
+.card,
+[class*="panel"],
+[class*="section"] {
+  padding: 10px !important;
+  margin: 8px 0 !important;
+}
+
+/* Botões */
+button,
+.btn,
+[class*="btn"] {
+  padding: 8px 16px !important;
+  font-size: 10px !important;
+}
+
+/* Inputs */
+input,
+select,
+textarea {
+  padding: 8px !important;
+  font-size: 10px !important;
+}
+
+/* Tabelas */
+table {
+  font-size: 9px !important;
+}
+
+td, th {
+  padding: 6px !important;
+}
+
+/* Logo/Header */
+.logo,
+[class*="logo"] {
+  font-size: 16px !important;
+  margin: 0 !important;
+}
+
+/* Reduz margens entre elementos */
+* + * {
+  margin-top: 6px !important;
+}
+
+/* Scrollbar estilizada */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(26, 13, 36, 0.5);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9933ff;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b366ff;
+}

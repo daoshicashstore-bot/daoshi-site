@@ -1,0 +1,1292 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⚔️ Genshin Impact - Daoshi Store</title>
+  <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1lLnjQ3NYt6Bd6WapJ2p0EjzfQJIbB-es">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  
+  
+  
+  <!-- ?? Fix Viewport - Evita Scroll -->
+  <link rel="stylesheet" href="../../shared/viewport-fix.css">
+  <!-- 💰 Arquivo de Configuração de Preços -->
+  <script src="config-precos.js"></script>
+  
+  <style>
+    :root {
+      --bg-dark: #0f0a1a;
+      --bg-card: rgba(61, 27, 45, 0.92);
+      --bg-card-hover: #301d24;
+      --purple: #ff1493;
+      --purple-light: #ff69b4;
+      --purple-dark: #c71585;
+      --gold: #ffd700;
+      --gold-light: #ffbf00;
+      --text-primary: #f5f5f5;
+      --text-secondary: #ff69b4;
+      --border: #ff69b4;
+      --success: #10b981;
+      --danger: #ef4444;
+      --shadow: rgba(0, 0, 0, 0.5);
+      --panel-bg: rgba(61, 27, 45, 0.92);
+      --panel-border: #ff69b4;
+      --star-pink: #ff1493;
+      --star-yellow: #ffd700;
+      --star-blue: #ff69b4;
+      --star-purple: #ff1493;
+      
+      --primary-color: #9933ff;
+      --secondary-color: #2d1b3d;
+      --accent-color: #ffd700;
+      --gold-color: #ffd700;
+      --gold-dark: #ffbf00;
+      --text-color: #f5f5f5;
+      --input-bg: rgba(153, 51, 255, 0.2);
+      --input-border: #ffd700;
+      --button-primary: #9933ff;
+      --button-hover: #b366ff;
+      --button-active: #cc66ff;
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      transition: none;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+    
+    body {
+      background-image: url('https://lh3.googleusercontent.com/d/1ECtr_z7YWp_QugVyvTQBWTiV9d88m5zS');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: 'Press Start 2P', cursive;
+      color: var(--text-color);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding: 15px;
+      font-size: 10px;
+      line-height: 1.6;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, 
+        rgba(36, 13, 26, 0.90) 0%,
+        rgba(255, 20, 147, 0.3) 30%,
+        rgba(255, 105, 180, 0.3) 60%,
+        rgba(61, 27, 45, 0.90) 100%
+      );
+      z-index: -1;
+    }
+    
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.05) 0px,
+        rgba(0, 0, 0, 0.05) 1px,
+        transparent 1px,
+        transparent 2px
+      );
+      pointer-events: none;
+      z-index: 9999;
+      animation: scanlines 8s linear infinite;
+    }
+    
+    @keyframes scanlines {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(10px); }
+    }
+    
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      flex-grow: 1;
+    }
+    
+    header {
+      text-align: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+    
+    header h1 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 24px;
+      color: var(--star-yellow);
+      text-shadow: 
+        4px 0 0 var(--star-pink),
+        -4px 0 0 var(--star-pink),
+        0 4px 0 var(--star-pink),
+        0 -4px 0 var(--star-pink),
+        4px 4px 0 var(--star-pink),
+        -4px -4px 0 var(--star-pink),
+        4px -4px 0 var(--star-pink),
+        -4px 4px 0 var(--star-pink);
+      animation: float 3s ease-in-out infinite, title-glow 2s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    @keyframes title-glow {
+      0%, 100% { 
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.7)) drop-shadow(0 0 20px rgba(179, 102, 255, 0.5));
+      }
+      50% { 
+        filter: drop-shadow(0 0 25px rgba(255, 215, 0, 1)) drop-shadow(0 0 35px rgba(179, 102, 255, 0.9));
+      }
+    }
+    
+    header p {
+      color: var(--star-yellow);
+      font-weight: 400;
+      font-size: 10px;
+      margin-top: 15px;
+      text-shadow: 2px 2px 0 var(--star-purple);
+    }
+    
+    .cotacao-display {
+      margin-top: 15px;
+      background: var(--star-purple);
+      padding: 10px 20px;
+      border-radius: 0;
+      font-size: 10px;
+      border: 4px solid var(--star-yellow);
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .cotacao-display {
+      color: #00d9ff;
+    }
+    .cotacao-display .icon { 
+      margin-right: 10px; 
+      color: var(--star-yellow);
+      font-size: 16px;
+    }
+    .cotacao-display .value { 
+      font-weight: 600; 
+      color: var(--gold);
+    }
+
+    .main-layout {
+        display: flex;
+        gap: 20px;
+        flex-grow: 1;
+    }
+
+    .left-column {
+        flex: 2;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+
+    .right-column {
+        flex: 1.2;
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+    }
+    
+    .tab-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-shrink: 0;
+    }
+
+    .tab-button {
+      padding: 15px 30px;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 12px;
+      font-weight: 400;
+      cursor: pointer;
+      border: 4px solid var(--star-yellow);
+      background: var(--star-purple);
+      color: var(--text-color);
+      border-radius: 0;
+      border-bottom: none;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+
+    .tab-button.active {
+      background: var(--star-pink);
+      color: var(--text-color);
+      border-color: var(--star-yellow);
+      transform: translateY(0px);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 20px var(--star-yellow);
+      animation: pulse-border 1.5s infinite;
+    }
+    
+    @keyframes pulse-border {
+      0%, 100% { box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 20px var(--star-yellow); }
+      50% { box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 30px var(--star-yellow); }
+    }
+
+    @keyframes shimmer-effect {
+      0% { transform: translateX(-150%) skewX(-30deg); }
+      100% { transform: translateX(150%) skewX(-30deg); }
+    }
+
+    .tab-button.active::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.4) 50%, rgba(255, 255, 255, 0) 100%);
+      animation: shimmer-effect 2.5s infinite linear;
+    }
+    
+    .tab-content {
+        flex-grow: 1;
+        margin-top: -12px;
+    }
+    
+    .tab-pane {
+        height: 100%;
+        display: none;
+    }
+    .tab-pane.active {
+        display: block;
+    }
+    
+    .panel {
+      background: var(--panel-bg);
+      border-radius: 0;
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+      border: 4px solid var(--panel-border);
+      backdrop-filter: none;
+      padding: 20px;
+      animation: fadeIn 0.6s ease forwards;
+      height: auto;
+      position: relative;
+    }
+    
+    .panel::before {
+      content: '⭐';
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 24px;
+      animation: star-spin 4s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255, 237, 78, 0.8));
+    }
+    
+    .panel::after {
+      content: '💫';
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      font-size: 20px;
+      animation: star-spin-reverse 5s linear infinite;
+      filter: drop-shadow(0 0 8px rgba(255, 110, 199, 0.8));
+    }
+    
+    @keyframes star-spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    @keyframes star-spin-reverse {
+      0% { transform: rotate(360deg); }
+      100% { transform: rotate(0deg); }
+    }
+    
+    .tab-content .panel {
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+    }
+    
+    .panel-content-wrapper {
+        display: grid;
+        grid-template-columns: 1.5fr 2fr;
+        gap: 20px;
+    }
+
+    .login-section {
+        grid-column: 2;
+    }
+
+    .panel-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    
+    h2 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 14px;
+      font-weight: 400;
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+      color: var(--star-yellow);
+      display: inline-block;
+      position: relative;
+      padding: 5px 10px;
+      background: var(--star-purple);
+      border: 3px solid var(--star-yellow);
+    }
+    
+    h2::after {
+      content: '✨';
+      position: absolute;
+      bottom: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 16px;
+    }
+    
+    h3 {
+      font-family: 'Press Start 2P', cursive;
+      font-size: 11px;
+      font-weight: 400;
+      margin-top: 15px;
+      margin-bottom: 10px;
+      color: var(--star-yellow);
+      text-align: center;
+      border-bottom: 3px solid var(--panel-border);
+      padding-bottom: 10px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    
+    .form-group { margin-bottom: 15px; }
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 400;
+      color: var(--star-yellow);
+      font-size: 9px;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    
+    input[type="number"], input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--input-bg);
+      color: #00d9ff;
+      border: 3px solid var(--input-border);
+      border-radius: 0;
+      font-family: 'Press Start 2P', cursive;
+      font-size: 10px;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    
+    input[type="number"]:focus, input[type="text"]:focus {
+      outline: none;
+      border-color: var(--star-pink);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 15px var(--star-pink);
+    }
+    
+    input[type="number"]::-webkit-outer-spin-button,
+    input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; appearance: none; margin: 0; }
+    input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    
+    .result-group {
+      margin: 15px 0;
+      padding: 15px;
+      background: rgba(0, 0, 0, 0.5);
+      border-radius: 0;
+      border: 3px solid var(--star-blue);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    
+    .result-item { 
+      display: flex; 
+      justify-content: space-between; 
+      align-items: center; 
+      margin-bottom: 10px; 
+      font-size: 9px;
+    }
+    .result-item:last-child { margin-bottom: 0; }
+    .result-label { 
+      font-weight: 400;
+      color: var(--star-yellow);
+    }
+    .result-value { 
+      font-weight: 400; 
+      color: var(--star-pink);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .result-value small { 
+      font-size: 0.8em; 
+      opacity: 0.9;
+      color: var(--star-blue);
+    }
+    
+    .pacote-section { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
+    .pacote-total { margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255, 255, 255, 0.1); display: flex; justify-content: space-between; font-size: 0.9rem; }
+    .pacote-total-label { font-weight: 500; }
+    .pacote-total-value { font-weight: 600; color: var(--gold-color); }
+    
+    .btn { 
+      display: inline-flex; 
+      align-items: center; 
+      justify-content: center; 
+      padding: 15px 20px; 
+      background: var(--button-primary); 
+      color: white; 
+      border: 3px solid var(--star-yellow); 
+      border-radius: 0; 
+      font-family: 'Press Start 2P', cursive; 
+      font-size: 10px; 
+      font-weight: 400; 
+      cursor: pointer; 
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.5); 
+      position: relative; 
+      overflow: hidden; 
+      width: 100%;
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .btn:hover { 
+      background: var(--button-hover); 
+      transform: translate(-2px, -2px); 
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.5);
+    }
+    .btn:active { 
+      background: var(--button-active); 
+      transform: translate(2px, 2px); 
+      box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .btn svg { width: 14px; height: 14px; margin-right: 10px; }
+    
+    .details-toggle { margin-top: 20px; }
+    .details-toggle summary { 
+      cursor: pointer; 
+      font-family: 'Press Start 2P', cursive; 
+      font-size: 10px; 
+      text-align: center; 
+      color: var(--star-yellow); 
+      padding: 12px; 
+      border-radius: 0; 
+      background: rgba(0,0,0,0.5);
+      border: 3px solid var(--star-blue);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    .details-toggle summary:hover { 
+      color: var(--star-pink);
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+    }
+    .details-content { 
+      margin-top: 15px; 
+      padding-top: 15px; 
+      border-top: 3px solid var(--panel-border);
+    }
+
+    .rates-grid { display: grid; grid-template-columns: 1fr; gap: 10px; margin-bottom: 20px; }
+    .rate-item { 
+      display: flex; 
+      justify-content: space-between; 
+      padding: 10px 12px; 
+      background: rgba(0,0,0,0.5); 
+      border-radius: 0; 
+      font-size: 9px;
+      border: 2px solid var(--star-blue);
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    }
+    .rate-label { color: var(--star-yellow); }
+    .rate-label span { margin-left: 5px; }
+    .rate-value { 
+      font-weight: 400; 
+      color: var(--star-pink);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    
+    .calc-result-container { display: flex; align-items: center; gap: 10px; }
+    .calc-result { 
+      text-align: center; 
+      font-size: 10px; 
+      font-weight: 400; 
+      color: var(--star-pink); 
+      margin-top: 5px; 
+      padding: 10px; 
+      background: rgba(0, 0, 0, 0.5); 
+      border-radius: 0; 
+      animation: pulse 2.5s infinite; 
+      flex-grow: 1;
+      border: 3px solid var(--star-blue);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .send-to-gold-btn { 
+      background: var(--button-primary); 
+      border: 3px solid var(--star-yellow); 
+      color: white; 
+      width: 40px; 
+      height: 40px; 
+      border-radius: 0; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 16px; 
+      font-weight: bold; 
+      cursor: pointer; 
+      flex-shrink: 0;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    .send-to-gold-btn:hover { 
+      background: var(--button-hover); 
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.5);
+    }
+    
+    @keyframes pulse {
+      0% { box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 0 0 rgba(255, 110, 199, 0.6); }
+      70% { box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 0 15px rgba(255, 110, 199, 0); }
+      100% { box-shadow: 4px 4px 0 rgba(0,0,0,0.5), 0 0 0 0 rgba(255, 110, 199, 0); }
+    }
+    
+    .summary-and-payment { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; align-items: start; }
+    .payment-methods { display: flex; flex-direction: column; gap: 15px; }
+    .payment-method { 
+      padding: 15px; 
+      background: rgba(0, 0, 0, 0.5); 
+      border-radius: 0; 
+      border: 3px solid var(--star-blue); 
+      position: relative;
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    .payment-method-title { 
+      display: flex; 
+      align-items: center; 
+      font-size: 11px; 
+      margin-bottom: 12px; 
+      color: var(--star-yellow);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .payment-method-title span { margin-left: 8px; }
+    .payment-details { 
+      font-size: 9px;
+      line-height: 1.8;
+    }
+    .payment-details strong { 
+      color: var(--star-pink);
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .copy-payment-btn { 
+      position: absolute; 
+      top: 12px; 
+      right: 12px; 
+      background: var(--button-primary); 
+      border: 2px solid var(--star-yellow); 
+      border-radius: 0; 
+      width: 35px; 
+      height: 35px; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      cursor: pointer; 
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    }
+    .copy-payment-btn:hover { 
+      background: var(--button-hover); 
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+    }
+    .copy-payment-btn svg { width: 15px; height: 15px; fill: none; stroke: white; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: block; }
+    .copy-payment-btn img { width: 15px; height: 15px; display: block; }
+    
+    .total-grand { 
+      font-size: 11px; 
+      font-weight: 400; 
+      margin-bottom: 15px; 
+      text-align: center; 
+      color: var(--star-yellow); 
+      text-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+    }
+    .total-grand span { 
+      display: block; 
+      margin-top: 8px; 
+      font-size: 14px;
+      color: var(--star-pink);
+      text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    }
+    .total-grand span small { 
+      font-size: 0.7em; 
+      opacity: 0.9;
+      color: var(--star-blue);
+    }
+
+    .tooltip { 
+      position: fixed; 
+      background: var(--star-purple); 
+      color: white; 
+      padding: 12px 18px; 
+      border-radius: 0; 
+      font-size: 9px; 
+      z-index: 1000; 
+      pointer-events: none; 
+      opacity: 0; 
+      transition: opacity 0.3s; 
+      box-shadow: 5px 5px 0 rgba(0,0,0,0.5);
+      border: 3px solid var(--star-yellow);
+    }
+    .particles-container { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: -2; }
+    .particle { position: absolute; background: var(--star-pink); border-radius: 50%; opacity: 0.6; }
+    .sound-control { 
+      position: fixed; 
+      bottom: 15px; 
+      right: 270px; 
+      z-index: 1000;
+      background: var(--star-purple);
+      padding: 10px;
+      border-radius: 0;
+      border: 3px solid var(--star-yellow);
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    }
+    
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    
+    @media (max-width: 1024px) {
+        .main-layout {
+            flex-direction: column;
+        }
+        .panel-content-wrapper, .summary-and-payment {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 768px) {
+        body { 
+          padding: 10px;
+          font-size: 9px;
+        }
+        header h1 { 
+          font-size: 16px;
+        }
+        header p {
+          font-size: 8px;
+        }
+        .tab-button { 
+          font-size: 9px; 
+          padding: 12px 20px;
+        }
+        .panel { 
+          padding: 15px;
+        }
+        .pacote-section { 
+          grid-template-columns: 1fr 1fr;
+        }
+        h2 {
+          font-size: 11px;
+        }
+        h3 {
+          font-size: 9px;
+        }
+        label {
+          font-size: 8px;
+        }
+        .star-gif {
+          width: 160px;
+          bottom: 10px;
+          right: 10px;
+        }
+        .sound-control {
+          right: 180px;
+        }
+        .volume-slider {
+          right: 240px;
+        }
+    }
+
+    /* Flores removidas */
+    .gross-gold-display { 
+      font-size: 8px; 
+      color: var(--star-blue); 
+      text-align: right; 
+      margin-top: -10px; 
+      padding-right: 5px; 
+      height: 16px;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    }
+    .invisible-button { 
+      position: absolute; 
+      top: 15px; 
+      left: 15px; 
+      width: 30px; 
+      height: 30px; 
+      background: transparent; 
+      border: none; 
+      cursor: pointer; 
+      z-index: 10; 
+      padding: 0; 
+      display: flex; 
+      align-items: center; 
+      justify-content: center; 
+      font-size: 0;
+      opacity: 0;
+    }
+    .invisible-button::after { 
+      content: "🌸"; 
+      font-size: 18px; 
+      opacity: 0;
+    }
+    .invisible-button:hover::after { 
+      opacity: 0.3;
+      animation: spin 0.5s linear;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .sound-icon { width: 20px; height: 20px; fill: var(--star-yellow); }
+    .muted .sound-icon .wave { opacity: 0.3; }
+    .muted .sound-icon .line { opacity: 1; }
+    .volume-slider { 
+      position: fixed; 
+      bottom: 15px; 
+      right: 330px; 
+      background: var(--star-purple); 
+      padding: 10px 15px; 
+      border-radius: 0; 
+      z-index: 1000; 
+      display: flex; 
+      align-items: center; 
+      box-shadow: 4px 4px 0 rgba(0,0,0,0.5); 
+      border: 3px solid var(--star-yellow); 
+      transform: translateX(200px); 
+      opacity: 0; 
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .volume-slider.active { transform: translateX(0); opacity: 1; }
+    .volume-slider input { width: 80px; margin: 0 8px; }
+    .volume-label { 
+      color: var(--star-yellow); 
+      font-size: 8px; 
+      margin-right: 6px;
+    }
+    
+    .star-gif {
+      position: fixed;
+      bottom: 15px;
+      right: 15px;
+      width: 240px;
+      height: auto;
+      z-index: 1000;
+      pointer-events: none;
+      filter: 
+        drop-shadow(0 0 15px rgba(153, 51, 255, 0.8)) 
+        drop-shadow(0 0 25px rgba(255, 215, 0, 0.6));
+      image-rendering: pixelated;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <h1>⚔️ Genshin Impact ⚔️</h1>
+      <p>✨ Genesis Crystals - Daoshi Store ✨</p>
+      <div class="cotacao-display">
+        <span class="icon">💫</span>
+        <span id="cotacao">Carregando cotação...</span>
+      </div>
+    </header>
+
+    <div class="main-layout">
+        <div class="left-column">
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('topup')">💎 Genesis Crystals 💎</button>
+            </div>
+            <div class="tab-content">
+                <div id="topupTab" class="tab-pane active">
+                    <div class="panel">
+                        <div class="panel-content-wrapper">
+                            <div>
+                                <h3>Passo 1: Selecione os Pacotes</h3>
+                                <div class="pacote-section">
+                                    <div class="form-group"><label for="pacote1">Benção da Lua</label><input type="number" id="pacote1" value="0" onfocus="this.select()" oninput="updatePacoteQuantidades(1, this.value);"></div>
+                                    <div class="form-group"><label for="pacote2">Crystal 300+30</label><input type="number" id="pacote2" value="0" onfocus="this.select()" oninput="updatePacoteQuantidades(2, this.value);"></div>
+                                    <div class="form-group"><label for="pacote3">Crystal 980+110</label><input type="number" id="pacote3" value="0" onfocus="this.select()" oninput="updatePacoteQuantidades(3, this.value);"></div>
+                                    <div class="form-group"><label for="pacote4">Crystal 1980+260</label><input type="number" id="pacote4" value="0" onfocus="this.select()" oninput="updatePacoteQuantidades(4, this.value);"></div>
+                                    <div class="form-group"><label for="pacote5">Crystal 3200+600</label><input type="number" id="pacote5" value="0" onfocus="this.select()" oninput="updatePacoteQuantidades(5, this.value);"></div>
+                                    <div class="form-group"><label for="pacote6">Crystal 6400+1600</label><input type="number" id="pacote6" value="0" onfocus="this.select()" oninput="updatePacoteQuantidades(6, this.value);"></div>
+                                </div>
+                            </div>
+                            <div class="login-section">
+                                <h3>Passo 2: Informações da Conta</h3>
+                                <div class="form-group"><label for="login">UID:</label><input type="text" id="login" placeholder="Digite seu UID"></div>
+                                <div class="form-group"><label for="server">Server:</label><input type="text" id="server" placeholder="Digite seu servidor"></div>
+                                <div class="form-group"><label for="nickname">Nickname:</label><input type="text" id="nickname" placeholder="Digite seu nickname"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="panel">
+                <div class="panel-header">
+                    <h2>🌸 Resumo e Pagamento 🌸</h2>
+                </div>
+                <div class="summary-and-payment">
+                    <div class="summary">
+                        <h3>Resumo do Pedido</h3>
+                        <div class="result-group">
+                            <div class="total-grand">
+                                💰 Total
+                                <span id="summaryTotalDisplay">R$0.00</span>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="copySmartClipboard(event)">
+                          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                          Copiar Resumo do Pedido
+                        </button>
+                        <button class="invisible-button" onclick="copyForCardPayment(event)" title="Opção para pagamento com cartão"></button>
+                    </div>
+                    <div class="payment-methods">
+                        <h3>Formas de Pagamento</h3>
+                        <div class="payment-method">
+                            <div class="payment-method-title"><span>Pix</span></div>
+                            <div class="payment-details">
+                                <p><strong>CELULAR:</strong> <span id="pixCelular">14988231270</span></p>
+                                <p><strong>Nome:</strong> <span id="pixNome">DAOSHI TRADE</span></p>
+                            </div>
+                            <button class="copy-payment-btn" onclick="copyPaymentDetail('pix', event)" title="Copiar Chave Pix" aria-label="Copiar Chave Pix">
+                              <img src="../copy-icon.svg" alt="" aria-hidden="true">
+                            </button>
+                        </div>
+                        <div class="payment-method">
+                            <div class="payment-method-title"><span>Binance</span></div>
+                            <div class="payment-details"><p><strong>ID:</strong> <span id="binanceId">1202540648</span></p></div>
+                            <button class="copy-payment-btn" onclick="copyPaymentDetail('binance', event)" title="Copiar E-mail Binance" aria-label="Copiar E-mail Binance">
+                              <img src="../copy-icon.svg" alt="" aria-hidden="true">
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div class="particles-container" id="particles"></div>
+  <div class="tooltip" id="tooltip"></div>
+  <img src="https://media.giphy.com/media/bzawYMvJVw0KPA0u7M/giphy.gif" alt="Star Butterfly" class="star-gif">
+
+<script>
+    // Carrega configuração do arquivo externo config-precos.js
+    const CONFIG = window.GENSHIN_CONFIG || {
+        defaultExchangeRate: 5.30,
+        cardFeePercentage: 0.06,
+        goldRates: { base: 27.00, above5k: 26.00, above10k: 26.00, above20k: 23.00, usdt: 4.20 },
+        topUpPackages: { 1: { price: 0.90 }, 3: { price: 2.60 }, 5: { price: 4.20 }, 10: { price: 7.60 }, 30: { price: 22.80 }, 50: { price: 40.00 }, 100: { price: 76.00 }}
+    };
+    let audioContext, masterGainNode, backgroundMusic;
+    let isMuted = true;
+    let audioInitialized = false;
+    let exchangeRate = CONFIG.defaultExchangeRate;
+    let listaOuroGlobal = [];
+    let pacoteQuantidades = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0 };
+    
+    const carrinhoSound = new Audio('../carrinho.mp3');
+    carrinhoSound.volume = 0.7;
+    
+    function playCarrinhoSound() {
+        carrinhoSound.currentTime = 0;
+        carrinhoSound.play().catch(err => console.log('Erro ao tocar som:', err));
+    }
+    
+    window.onload = function() {
+      initializeUIFromConfig();
+      setupEventListeners();
+      atualizarCotacaoDolar();
+      const soundControl = document.getElementById("soundControl");
+      if (soundControl) soundControl.classList.add("muted");
+    };
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-pane').forEach(tab => tab.classList.remove('active'));
+        document.getElementById(tabName + 'Tab').classList.add('active');
+        document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
+        document.querySelector(`.tab-button[onclick="showTab('${tabName}')"]`).classList.add('active');
+        playSound('click');
+    }
+    function initAudio() {
+        if (audioInitialized) return;
+        try {
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            masterGainNode = audioContext.createGain();
+            masterGainNode.gain.value = 0.7;
+            masterGainNode.connect(audioContext.destination);
+            backgroundMusic = document.getElementById("backgroundMusic");
+            backgroundMusic.volume = 0.35;
+            audioInitialized = true;
+            toggleMute();
+        } catch (e) {
+            console.error("AudioContext não pôde ser iniciado.", e);
+        }
+    }
+    function playSound(name) {
+        if (!audioInitialized || isMuted) return;
+        const noteMap = { click: 800, hover: 600, success: 1200, type: 440 + Math.random() * 100 };
+        const gainMap = { click: 0.1, hover: 0.05, success: 0.2, type: 0.03 };
+        const duration = name === "success" ? 0.3 : 0.1;
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        oscillator.type = name === "click" ? "triangle" : "sine";
+        oscillator.frequency.value = noteMap[name];
+        gainNode.gain.value = gainMap[name];
+        oscillator.connect(gainNode).connect(masterGainNode);
+        oscillator.start();
+        gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+        oscillator.stop(audioContext.currentTime + duration);
+    }
+    function toggleMute() {
+        if (!audioInitialized) initAudio();
+        isMuted = !isMuted;
+        const soundControl = document.getElementById("soundControl");
+        if (soundControl) {
+            soundControl.classList.toggle("muted", isMuted);
+        }
+        if (backgroundMusic) {
+            isMuted ? backgroundMusic.pause() : backgroundMusic.play().catch(e => {});
+        }
+        playSound('click');
+    }
+    function setupEventListeners() {
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener("keydown", () => playSound("type"));
+            if (input.type === 'number') {
+                input.addEventListener('focus', () => { if (input.value === '0') input.value = ''; });
+                input.addEventListener('blur', () => { if (input.value === '') input.value = '0'; });
+            }
+        });
+        document.querySelectorAll("button, .details-toggle summary").forEach(el => {
+            el.addEventListener("click", () => playSound("click"));
+            el.addEventListener("mouseenter", () => playSound("hover"));
+        });
+        const soundControl = document.getElementById("soundControl");
+        const volumeSlider = document.getElementById("volumeSlider");
+        if (soundControl) {
+            soundControl.addEventListener("click", toggleMute);
+            if (volumeSlider) {
+                soundControl.addEventListener("mouseenter", () => volumeSlider.classList.add("active"));
+            }
+        }
+        if (volumeSlider) {
+            volumeSlider.addEventListener("mouseleave", () => volumeSlider.classList.remove("active"));
+        }
+        const volumeRange = document.getElementById("volumeRange");
+        if (volumeRange) {
+            volumeRange.addEventListener("input", function() {
+                if (audioInitialized) {
+                    const vol = this.value / 100;
+                    masterGainNode.gain.value = vol;
+                    if (backgroundMusic) backgroundMusic.volume = vol * 0.5;
+                }
+            });
+        }
+        // Flores removidas conforme solicitado
+    }
+    function showTooltip(message, event) {
+        const tooltip = document.getElementById("tooltip");
+        tooltip.textContent = message;
+        const rect = event.target.getBoundingClientRect();
+        tooltip.style.left = `${rect.left + rect.width / 2 - tooltip.offsetWidth / 2}px`;
+        tooltip.style.top = `${rect.top - tooltip.offsetHeight - 10}px`;
+        tooltip.style.opacity = "1";
+        setTimeout(() => { tooltip.style.opacity = "0"; }, 2000);
+    }
+    function initializeUIFromConfig() {
+        // Desabilitado: não há Gold neste jogo
+        // document.getElementById('rate1k').innerText = CONFIG.goldRates.base.toFixed(2);
+        // document.getElementById('rate5k').innerText = CONFIG.goldRates.above5k.toFixed(2);
+        // document.getElementById('rate10k').innerText = CONFIG.goldRates.above10k.toFixed(2);
+        // document.getElementById('rate20k').innerText = CONFIG.goldRates.above20k.toFixed(2);
+        // document.getElementById('rateDollar').innerText = CONFIG.goldRates.usdt.toFixed(2);
+    }
+    function updateAllCalculations() {
+        // updateOuroCalculations(); // Desabilitado: não há Gold neste jogo
+        updatePacoteTotals();
+    }
+    function updateOuroCalculations() {
+        // Desabilitado: não há Gold neste jogo
+    }
+    function updatePacoteQuantidades(pacote, quantidade) {
+        pacoteQuantidades[pacote] = parseInt(quantidade) || 0;
+        updatePacoteTotals();
+        playSound('type');
+    }
+    function updatePacoteTotals() {
+        let totalD = 0;
+        Object.keys(pacoteQuantidades).forEach(pacote => {
+            totalD += (pacoteQuantidades[pacote] || 0) * CONFIG.topUpPackages[pacote].price;
+        });
+        updateSummary();
+    }
+    function updateSummary() {
+        const totalROuro = 0;
+        const totalDOuro = 0;
+        let totalDPacotes = 0;
+        Object.keys(pacoteQuantidades).forEach(pacote => {
+            totalDPacotes += (pacoteQuantidades[pacote] || 0) * CONFIG.topUpPackages[pacote].price;
+        });
+        const totalRPacotes = totalDPacotes * exchangeRate;
+        const totalGeralR = totalROuro + totalRPacotes;
+        const totalGeralD = totalDOuro + totalDPacotes;
+
+        // Proteção contra NaN
+        const safeROuro = isNaN(totalROuro) ? 0 : totalROuro;
+        const safeDOuro = isNaN(totalDOuro) ? 0 : totalDOuro;
+        const safeRPacotes = isNaN(totalRPacotes) ? 0 : totalRPacotes;
+        const safeDPacotes = isNaN(totalDPacotes) ? 0 : totalDPacotes;
+        const safeGeralR = isNaN(totalGeralR) ? 0 : totalGeralR;
+        const safeGeralD = isNaN(totalGeralD) ? 0 : totalGeralD;
+
+        if(document.getElementById("summaryGoldDisplay")) document.getElementById("summaryGoldDisplay").innerHTML = `R$${safeROuro.toFixed(2)} <small>/ $${safeDOuro.toFixed(2)}</small>`;
+        if(document.getElementById("summaryTopUpDisplay")) document.getElementById("summaryTopUpDisplay").innerHTML = `R$${safeRPacotes.toFixed(2)} <small>/ $${safeDPacotes.toFixed(2)}</small>`;
+        if(document.getElementById("summaryTotalDisplay")) document.getElementById("summaryTotalDisplay").innerHTML = `R$${safeGeralR.toFixed(2)} <small>/ $${safeGeralD.toFixed(2)}</small>`;
+    }
+    function calcularListaOuro(quantidade) {
+        if (quantidade <= 0) return [];
+        const total = Math.floor(quantidade * 1.053);
+        let partes = quantidade >= 20000 ? Math.ceil(quantidade / 5000) : Math.ceil(quantidade / 2500);
+        if (partes <= 0) partes = 1;
+        let resultado = [];
+        let soma = 0;
+        const base = Math.floor(total / partes);
+        for (let i = 0; i < partes - 1; i++) {
+            resultado.push(base);
+            soma += base;
+        }
+        resultado.push(total - soma);
+        return resultado;
+    }
+    function calculateGoldFromReal() {
+      const valor = parseFloat(document.getElementById("inputReal").value) || 0;
+      const estimatedGold = (valor * 1000) / CONFIG.goldRates.base;
+      let rate = CONFIG.goldRates.base;
+      if (estimatedGold >= 20000) rate = CONFIG.goldRates.above20k;
+      else if (estimatedGold >= 10000) rate = CONFIG.goldRates.above10k;
+      else if (estimatedGold >= 5000) rate = CONFIG.goldRates.above5k;
+      const gold = (valor * 1000) / rate;
+      document.getElementById("resultadoReal").textContent = `≈${Math.round(gold)} Gold`;
+      playSound('type');
+    }
+    function calculateGoldFromDollar() {
+      const valor = parseFloat(document.getElementById("inputDollar").value) || 0;
+      const gold = (valor * 1000) / CONFIG.goldRates.usdt;
+      document.getElementById("resultadoDollar").textContent = `≈${Math.round(gold)} Gold`;
+      playSound('type');
+    }
+    function sendToGold(source, event) {
+        const resultId = source === 'real' ? 'resultadoReal' : 'resultadoDollar';
+        const goldValue = parseInt(document.getElementById(resultId).textContent.replace(/\D/g, '')) || 0;
+        document.getElementById('quantidadeOuro').value = goldValue;
+        updateAllCalculations();
+        playSound('success');
+        showTooltip(`Valor ${goldValue} enviado para o cálculo!`, event);
+    }
+    async function atualizarCotacaoDolar() {
+      const cotacaoEl = document.getElementById('cotacao');
+      if (!cotacaoEl) {
+        console.error('Elemento #cotacao não encontrado!');
+        return;
+      }
+      
+      cotacaoEl.innerHTML = `<span class="value">⏳ Buscando cotação...</span>`;
+      
+      try {
+        const response = await fetch('https://api.binance.com/api/v3/ticker/price?symbol=USDTBRL');
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const data = await response.json();
+        exchangeRate = parseFloat(data.price);
+        
+        if (isNaN(exchangeRate)) throw new Error('Valor inválido recebido');
+        
+        cotacaoEl.innerHTML = `Cotação USDT/BRL: <span class="value">R$${exchangeRate.toFixed(2)}</span>`;
+      } catch (error) {
+        console.error('Erro ao buscar cotação:', error);
+        exchangeRate = CONFIG.defaultExchangeRate;
+        cotacaoEl.innerHTML = `Cotação USDT/BRL: <span class="value">R$${exchangeRate.toFixed(2)} (offline)</span>`;
+      }
+      
+      updateAllCalculations();
+    }
+    function copyContent(text, message, event) {
+        if (!text) {
+            showTooltip("Nada para copiar!", event);
+            return;
+        }
+        navigator.clipboard.writeText(text).then(() => {
+            showTooltip(message, event);
+            playSound("success");
+        }).catch(err => {
+            console.error('Falha ao copiar: ', err);
+            showTooltip("Erro ao copiar!", event);
+        });
+    }
+    function copyPaymentDetail(method, event) {
+        playCarrinhoSound();
+        let textToCopy = '';
+        let message = '';
+        if (method === 'pix') {
+            const pixCelular = document.getElementById('pixCelular').innerText;
+            const pixNome = document.getElementById('pixNome').innerText;
+            textToCopy = `PIX: ${pixCelular}\nNome: ${pixNome}`; 
+            message = 'Informações do Pix copiadas!';
+        } else if (method === 'binance') {
+            textToCopy = document.getElementById('binanceEmail').innerText;
+            message = 'E-mail da Binance copiado!';
+        }
+        copyContent(textToCopy, message, event);
+    }
+    function getFormValues() {
+        const data = {
+            quantidadeOuro: 0,
+            servidor: '',
+            totalROuro: 0,
+            totalDOuro: 0,
+            quantidadeAnunciada: '0',
+            hasGold: false, hasTopUp: false,
+            pacotesTexto: '', totalPacotesR: 0, totalPacotesD: 0,
+            login: document.getElementById('login')?.value || '',
+            password: '',
+            nickname: document.getElementById('nickname')?.value || '',
+            level: '',
+            server: document.getElementById('server')?.value || '',
+            metodoLogin: ''
+        };
+        if (data.quantidadeOuro > 0) data.hasGold = true;
+        Object.keys(pacoteQuantidades).forEach(p => {
+            const qtd = pacoteQuantidades[p];
+            if (qtd > 0) {
+                data.hasTopUp = true;
+                const preco = CONFIG.topUpPackages[p].price;
+                const subtotalD = qtd * preco;
+                data.pacotesTexto += `  - Pacote de $${p}: ${qtd} un.\n`;
+                data.totalPacotesD += subtotalD;
+            }
+        });
+        data.totalPacotesR = data.totalPacotesD * exchangeRate;
+        return data;
+    }
+    function copySmartClipboard(event) {
+        playCarrinhoSound();
+        const data = getFormValues();
+        if (!data.hasGold && !data.hasTopUp) {
+            showTooltip("Preencha Gold ou Top Up!", event);
+            return;
+        }
+        
+        // CABEÇALHO COM NOME DO JOGO
+        let texto = "⭐ RESUMO DO PEDIDO DAOSHI ⭐\n";
+        texto += "🎮 JOGO: GENSHIN IMPACT\n";
+        texto += "---------------------------------\n";
+        
+        if (data.hasGold) {
+            texto += `🌟 GOLD\n`;
+            if (data.servidor) texto += `  - Servidor: ${data.servidor}\n`;
+            texto += `  - Anunciar: ${data.quantidadeAnunciada}\n`;
+            texto += `  - Valor: R$${data.totalROuro.toFixed(2)} / $${data.totalDOuro.toFixed(2)}\n---------------------------------\n`;
+        }
+        if (data.hasTopUp) {
+            texto += `💮 TOP UP\n${data.pacotesTexto}`;
+            texto += `  - Valor: R$${data.totalPacotesR.toFixed(2)} / $${data.totalPacotesD.toFixed(2)}\n---------------------------------\n`;
+            
+            // DADOS DA CONTA - APENAS CAMPOS PREENCHIDOS (Genshin usa UID)
+            const loginFields = [];
+            if (data.login) loginFields.push(`UID: ${data.login}`);
+            if (data.server) loginFields.push(`Server: ${data.server}`);
+            if (data.nickname) loginFields.push(`Nickname: ${data.nickname}`);
+            
+            if (loginFields.length > 0) {
+                texto += `👤 DADOS DA CONTA\n\`\`\`\n${loginFields.join('\n')}\n\`\`\`\n---------------------------------\n`;
+            }
+        }
+        const totalGeralR = data.totalROuro + data.totalPacotesR;
+        const totalGeralD = data.totalDOuro + data.totalPacotesD;
+        texto += `💰 TOTAL GERAL: R$${totalGeralR.toFixed(2)} / $${totalGeralD.toFixed(2)}\n`;
+        const pixCelular = document.getElementById('pixCelular').innerText;
+        const pixNome = document.getElementById('pixNome').innerText;
+        const binanceEmail = document.getElementById('binanceEmail').innerText;
+        texto += "---------------------------------\n";
+        texto += "🌸 INFORMAÇÕES DE PAGAMENTO 🌸\n";
+        texto += `PIX (Celular): ${pixCelular}\n`;
+        texto += `Nome: ${pixNome}\n\n`;
+        texto += `Binance (Email): ${binanceEmail}\n`;
+        copyContent(texto, "Resumo copiado!", event);
+    }
+    // FUNÇÃO MODIFICADA
+    function copyForCardPayment(event) {
+        const data = getFormValues();
+        if (!data.hasGold && !data.hasTopUp) {
+            showTooltip("Preencha algo para pagar com cartão!", event);
+            return;
+        }
+        const totalGeralR = data.totalROuro + data.totalPacotesR;
+        const totalGeralD = data.totalDOuro + data.totalPacotesD;
+        const totalComTaxa = totalGeralR * (1 + CONFIG.cardFeePercentage);
+        
+        let texto = "⭐ Pedido para Pagamento no Cartão ⭐\n---------------------------------\n";
+        if (data.hasGold) texto += `- Item: ${data.quantidadeOuro} Gold\n`;
+        if (data.hasTopUp) texto += `- Itens: Pacotes Top Up\n`;
+        
+        texto += `Valor do Pedido: R$${totalGeralR.toFixed(2)} / $${totalGeralD.toFixed(2)}\n`;
+        texto += `Taxa do Cartão (${(CONFIG.cardFeePercentage * 100).toFixed(0)}%): R$${(totalComTaxa - totalGeralR).toFixed(2)}\n`;
+        texto += `TOTAL A PAGAR: R$${totalComTaxa.toFixed(2)}\n\n`;
+        texto += "Link de Pagamento (Mercado Pago):\nhttps://link.mercadopago.com.br/daoshistore";
+        
+        texto += "\n\n";
+        texto += "⚠️ INFORMAÇÕES IMPORTANTES ⚠️\n";
+        texto += "---------------------------------\n";
+        texto += "💳 Pagamentos no Cartão de Crédito\n\n";
+        texto += "• O cartão deve ser, obrigatoriamente, do próprio comprador.\n";
+        texto += `• Pagamentos têm acréscimo de ${(CONFIG.cardFeePercentage * 100).toFixed(0)}% de juros.\n\n`;
+        texto += "🔒 Para segurança da transação, é necessário informar:\n";
+        texto += "  - Nome completo:\n";
+        texto += "  - CPF:\n";
+        texto += "  - Telefone (WhatsApp):\n";
+        texto += "  - Rede social ativa:\n\n";
+        texto += "❗️Atenção: Em casos de suspeita de fraude ou tentativa de golpe, temos processos internos e legais para identificar e responsabilizar o comprador.";
+        
+        copyContent(texto, "Informações para cartão copiadas!", event);
+    }
+</script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

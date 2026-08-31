@@ -1,0 +1,182 @@
+/* ===== VARIÁVEIS DE COR E FONTES ===== */
+:root {
+  --primary-color: #c0c0c0;
+  --secondary-color: #e5e7eb;
+  --accent-color: #9ca3af;
+  --silver-color: #c0c0c0;
+  --silver-dark: #a6a6a6;
+  --text-color: #f8fafc;
+  
+  /* ----- MODIFICADO ----- */
+  /* Mudei de RGBA (transparente) para cores sólidas */
+  --panel-bg: #1F2937; /* Cor sólida (Tailwind gray-800) */
+  --panel-border: rgba(192, 192, 192, 0.3);
+  --input-bg: #374151; /* Cor sólida (Tailwind gray-700) */
+  /* ------------------------ */
+
+  --input-border: rgba(192, 192, 192, 0.5);
+  --button-primary: linear-gradient(135deg, #a1a1a1, #c0c0c0);
+  --button-hover: linear-gradient(135deg, #c0c0c0, #a1a1a1);
+  --button-active: linear-gradient(135deg, #8a8a8a, #a1a1a1);
+}
+
+/* ===== FONTES GLOBAIS ===== */
+body, .font-sans {
+  font-family: 'Montserrat', sans-serif;
+}
+
+/* ===== BACKGROUND DA PÁGINA (MODIFICADO) ===== */
+body {
+  /* 1. Overlay: Um gradiente preto semi-transparente (60% opaco)
+    2. Imagem: Sua imagem de fundo
+  */
+  background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+                    url('https://lh3.googleusercontent.com/d/1ECtr_z7YWp_QugVyvTQBWTiV9d88m5zS');
+  
+  background-size: cover;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+/* ========================================= */
+
+h1, h2, h3, h4, h5, h6, .font-heading {
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--silver-color);
+}
+
+/* ===== EFEITO DE TEXTO METÁLICO ===== */
+.metallic-text {
+  background: linear-gradient(135deg, 
+    #f8f8f8 20%,
+    #c0c0c0 45%,
+    #a8a8a8 55%,
+    #c0c0c0 75%
+  );
+  background-size: 400% 400%;
+  animation: metallic-shine 8s ease infinite;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-fill-color: transparent;
+  text-shadow: 0 2px 3px rgba(0, 0, 0, 0.2), 
+               0 1px 1px rgba(255, 255, 255, 0.1);
+}
+
+@keyframes metallic-shine {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===== ESTILOS DOS PAINÉIS (MODIFICADO) ===== */
+.panel {
+  background: var(--panel-bg); /* Agora usa a cor sólida */
+  border: 2px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 
+              inset 0 0 15px rgba(192, 192, 192, 0.1);
+  /* backdrop-filter: blur(10px);  <-- REMOVIDO, não precisa mais */
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Brilho no painel ao passar o mouse OU focar um input */
+.panel:hover,
+.panel:focus-within {
+  border-color: rgba(192, 192, 192, 1);
+  box-shadow: 0 0 30px rgba(192, 192, 192, 0.6),
+              inset 0 0 20px rgba(192, 192, 192, 0.2);
+}
+
+.panel-header {
+  text-align: center;
+  border-bottom: 2px solid var(--panel-border);
+  padding-bottom: 0.75rem;
+}
+
+.panel-header h2 {
+  font-size: 1.75rem;
+  color: var(--text-color);
+}
+
+/* ===== ESTILOS DE FORMULÁRIO (MODIFICADO) ===== */
+input[type="number"],
+input[type="text"] {
+  background-color: var(--input-bg); /* Agora usa a cor sólida */
+  border: 1px solid var(--input-border);
+  color: var(--text-color);
+  caret-color: var(--silver-color);
+}
+
+input[type="number"]:focus,
+input[type="text"]:focus {
+  background-color: rgba(255, 255, 255, 0.05); /* Mantém um leve brilho no input focado */
+  border-color: var(--silver-color);
+  box-shadow: 0 0 10px rgba(192, 192, 192, 0.5);
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+.typing-effect {
+  border-color: var(--silver-color) !important;
+  box-shadow: 0 0 15px rgba(192, 192, 192, 0.7) !important;
+  transition: border-color 0.1s ease, box-shadow 0.1s ease;
+}
+
+/* ===== BOTÕES ===== */
+.btn, .btn-pix, .btn-binance {
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+  transform: translateY(0);
+}
+
+.btn:hover, .btn-pix:hover, .btn-binance:hover {
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  transform: translateY(-3px);
+  filter: brightness(1.15);
+}
+
+.btn:active, .btn-pix:active, .btn-binance:active {
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  transform: translateY(1px);
+  filter: brightness(0.9);
+}
+
+/* Animação de pulso para o botão principal */
+@keyframes pulse-glow {
+  0% {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3), 
+                0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(59, 130, 246, 0.8), 
+                0 6px 15px rgba(0, 0, 0, 0.4);
+  }
+  100% {
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3), 
+                0 4px 10px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Classe da animação */
+.btn-cta-pulse {
+  animation: pulse-glow 2.5s infinite ease-in-out;
+}
+
+/* ===== OUTROS ===== */
+.pacote-total-value {
+  color: var(--silver-color);
+  font-weight: 600;
+  font-size: 1.1rem;
+}

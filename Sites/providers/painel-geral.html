@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📋 Painel Geral - Todos os Pedidos</title>
+    <link rel="stylesheet" href="estilos.css">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #111111;
+            --bg-tertiary: #1a1a1a;
+            --border: #2a2a2a;
+            --text-primary: #ffffff;
+            --text-secondary: #888888;
+            --accent: #ff6b00;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+        
+        .stat-card h3 {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .stat-card .value {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .stat-card.pending .value { color: var(--warning); }
+        .stat-card.processing .value { color: #3b82f6; }
+        .stat-card.completed .value { color: var(--success); }
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        
+        .filters select, .filters input {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        
+        .filters select:focus, .filters input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #e65c00);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 107, 0, 0.3);
+        }
+        
+        .orders-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+        }
+        
+        .order-card {
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .order-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        .order-card.pending { border-left: 4px solid var(--warning); }
+        .order-card.processing { border-left: 4px solid #3b82f6; }
+        .order-card.completed { border-left: 4px solid var(--success); }
+        
+        .order-header {
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .order-id {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--accent);
+        }
+        
+        .order-provider {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+        
+        .provider-AMARELO { background: #fbbf24; color: #000; }
+        .provider-LBW { background: #60a5fa; color: #000; }
+        .provider-VACA { background: #34d399; color: #000; }
+        .provider-DW { background: #a78bfa; color: #000; }
+        .provider-DOG { background: #f472b6; color: #000; }
+        .provider-DAODAO { background: #fb923c; color: #000; }
+        .provider-SOMBRA { background: #6b7280; color: #fff; }
+        
+        .order-body {
+            padding: 15px;
+        }
+        
+        .order-game {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+        
+        .game-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+        
+        .game-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .game-type {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .order-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .detail-item {
+            background: var(--bg-tertiary);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .detail-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+        
+        .detail-value {
+            font-size: 13px;
+            font-weight: 600;
+            word-break: break-all;
+        }
+        
+        .order-status {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+        .status-processing { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .status-completed { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+        
+        .order-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .no-orders {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px;
+            color: var(--text-secondary);
+        }
+        
+        .no-orders h3 {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+        
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            box-shadow: 0 4px 20px rgba(255, 107, 0, 0.4);
+            transition: all 0.3s;
+        }
+        
+        .refresh-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .refresh-btn.loading {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Image Modal */
+        .image-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+            cursor: zoom-out;
+        }
+        
+        .image-modal-overlay.active {
+            display: flex;
+        }
+        
+        .image-modal-overlay img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <div class="header">
+            <h1>📋 Painel Geral de Pedidos</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span id="last-update" style="color: var(--text-secondary); font-size: 13px;">Última atualização: --</span>
+                <button class="btn btn-primary" onclick="loadAllOrders()">🔄 Atualizar</button>
+            </div>
+        </div>
+        
+        <!-- ESTATÍSTICAS -->
+        <div class="stats-grid">
+            <div class="stat-card pending">
+                <h3>⏳ Pendentes</h3>
+                <p class="value" id="count-pending">0</p>
+            </div>
+            <div class="stat-card processing">
+                <h3>🔄 Em Processamento</h3>
+                <p class="value" id="count-processing">0</p>
+            </div>
+            <div class="stat-card completed">
+                <h3>✅ Concluídos (Hoje)</h3>
+                <p class="value" id="count-completed">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>📦 Pedidos Carregados</h3>
+                <p class="value" id="count-total">0</p>
+            </div>
+        </div>
+        
+        <!-- FILTROS -->
+        <div class="filters">
+            <select id="filter-provider" onchange="applyFilters()">
+                <option value="">Todos os Fornecedores</option>
+                <option value="AMARELO">🟡 AMARELO (Gold)</option>
+                <option value="LBW">🔵 LoboLbw (Gold)</option>
+                <option value="VACA">🟢 VACA (Gold)</option>
+                <option value="DW">🟣 DW (Gold)</option>
+                <option value="DOG">🩷 DOG (TopUp)</option>
+                <option value="DAODAO">🟠 DAODAO (TopUp)</option>
+                <option value="SOMBRA">⚫ SOMBRA (TopUp)</option>
+            </select>
+            
+            <select id="filter-status" onchange="applyFilters()">
+                <option value="">Todos os Status</option>
+                <option value="pending">⏳ Pendente</option>
+                <option value="processing">🔄 Processando</option>
+                <option value="completed">✅ Concluído</option>
+                <option value="cancelled">❌ Cancelado</option>
+            </select>
+
+            <select id="filter-workflow" onchange="applyFilters()">
+                <option value="">Todos os Fluxos</option>
+                <option value="active">🟢 Em andamento</option>
+                <option value="absent">⏸️ Ausente</option>
+                <option value="problem_pending">⚠️ Problema em espera</option>
+                <option value="problem_resolved">🛠️ Problema resolvido</option>
+                <option value="cancelled">❌ Cancelado</option>
+            </select>
+            
+            <select id="filter-game" onchange="applyFilters()">
+                <option value="">Todos os Jogos</option>
+                <!-- Jogos serão adicionados via JS -->
+            </select>
+            
+            <input type="text" id="filter-search" placeholder="🔍 Buscar por ID..." oninput="applyFilters()">
+        </div>
+        
+        <!-- GRID DE PEDIDOS -->
+        <div class="orders-grid" id="orders-grid">
+            <div class="no-orders">
+                <h3>📋</h3>
+                <p>Carregando pedidos...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- BOTÃO DE REFRESH FLUTUANTE -->
+    <button class="refresh-btn" id="refresh-btn" onclick="loadAllOrders()">🔄</button>
+    
+    <!-- MODAL DE IMAGEM -->
+    <div class="image-modal-overlay" id="image-modal" onclick="closeImageModal()">
+        <img src="" alt="Imagem ampliada" id="modal-image">
+    </div>
+
+    <!-- FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="../shared/firebase-config-orders.js"></script>
+    <script>
+        // Dados
+        let allOrders = [];
+        let filteredOrders = [];
+
+        // Protecao de banda: por padrao o painel geral acompanha somente a janela
+        // operacional mais recente. O modo completo continua disponivel como
+        // escape reversivel via `?legacyFullOrders=1`, mas nunca recarrega a raiz
+        // em resposta a cada child_added/child_changed.
+        const LEGACY_FULL_ORDERS_MODE = new URLSearchParams(window.location.search).get('legacyFullOrders') === '1';
+        const ORDERS_WINDOW = 500;
+        let ordersRealtimeRef = null;
+        let renderTimer = null;
+
+        function getOrdersQuery() {
+            const root = window.db.ref('orders');
+            return LEGACY_FULL_ORDERS_MODE ? root : root.orderByKey().limitToLast(ORDERS_WINDOW);
+        }
+
+        function upsertOrder(orderId, order) {
+            const index = allOrders.findIndex((item) => item.id === orderId);
+            const next = { id: orderId, ...(order || {}) };
+            if (index >= 0) allOrders[index] = next;
+            else allOrders.push(next);
+        }
+
+        function scheduleOrdersRender() {
+            if (renderTimer) return;
+            renderTimer = setTimeout(() => {
+                renderTimer = null;
+                allOrders.sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                updateGameFilter();
+                applyFilters();
+                const scope = LEGACY_FULL_ORDERS_MODE ? 'modo completo' : `ultimos ${ORDERS_WINDOW}`;
+                document.getElementById('last-update').textContent =
+                    `Atualizado em tempo real: ${new Date().toLocaleTimeString('pt-BR')} (${scope})`;
+            }, 120);
+        }
+        
+        const GAME_IMAGES = {
+            'mir4': 'https://i.imgur.com/XrXphs0.png',
+            'nightcrows': 'https://i.imgur.com/LLGJGNI.png',
+            'odin': 'https://i.imgur.com/aLsQf6y.png',
+            'wemix': 'https://i.imgur.com/YTGq40y.png',
+            'raven2': 'https://i.imgur.com/jgNSgdY.png',
+            'rohan2': 'https://i.imgur.com/nZg3UYE.png',
+            'genshin': 'https://i.imgur.com/Q1T1tta.png',
+            'summonerswar': 'https://i.imgur.com/kav5I7I.png',
+            'aion2': 'https://i.imgur.com/tX10TIL.png',
+            'wutheringwaves': 'https://i.imgur.com/zfzGI4x.png',
+            'honkaistarrail': 'https://i.imgur.com/1XB7OhJ.png',
+            'zzz': 'https://i.imgur.com/c82IUtg.png',
+            'romgoldenage': 'https://i.imgur.com/tgdkTPb.png'
+        };
+        
+        const GAME_NAMES = {
+            'mir4': 'MIR4',
+            'nightcrows': 'Night Crows',
+            'odin': 'Odin',
+            'wemix': 'Wemix',
+            'raven2': 'Raven II',
+            'rohan2': 'Rohan II',
+            'genshin': 'Genshin Impact',
+            'summonerswar': 'Summoners War',
+            'aion2': 'AION 2',
+            'wutheringwaves': 'Wuthering Waves UID',
+            'honkaistarrail': 'Honkai Star Rail',
+            'zzz': 'Zenless Zone Zero',
+            'romgoldenage': 'ROM Golden Age'
+        };
+        
+        // Carregar todos os pedidos
+        async function loadAllOrders() {
+            const refreshBtn = document.getElementById('refresh-btn');
+            refreshBtn.classList.add('loading');
+            
+            try {
+                const snapshot = await getOrdersQuery().once('value');
+                const data = snapshot.val() || {};
+                
+                allOrders = Object.entries(data).map(([id, order]) => ({
+                    id,
+                    ...order
+                })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+                
+                // Atualizar filtro de jogos
+                updateGameFilter();
+                
+                // Aplicar filtros
+                applyFilters();
+                
+                // Atualizar timestamp
+                const scope = LEGACY_FULL_ORDERS_MODE ? 'modo completo' : `ultimos ${ORDERS_WINDOW}`;
+                document.getElementById('last-update').textContent =
+                    `Atualizado: ${new Date().toLocaleTimeString('pt-BR')} (${scope})`;
+                
+            } catch (error) {
+                console.error('Erro ao carregar pedidos:', error);
+            } finally {
+                refreshBtn.classList.remove('loading');
+            }
+        }
+        
+        // Atualizar filtro de jogos
+        function updateGameFilter() {
+            const select = document.getElementById('filter-game');
+            const games = [...new Set(allOrders.map(o => o.game).filter(Boolean))];
+            
+            select.innerHTML = '<option value="">Todos os Jogos</option>' +
+                games.map(g => `<option value="${g}">${GAME_NAMES[g] || g}</option>`).join('');
+        }
+        
+        // Aplicar filtros
+        function applyFilters() {
+            const provider = document.getElementById('filter-provider').value;
+            const status = document.getElementById('filter-status').value;
+            const workflow = document.getElementById('filter-workflow').value;
+            const game = document.getElementById('filter-game').value;
+            const search = document.getElementById('filter-search').value.toLowerCase();
+            
+            filteredOrders = allOrders.filter(order => {
+                if (provider && order.assignedProvider !== provider) return false;
+                if (status && order.status !== status) return false;
+                if (workflow && getWorkflowState(order) !== workflow) return false;
+                if (game && order.game !== game) return false;
+                if (search && !order.orderId?.toLowerCase().includes(search)) return false;
+                return true;
+            });
+            
+            updateStats();
+            renderOrders();
+        }
+
+        function getWorkflowState(order) {
+            if (order.status === 'cancelled') return 'cancelled';
+            if (order.workflowState === 'problem_resolved') return 'problem_resolved';
+            if (order.status === 'completed' || order.status === 'delivered') return 'completed';
+            if (order.workflowState) return order.workflowState;
+            if (order.problem?.status === 'resolved') return 'problem_resolved';
+            if (order.problem?.status === 'pending') return 'problem_pending';
+            if (order.skipped) return 'absent';
+            return 'active';
+        }
+
+        async function markProblem(orderId) {
+            const note = prompt('Descreva o problema:');
+            if (!note || !note.trim()) return;
+            await window.db.ref(`orders/${orderId}`).update({
+                workflowState: 'problem_pending',
+                problem: { status: 'pending', note: note.trim(), openedAt: Date.now(), openedBy: 'STAFF' }
+            });
+        }
+
+        async function resolveProblem(orderId) {
+            const order = allOrders.find(item => (item.orderId || item.id) === orderId) || {};
+            const resolutionNote = prompt('Como o problema foi resolvido? (opcional)') || '';
+            await window.db.ref(`orders/${orderId}`).update({
+                status: 'completed',
+                workflowState: 'problem_resolved',
+                problem: { ...(order.problem || {}), status: 'resolved', resolvedAt: Date.now(), resolvedBy: 'STAFF', resolutionNote: resolutionNote.trim() || null }
+            });
+        }
+        
+        // Atualizar estatísticas
+        function updateStats() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const todayMs = today.getTime();
+            
+            const pending = allOrders.filter(o => o.status === 'pending').length;
+            const processing = allOrders.filter(o => o.status === 'processing').length;
+            const completedToday = allOrders.filter(o => 
+                o.status === 'completed' && o.timestamp >= todayMs
+            ).length;
+            
+            document.getElementById('count-pending').textContent = pending;
+            document.getElementById('count-processing').textContent = processing;
+            document.getElementById('count-completed').textContent = completedToday;
+            document.getElementById('count-total').textContent = allOrders.length;
+        }
+        
+        // Renderizar pedidos
+        function renderOrders() {
+            const grid = document.getElementById('orders-grid');
+            
+            if (filteredOrders.length === 0) {
+                grid.innerHTML = `
+                    <div class="no-orders">
+                        <h3>📭</h3>
+                        <p>Nenhum pedido encontrado</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = filteredOrders.map(order => {
+                const gameName = GAME_NAMES[order.game] || order.game || 'Desconhecido';
+                const gameImage = GAME_IMAGES[order.game] || '';
+                const gameType = order.gameType === 'gold' ? '💰 Gold' : '🎁 TopUp';
+                const provider = order.assignedProvider || 'N/A';
+                const status = order.status || 'pending';
+                const workflow = getWorkflowState(order);
+                const statusLabel = {
+                    'pending': '⏳ Pendente',
+                    'processing': '🔄 Processando',
+                    'completed': '✅ Concluído'
+                }[status] || status;
+                
+                const account = order.account || {};
+                const timestamp = order.timestamp ? new Date(order.timestamp).toLocaleString('pt-BR') : '--';
+                
+                // Itens do carrinho
+                const cartItems = (order.cart || []).map(item => 
+                    item.pack || item.goldAmount?.toLocaleString('pt-BR') + ' Gold' || 'Item'
+                ).join(', ');
+                
+                return `
+                    <div class="order-card ${status}">
+                        <div class="order-header">
+                            <div>
+                                <span class="order-id">${order.orderId || order.id}</span>
+                                <span class="order-status status-${status}">${statusLabel}</span>
+                            </div>
+                            <span class="order-provider provider-${provider}">${provider}</span>
+                        </div>
+                        <div class="order-body">
+                            <div class="order-game">
+                                ${gameImage ? `<img src="${gameImage}" class="game-icon" alt="${gameName}">` : ''}
+                                <div>
+                                    <div class="game-name">${gameName}</div>
+                                    <div class="game-type">${gameType}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="order-details">
+                                ${account.login ? `
+                                    <div class="detail-item">
+                                        <div class="detail-label">Login</div>
+                                        <div class="detail-value">${account.login}</div>
+                                    </div>
+                                ` : ''}
+                                ${account.server ? `
+                                    <div class="detail-item">
+                                        <div class="detail-label">Servidor</div>
+                                        <div class="detail-value">${account.server}</div>
+                                    </div>
+                                ` : ''}
+                                ${account.nickname ? `
+                                    <div class="detail-item">
+                                        <div class="detail-label">Personagem</div>
+                                        <div class="detail-value">${account.nickname}</div>
+                                    </div>
+                                ` : ''}
+                                <div class="detail-item" style="grid-column: span 2;">
+                                    <div class="detail-label">Itens</div>
+                                    <div class="detail-value">${cartItems || 'N/A'}</div>
+                                </div>
+                            </div>
+                            
+                            <div class="order-time">
+                                <span>📅 ${timestamp}</span>
+                                <span>👤 ${order.client?.username || 'N/A'}</span>
+                            </div>
+                            ${order.problem?.note ? `<div class="detail-item" style="margin-top:12px;border:1px solid var(--warning);"><div class="detail-label">Problema</div><div class="detail-value">${order.problem.note}</div></div>` : ''}
+                            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;">
+                                ${workflow === 'problem_pending'
+                                    ? `<button class="btn btn-primary" onclick="resolveProblem('${order.orderId || order.id}')">✅ Resolver problema</button>`
+                                    : (status !== 'completed' && status !== 'cancelled'
+                                        ? `<button class="btn" style="background:var(--warning);color:#111" onclick="markProblem('${order.orderId || order.id}')">⚠️ Colocar em espera</button>`
+                                        : '')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Modal de imagem
+        function openImageModal(url) {
+            const modal = document.getElementById('image-modal');
+            document.getElementById('modal-image').src = url;
+            modal.classList.add('active');
+        }
+        
+        function closeImageModal() {
+            document.getElementById('image-modal').classList.remove('active');
+        }
+        
+        // ESC para fechar modal
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') closeImageModal();
+        });
+        
+        // Monitoramento em tempo real
+        function startRealTimeMonitoring() {
+            if (ordersRealtimeRef) return;
+            ordersRealtimeRef = getOrdersQuery();
+
+            ordersRealtimeRef.on('child_added', (snapshot) => {
+                upsertOrder(snapshot.key, snapshot.val());
+                scheduleOrdersRender();
+            });
+
+            ordersRealtimeRef.on('child_changed', (snapshot) => {
+                upsertOrder(snapshot.key, snapshot.val());
+                scheduleOrdersRender();
+            });
+
+            ordersRealtimeRef.on('child_removed', (snapshot) => {
+                allOrders = allOrders.filter((item) => item.id !== snapshot.key);
+                scheduleOrdersRender();
+            });
+
+            window.addEventListener('beforeunload', () => {
+                try { ordersRealtimeRef.off(); } catch (_) {}
+            }, { once: true });
+        }
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAllOrders();
+            startRealTimeMonitoring();
+        });
+    </script>
+</body>
+</html>

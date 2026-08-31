@@ -1,0 +1,18 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const vm = require('node:vm');
+const source = fs.readFileSync(require('node:path').join(__dirname, 'template.js'), 'utf8');
+const normalizeMatch = source.match(/function normalizeProviderAuthNumber\(value\) \{[\s\S]*?\n\}/);
+assert.ok(normalizeMatch, 'normalizer must exist');
+const context = {};
+vm.runInNewContext(normalizeMatch[0] + '; this.normalize = normalizeProviderAuthNumber;', context);
+assert.equal(context.normalize('91'), '91');
+assert.equal(context.normalize('\uFF19\uFF11'), '91');
+assert.equal(context.normalize(' 9-1 '), '91');
+assert.equal(context.normalize('000'), '000');
+assert.equal(context.normalize('1234'), '123');
+assert.match(source, /inputmode="numeric"/);
+assert.match(source, /oninput="handleAuthNumberInput/);
+assert.doesNotMatch(source, /onkeypress="return event\.charCode/);
+assert.match(source, /providerAuthNumberDrafts\.get/);
+console.log('provider auth number input: OK');

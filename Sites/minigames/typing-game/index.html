@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⌨️ Daoshi Typing - Teste de Digitação</title>
+  <link rel="icon" type="image/gif" href="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExenJsZ3h2ejgxeTN4enRwazcyYTllYzI1aW1uaTh1czdzZjJnd3YzcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/IAkgiYMQzCzzMas62O/giphy.gif">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  
+  <!-- Login/Register Modal -->
+  <div id="authModal" class="modal">
+    <div class="modal-content auth-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">⌨️ DAOSHI TYPING</h2>
+        <button class="modal-close" onclick="closeAuthModal()">×</button>
+      </div>
+      
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">CRIAR CONTA</button>
+      </div>
+      
+      <!-- Login Form -->
+      <div id="loginForm" class="auth-form active">
+        <div class="form-group">
+          <label>📧 Email</label>
+          <input type="email" id="loginEmail" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+          <label>🔒 Senha</label>
+          <input type="password" id="loginPassword" placeholder="••••••••">
+        </div>
+        <button class="auth-btn primary" onclick="loginWithEmail()">
+          🚀 ENTRAR
+        </button>
+        <div class="auth-divider">OU</div>
+        <button class="auth-btn google" onclick="loginWithGoogle()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          CONTINUAR COM GOOGLE
+        </button>
+      </div>
+      
+      <!-- Register Form -->
+      <div id="registerForm" class="auth-form">
+        <div class="form-group">
+          <label>👤 Nome de Usuário</label>
+          <input type="text" id="registerUsername" placeholder="SeuNome123">
+          <small>Será exibido no ranking</small>
+        </div>
+        <div class="form-group">
+          <label>📧 Email</label>
+          <input type="email" id="registerEmail" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+          <label>🔒 Senha</label>
+          <input type="password" id="registerPassword" placeholder="Mínimo 6 caracteres">
+        </div>
+        <button class="auth-btn primary" onclick="registerWithEmail()">
+          ✨ CRIAR CONTA
+        </button>
+        <div class="auth-divider">OU</div>
+        <button class="auth-btn google" onclick="loginWithGoogle()">
+          <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+          CRIAR COM GOOGLE
+        </button>
+      </div>
+      
+      <div id="authError" class="auth-error"></div>
+    </div>
+  </div>
+  
+  <!-- Main App -->
+  <div id="app" style="display: none;">
+    
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="logo">⌨️ DAOSHI TYPING</h1>
+        <div class="tagline">Teste sua velocidade de digitação</div>
+      </div>
+      <div class="header-right">
+        <div class="user-info" id="userInfo">
+          <span class="user-avatar" id="userAvatar">👤</span>
+          <span class="user-name" id="userName">Visitante</span>
+          <button class="btn-logout" onclick="logout()">Sair</button>
+        </div>
+      </div>
+    </header>
+    
+    <!-- Navigation -->
+    <nav class="nav-tabs">
+      <button class="nav-tab active" data-tab="game" onclick="switchTab('game', event)">🎮 JOGAR</button>
+      <button class="nav-tab" data-tab="stats" onclick="switchTab('stats', event)">📊 ESTATÍSTICAS</button>
+      <button class="nav-tab" data-tab="ranking" onclick="switchTab('ranking', event)">🏆 RANKING</button>
+      <button class="nav-tab" data-tab="history" onclick="switchTab('history', event)">📜 HISTÓRICO</button>
+    </nav>
+    
+    <!-- Game Section -->
+    <section id="gameSection" class="section active">
+      
+      <!-- Mode Selection -->
+      <div class="mode-selector">
+        <button class="mode-btn active" onclick="selectMode('casual')" data-mode="casual">
+          🎮 CASUAL
+        </button>
+        <button class="mode-btn" onclick="selectMode('ranked')" data-mode="ranked">
+          🏆 RANQUEADO
+        </button>
+      </div>
+      
+      <!-- Time Selection -->
+      <div class="time-selector">
+        <button class="time-btn active" onclick="selectTime(15)" data-time="15">15s</button>
+        <button class="time-btn" onclick="selectTime(30)" data-time="30">30s</button>
+        <button class="time-btn" onclick="selectTime(60)" data-time="60">60s</button>
+      </div>
+      
+      <!-- Game Stats -->
+      <div class="game-stats">
+        <div class="stat-item">
+          <div class="stat-value" id="timer">15</div>
+          <div class="stat-label">Tempo</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="wpm">0</div>
+          <div class="stat-label">PPM</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="accuracy">100%</div>
+          <div class="stat-label">Precisão</div>
+        </div>
+      </div>
+      
+      <!-- Play Button (only for Ranked) -->
+      <div class="play-container hidden" id="playContainer">
+        <button class="btn-play" onclick="startRankedGame()">
+          ▶️ INICIAR JOGO RANQUEADO
+        </button>
+        <p class="play-hint">As palavras aparecerão quando o timer começar</p>
+      </div>
+      
+      <!-- Words Display -->
+      <div class="words-container" id="wordsContainer">
+        <!-- Words will be inserted here dynamically -->
+      </div>
+      
+      <!-- Input -->
+      <div id="inputContainer" class="input-container">
+        <input 
+          type="text" 
+          id="wordInput" 
+          class="word-input" 
+          placeholder="Comece a digitar..."
+          autocomplete="off"
+          autocorrect="off"
+          autocapitalize="off"
+          spellcheck="false"
+        >
+      </div>
+      
+      <!-- Reset Button -->
+      <div class="controls">
+        <button class="btn-reset" onclick="resetGame()">
+          🔄 RESETAR (Shift + Enter)
+        </button>
+      </div>
+      
+    </section>
+    
+    <!-- Stats Section -->
+    <section id="statsSection" class="section">
+      <div class="stats-container">
+        <h2 class="section-title">📊 SUAS ESTATÍSTICAS</h2>
+        
+        <div class="stats-grid">
+          <div class="stats-card">
+            <div class="stats-icon">🏆</div>
+            <div class="stats-value" id="bestWPM">0</div>
+            <div class="stats-label">Melhor PPM</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-icon">🎯</div>
+            <div class="stats-value" id="avgAccuracy">0%</div>
+            <div class="stats-label">Precisão Média</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-icon">🎮</div>
+            <div class="stats-value" id="totalGames">0</div>
+            <div class="stats-label">Jogos Totais</div>
+          </div>
+          <div class="stats-card">
+            <div class="stats-icon">⌨️</div>
+            <div class="stats-value" id="totalWords">0</div>
+            <div class="stats-label">Palavras Digitadas</div>
+          </div>
+        </div>
+        
+        <div class="records-card">
+          <h3 class="chart-title">🏅 Recordes Ranqueados</h3>
+          <div class="records-grid">
+            <div class="record-item">
+              <div class="record-label">15s</div>
+              <div class="record-value" id="record15">--</div>
+              <div class="record-meta" id="record15Meta">Jogue ranqueado para registrar</div>
+            </div>
+            <div class="record-item">
+              <div class="record-label">30s</div>
+              <div class="record-value" id="record30">--</div>
+              <div class="record-meta" id="record30Meta">Jogue ranqueado para registrar</div>
+            </div>
+            <div class="record-item">
+              <div class="record-label">60s</div>
+              <div class="record-value" id="record60">--</div>
+              <div class="record-meta" id="record60Meta">Jogue ranqueado para registrar</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="chart-container">
+          <h3 class="chart-title">📈 Progresso (Últimos 10 Jogos)</h3>
+          <canvas id="progressChart"></canvas>
+        </div>
+      </div>
+    </section>
+    
+    <!-- Ranking Section -->
+    <section id="rankingSection" class="section">
+      <div class="ranking-container">
+        <h2 class="section-title">🏆 RANKING GLOBAL</h2>
+        
+        <div class="ranking-filters">
+          <button class="filter-btn active" data-filter="15" onclick="filterRanking('15')">15s</button>
+          <button class="filter-btn" data-filter="30" onclick="filterRanking('30')">30s</button>
+          <button class="filter-btn" data-filter="60" onclick="filterRanking('60')">60s</button>
+          <button class="filter-btn" data-filter="all" onclick="filterRanking('all')">Geral</button>
+        </div>
+        
+        <div class="ranking-table">
+          <div class="ranking-header">
+            <div class="rank-col">#</div>
+            <div class="player-col">Jogador</div>
+            <div class="wpm-col">PPM</div>
+            <div class="accuracy-col">Precisão</div>
+            <div class="date-col">Data</div>
+          </div>
+          <div id="rankingList" class="ranking-list">
+            <!-- Rankings will be loaded here -->
+          </div>
+        </div>
+      </div>
+    </section>
+    
+    <!-- History Section -->
+    <section id="historySection" class="section">
+      <div class="history-container">
+        <h2 class="section-title">📜 SEU HISTÓRICO</h2>
+        
+        <div class="history-controls">
+          <button class="btn-clear-history" onclick="clearHistory()">
+            🗑️ Limpar Histórico
+          </button>
+        </div>
+        
+        <div id="historyList" class="history-list">
+          <!-- History will be loaded here -->
+        </div>
+      </div>
+    </section>
+    
+  </div>
+  
+  <!-- Result Modal -->
+  <div id="resultModal" class="modal hidden">
+    <div class="modal-content result-modal">
+      <div class="modal-header">
+        <h2 class="modal-title">🎉 RESULTADO</h2>
+        <button class="modal-close" onclick="closeResultModal()">×</button>
+      </div>
+      
+      <div class="result-content">
+        <div class="result-main">
+          <div class="result-wpm">
+            <div class="result-value" id="resultWPM">0</div>
+            <div class="result-label">Palavras por Minuto</div>
+          </div>
+        </div>
+        
+        <div class="result-details">
+          <div class="result-item">
+            <span class="result-item-label">⏱️ Tempo:</span>
+            <span class="result-item-value" id="resultTime">15s</span>
+          </div>
+          <div class="result-item">
+            <span class="result-item-label">🎯 Precisão:</span>
+            <span class="result-item-value" id="resultAccuracy">100%</span>
+          </div>
+          <div class="result-item">
+            <span class="result-item-label">✅ Corretas:</span>
+            <span class="result-item-value" id="resultCorrect">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-item-label">❌ Erradas:</span>
+            <span class="result-item-value" id="resultWrong">0</span>
+          </div>
+          <div class="result-item">
+            <span class="result-item-label">📊 Total:</span>
+            <span class="result-item-value" id="resultTotal">0</span>
+          </div>
+        </div>
+        
+        <div class="result-message" id="resultMessage">
+          <!-- Dynamic message -->
+        </div>
+        
+        <div class="result-actions">
+          <button class="btn-result primary" onclick="playAgain()">
+            🔄 JOGAR NOVAMENTE
+          </button>
+          <button class="btn-result secondary" onclick="viewStats()">
+            📊 VER ESTATÍSTICAS
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Toast Notification -->
+  <div id="toast" class="toast"></div>
+  
+  <script src="words.js"></script>
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+  
+</body>
+</html>
+
