@@ -1077,6 +1077,24 @@
       right: 15%;
       transform: translateY(-50%) scaleX(-1);
     }
+  
+        /* ===== MOBILE: navbar (unica media query — o menu de 5 itens transbordava
+       e cortava "Sobre"/"Contato". Agora o logo fica em cima e o menu numa 2a
+       linha, com wrap, mostrando TODOS os itens. Nada muda no desktop.) ===== */
+    @media (max-width: 768px) {
+      body { padding-top: 132px; }
+      body.no-navbar { padding-top: 0; }
+      .navbar { padding: 8px 0; }
+      .nav-container { flex-direction: column; gap: 8px; padding: 0 10px; }
+      .nav-logo { font-size: 14px; text-align: center; }
+      .nav-menu {
+        width: 100%;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 6px;
+      }
+      .nav-link { flex-shrink: 0; white-space: nowrap; padding: 8px 12px; font-size: 12px; }
+    }
   </style>
 </head>
 <body>
