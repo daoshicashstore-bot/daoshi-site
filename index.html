@@ -3,13 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>⭐ Daoshi Store - Loja Premium de Games</title>
+  <title>â­ Daoshi Store - Loja Premium de Games</title>
   <link rel="icon" type="image/png" href="https://lh3.googleusercontent.com/d/1lLnjQ3NYt6Bd6WapJ2p0EjzfQJIbB-es">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
   
-  <!-- Arquivo de Configuração -->
+  <!-- Arquivo de ConfiguraÃ§Ã£o -->
   <script src="config.js"></script>
   
   <style>
@@ -42,15 +42,20 @@
     body {
       font-family: var(--font-main);
       color: var(--text-color);
-      background: url('https://lh3.googleusercontent.com/d/1ECtr_z7YWp_QugVyvTQBWTiV9d88m5zS') center/cover no-repeat fixed;
+      /* véu escuro sobre a boneca de fundo (31/08): com center/cover a imagem
+         era ampliada para cobrir a tela e ficava GIGANTE, dominando o
+         conteúdo. O gradiente por cima a mantém como fundo DISCRETO, e os
+         cards da loja voltam a ser o que se lê primeiro. */
+      background: linear-gradient(rgba(15,5,26,.62), rgba(15,5,26,.62)),
+        url('https://lh3.googleusercontent.com/d/1ECtr_z7YWp_QugVyvTQBWTiV9d88m5zS') center/cover no-repeat fixed;
       min-height: 100vh;
       font-size: 14px;
       line-height: 1.6;
       overflow-x: hidden;
-      padding-top: 80px; /* Espaço para navbar fixa */
+      padding-top: 80px; /* EspaÃ§o para navbar fixa */
     }
     
-    /* Remove padding quando navbar está escondida */
+    /* Remove padding quando navbar estÃ¡ escondida */
     body.no-navbar {
       padding-top: 0;
     }
@@ -330,7 +335,7 @@
       margin-bottom: 60px;
     }
     
-    /* Seção de Mini Games separada */
+    /* SeÃ§Ã£o de Mini Games separada */
     .minigames-section {
       margin-bottom: 80px;
       padding: 50px 30px;
@@ -342,7 +347,7 @@
     }
     
     .minigames-section::before {
-      content: '🎮';
+      content: 'ðŸŽ®';
       position: absolute;
       top: -40px;
       left: 50%;
@@ -368,7 +373,7 @@
     
     .section-divider::before,
     .section-divider::after {
-      content: '✦';
+      content: 'âœ¦';
       margin: 0 20px;
       color: var(--purple-light);
       animation: starPulse 2s ease-in-out infinite;
@@ -431,7 +436,7 @@
       transition: transform 0.3s ease;
     }
     
-    /* Compatibilidade com configuração antiga */
+    /* Compatibilidade com configuraÃ§Ã£o antiga */
     .game-icon img.icon-large {
       --icon-scale: 1.2;
     }
@@ -467,7 +472,7 @@
     }
     
     .game-features li::before {
-      content: '✓';
+      content: 'âœ“';
       color: var(--gold);
       font-weight: bold;
     }
@@ -664,11 +669,17 @@
     
     /* ===== FOOTER ===== */
     footer {
-      background: rgba(15, 5, 26, 0.8);
+      /* FUNDO OPACO (31/08): o body tem background:url(...) FIXED, e o footer
+         era rgba(...,0.8) semi-transparente + blur — a imagem fixa da mascote
+         vazava ATRAVES do footer ao rolar, parecendo que ele "cobria as
+         coisas". Fundo solido resolve; o blur sai porque nao ha mais nada
+         atras para desfocar. */
+      background: #0f051a;
       border-top: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 60px 20px 30px;
-      margin-top: 80px;
-      backdrop-filter: blur(10px);
+      padding: 48px 20px 28px;
+      margin-top: 60px;
+      position: relative;
+      z-index: 2;
     }
     
     .footer-content {
@@ -1065,20 +1076,20 @@
   <!-- Navigation Bar -->
   <nav class="navbar">
     <div class="nav-container">
-      <div class="nav-logo" onclick="showSection('home')">⭐ DAOSHI STORE ⭐</div>
+      <div class="nav-logo" onclick="showSection('home')">â­ DAOSHI STORE â­</div>
       <ul class="nav-menu">
-        <li class="nav-link active" onclick="showSection('home')" data-section="home">🏠 Início</li>
-        <li class="nav-link" onclick="showSection('games')" data-section="games">🎮 Jogos</li>
-        <li class="nav-link" onclick="showSection('minigames')" data-section="minigames">🕹️ Minigames</li>
-        <li class="nav-link" onclick="showSection('about')" data-section="about">📖 Sobre</li>
-        <li class="nav-link" onclick="showSection('contact')" data-section="contact">💬 Contato</li>
+        <li class="nav-link active" onclick="showSection('home')" data-section="home">ðŸ  InÃ­cio</li>
+        <li class="nav-link" onclick="showSection('games')" data-section="games">ðŸŽ® Jogos</li>
+        <li class="nav-link" onclick="showSection('minigames')" data-section="minigames">ðŸ•¹ï¸ Minigames</li>
+        <li class="nav-link" onclick="showSection('about')" data-section="about">ðŸ“– Sobre</li>
+        <li class="nav-link" onclick="showSection('contact')" data-section="contact">ðŸ’¬ Contato</li>
       </ul>
     </div>
   </nav>
 
   <!-- Home Button (aparece nos jogos) -->
   <button class="home-button" id="homeButton" onclick="returnHome()">
-    🏠 VOLTAR AO INÍCIO
+    ðŸ  VOLTAR AO INÃCIO
   </button>
 
   <!-- HOME SECTION -->
@@ -1087,12 +1098,12 @@
       
       <!-- Hero -->
       <div class="hero">
-        <div class="hero-logo">⭐💎⭐</div>
+        <div class="hero-logo">â­ðŸ’Žâ­</div>
         <h1>DAOSHI STORE</h1>
-        <p class="hero-tagline">✨ A Loja Premium de Games que Você Confia ✨</p>
-        <p class="hero-subtitle" id="heroSubtitle">🎮 5 Jogos • Melhores Preços • Entrega Instantânea • Suporte 24/7 🚀</p>
-        <button class="hero-cta" onclick="showSection('games')">🎮 VER JOGOS</button>
-        <button class="hero-cta" onclick="showSection('contact')">💬 FALE CONOSCO</button>
+        <p class="hero-tagline">âœ¨ A Loja Premium de Games que VocÃª Confia âœ¨</p>
+        <p class="hero-subtitle" id="heroSubtitle">ðŸŽ® 5 Jogos â€¢ Melhores PreÃ§os â€¢ Entrega InstantÃ¢nea â€¢ Suporte 24/7 ðŸš€</p>
+        <button class="hero-cta" onclick="showSection('games')">ðŸŽ® VER JOGOS</button>
+        <button class="hero-cta" onclick="showSection('contact')">ðŸ’¬ FALE CONOSCO</button>
       </div>
 
       <!-- Stats Bar -->
@@ -1103,11 +1114,11 @@
         </div>
         <div class="stat-item">
           <div class="stat-number">50.000+</div>
-          <div class="stat-label">Transações Realizadas</div>
+          <div class="stat-label">TransaÃ§Ãµes Realizadas</div>
         </div>
         <div class="stat-item">
           <div class="stat-number">5</div>
-          <div class="stat-label">Jogos Disponíveis</div>
+          <div class="stat-label">Jogos DisponÃ­veis</div>
         </div>
         <div class="stat-item">
           <div class="stat-number">24/7</div>
@@ -1116,13 +1127,13 @@
       </div>
 
       <!-- Featured Games Preview -->
-      <h2 class="section-title">🎮 NOSSOS JOGOS 🎮</h2>
+      <h2 class="section-title">ðŸŽ® NOSSOS JOGOS ðŸŽ®</h2>
       <div class="games-grid" id="homeGamesGrid">
         <!-- Carregado dinamicamente -->
       </div>
 
-      <!-- Seção de Minigames com Borda Dourada -->
-      <div class="section-divider">🕹️ MINIGAMES EXCLUSIVOS 🕹️</div>
+      <!-- SeÃ§Ã£o de Minigames com Borda Dourada -->
+      <div class="section-divider">ðŸ•¹ï¸ MINIGAMES EXCLUSIVOS ðŸ•¹ï¸</div>
       <div class="minigames-section">
         <div class="games-grid" id="homeMinigamesGrid">
           <!-- Carregado dinamicamente -->
@@ -1135,41 +1146,41 @@
   <!-- GAMES SECTION -->
   <div class="section" id="games">
     <div class="container">
-      <h2 class="section-title">🎮 TODOS OS JOGOS 🎮</h2>
+      <h2 class="section-title">ðŸŽ® TODOS OS JOGOS ðŸŽ®</h2>
       <div class="games-grid">
         <div class="game-card" onclick="loadGame('mir4')">
           <div class="game-icon"><img src="https://i.imgur.com/XrXphs0.png" alt="MIR4" class="icon-large"></div>
           <h3 class="game-title">MIR4</h3>
-          <p class="game-description">O melhor serviço de Gold e Top Up para MIR4!</p>
+          <p class="game-description">O melhor serviÃ§o de Gold e Top Up para MIR4!</p>
           <ul class="game-features">
-            <li>Calculadora de Gold Automática</li>
-            <li>Conversão Dollar/Real em Tempo Real</li>
-            <li>Múltiplas Formas de Pagamento</li>
-            <li>Entrega Instantânea</li>
+            <li>Calculadora de Gold AutomÃ¡tica</li>
+            <li>ConversÃ£o Dollar/Real em Tempo Real</li>
+            <li>MÃºltiplas Formas de Pagamento</li>
+            <li>Entrega InstantÃ¢nea</li>
             <li>Suporte Dedicado</li>
           </ul>
-          <button class="game-btn">⚔️ Acessar MIR4</button>
+          <button class="game-btn">âš”ï¸ Acessar MIR4</button>
         </div>
         <div class="game-card" onclick="loadGame('nightcrows')">
           <div class="game-icon"><img src="https://i.imgur.com/LLGJGNI.png" alt="NIGHTCROWS" class="icon-large"></div>
           <h3 class="game-title">NIGHTCROWS</h3>
-          <p class="game-description">Compre Diamonds para Nightcrows com segurança!</p>
+          <p class="game-description">Compre Diamonds para Nightcrows com seguranÃ§a!</p>
           <ul class="game-features">
-            <li>Compra Rápida de Diamonds</li>
-            <li>Preços Competitivos</li>
+            <li>Compra RÃ¡pida de Diamonds</li>
+            <li>PreÃ§os Competitivos</li>
             <li>Sistema de Pagamento Seguro</li>
             <li>Entrega Garantida</li>
             <li>Suporte 24/7</li>
           </ul>
-          <button class="game-btn">🦇 Acessar Nightcrows</button>
+          <button class="game-btn">ðŸ¦‡ Acessar Nightcrows</button>
         </div>
                   <div class="game-card" onclick="loadGame('sealm')">
             <div class="game-icon"><img src="https://i.imgur.com/aDF7tqi.png" alt="SEAL M" class="icon-large"></div>
             <h3 class="game-title">SEAL M</h3>
-            <p class="game-description">Top Up seguro e r�pido para Seal M!</p>
+            <p class="game-description">Top Up seguro e rápido para Seal M!</p>
             <ul class="game-features">
               <li>Pacotes de Cash</li>
-              <li>Pre�os Competitivos</li>
+              <li>Preços Competitivos</li>
               <li>Sistema de Pagamento Seguro</li>
               <li>Entrega Garantida</li>
               <li>Suporte 24/7</li>
@@ -1182,25 +1193,25 @@
           <p class="game-description">Top Up de Diamonds para Odin Valhalla Rising!</p>
           <ul class="game-features">
             <li>Pacotes de Diamonds</li>
-            <li>Cálculo Automático de Valores</li>
+            <li>CÃ¡lculo AutomÃ¡tico de Valores</li>
             <li>Desconto em Grandes Compras</li>
             <li>Pagamento Facilitado</li>
             <li>Entrega Imediata</li>
           </ul>
-          <button class="game-btn">⚡ Acessar Odin</button>
+          <button class="game-btn">âš¡ Acessar Odin</button>
         </div>
         <div class="game-card" onclick="loadGame('wemix')">
           <div class="game-icon"><img src="https://i.imgur.com/YTGq40y.png" alt="WEMIX"></div>
           <h3 class="game-title">WEMIX</h3>
-          <p class="game-description">Conversão de WEMIX para Real facilitada!</p>
+          <p class="game-description">ConversÃ£o de WEMIX para Real facilitada!</p>
           <ul class="game-features">
             <li>Conversor WEMIX/BRL</li>
             <li>Taxas Transparentes</li>
-            <li>Cotação em Tempo Real</li>
-            <li>Transferência Rápida</li>
+            <li>CotaÃ§Ã£o em Tempo Real</li>
+            <li>TransferÃªncia RÃ¡pida</li>
             <li>Sistema Seguro</li>
           </ul>
-          <button class="game-btn">💎 Acessar Wemix</button>
+          <button class="game-btn">ðŸ’Ž Acessar Wemix</button>
         </div>
       </div>
     </div>
@@ -1209,37 +1220,37 @@
   <!-- MINIGAMES SECTION -->
   <div class="section" id="minigames">
     <div class="container">
-      <h2 class="section-title">🕹️ MINIGAMES EXCLUSIVOS 🕹️</h2>
+      <h2 class="section-title">ðŸ•¹ï¸ MINIGAMES EXCLUSIVOS ðŸ•¹ï¸</h2>
       <div class="games-grid">
         <div class="game-card featured" onclick="loadGame('typing')">
           <div class="game-icon">
             <img src="https://media3.giphy.com/media/v1.Y2lkPTc5MGI3NjExenJsZ3h2ejgxeTN4enRwazcyYTllYzI1aW1uaTh1czdzZjJnd3YzcCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/IAkgiYMQzCzzMas62O/giphy.gif" alt="Typing Game">
           </div>
           <h3 class="game-title">Daoshi Typing</h3>
-          <p class="game-description">Teste sua velocidade de digitação e compete no ranking global!</p>
+          <p class="game-description">Teste sua velocidade de digitaÃ§Ã£o e compete no ranking global!</p>
           <ul class="game-features">
             <li>500+ Palavras Brasileiras</li>
             <li>Ranking Online Global</li>
             <li>Sistema de Contas</li>
-            <li>Estatísticas Detalhadas</li>
-            <li>Histórico Completo</li>
+            <li>EstatÃ­sticas Detalhadas</li>
+            <li>HistÃ³rico Completo</li>
           </ul>
-          <button class="game-btn">⌨️ Jogar Typing Game</button>
+          <button class="game-btn">âŒ¨ï¸ Jogar Typing Game</button>
         </div>
         <div class="game-card featured" onclick="loadGame('snake')">
           <div class="game-icon">
             <img src="https://i.imgur.com/ZKBivNM.png" alt="Daoshi Snake">
           </div>
           <h3 class="game-title">Daoshi Snake</h3>
-          <p class="game-description">Mini-game exclusivo com reflexos de cor, tanques e projéteis que podem ser devolvidos!</p>
+          <p class="game-description">Mini-game exclusivo com reflexos de cor, tanques e projÃ©teis que podem ser devolvidos!</p>
           <ul class="game-features">
-            <li>Sistema de Progressão com Augments</li>
+            <li>Sistema de ProgressÃ£o com Augments</li>
             <li>Tanques Boss a cada 2 minutos</li>
             <li>Dificuldade Crescente</li>
             <li>Poderes Especiais (tecla K)</li>
-            <li>Visual Neon Retrô</li>
+            <li>Visual Neon RetrÃ´</li>
           </ul>
-          <button class="game-btn">🐍 Jogar Snake</button>
+          <button class="game-btn">ðŸ Jogar Snake</button>
         </div>
       </div>
     </div>
@@ -1248,52 +1259,52 @@
   <!-- ABOUT SECTION -->
   <div class="section" id="about">
     <div class="container">
-      <h2 class="section-title">📖 SOBRE NÓS 📖</h2>
+      <h2 class="section-title">ðŸ“– SOBRE NÃ“S ðŸ“–</h2>
       <div class="about-content">
-        <h3>💜 Quem Somos</h3>
-        <p>A DAOSHI STORE é a sua loja premium de confiança para serviços de games. Com anos de experiência no mercado, oferecemos as melhores soluções para jogadores que buscam qualidade, segurança e preços justos.</p>
-        <p>Trabalhamos com os principais jogos do momento, oferecendo Gold, Diamonds, Top Up e muito mais. Nossa missão é proporcionar a melhor experiência de compra para a comunidade gamer.</p>
+        <h3>ðŸ’œ Quem Somos</h3>
+        <p>A DAOSHI STORE Ã© a sua loja premium de confianÃ§a para serviÃ§os de games. Com anos de experiÃªncia no mercado, oferecemos as melhores soluÃ§Ãµes para jogadores que buscam qualidade, seguranÃ§a e preÃ§os justos.</p>
+        <p>Trabalhamos com os principais jogos do momento, oferecendo Gold, Diamonds, Top Up e muito mais. Nossa missÃ£o Ã© proporcionar a melhor experiÃªncia de compra para a comunidade gamer.</p>
         
         <div class="features-grid">
           <div class="feature-box">
-            <div class="feature-icon">🚀</div>
-            <div class="feature-title">ENTREGA RÁPIDA</div>
-            <p class="feature-text">Receba seus itens instantaneamente após a confirmação do pagamento</p>
+            <div class="feature-icon">ðŸš€</div>
+            <div class="feature-title">ENTREGA RÃPIDA</div>
+            <p class="feature-text">Receba seus itens instantaneamente apÃ³s a confirmaÃ§Ã£o do pagamento</p>
           </div>
           <div class="feature-box">
-            <div class="feature-icon">🔒</div>
+            <div class="feature-icon">ðŸ”’</div>
             <div class="feature-title">100% SEGURO</div>
-            <p class="feature-text">Transações protegidas e dados criptografados para sua segurança</p>
+            <p class="feature-text">TransaÃ§Ãµes protegidas e dados criptografados para sua seguranÃ§a</p>
           </div>
           <div class="feature-box">
-            <div class="feature-icon">💰</div>
-            <div class="feature-title">MELHOR PREÇO</div>
-            <p class="feature-text">Preços competitivos e justos para todos os jogadores</p>
+            <div class="feature-icon">ðŸ’°</div>
+            <div class="feature-title">MELHOR PREÃ‡O</div>
+            <p class="feature-text">PreÃ§os competitivos e justos para todos os jogadores</p>
           </div>
           <div class="feature-box">
-            <div class="feature-icon">💬</div>
+            <div class="feature-icon">ðŸ’¬</div>
             <div class="feature-title">SUPORTE 24/7</div>
-            <p class="feature-text">Equipe sempre disponível para ajudar você</p>
+            <p class="feature-text">Equipe sempre disponÃ­vel para ajudar vocÃª</p>
           </div>
           <div class="feature-box">
-            <div class="feature-icon">⭐</div>
+            <div class="feature-icon">â­</div>
             <div class="feature-title">5.000+ CLIENTES</div>
-            <p class="feature-text">Milhares de jogadores confiam em nossos serviços</p>
+            <p class="feature-text">Milhares de jogadores confiam em nossos serviÃ§os</p>
           </div>
           <div class="feature-box">
-            <div class="feature-icon">✅</div>
+            <div class="feature-icon">âœ…</div>
             <div class="feature-title">GARANTIA TOTAL</div>
-            <p class="feature-text">Devolução garantida em caso de problemas</p>
+            <p class="feature-text">DevoluÃ§Ã£o garantida em caso de problemas</p>
           </div>
           <div class="feature-box">
-            <div class="feature-icon">🎮</div>
+            <div class="feature-icon">ðŸŽ®</div>
             <div class="feature-title">MARKETPLACE</div>
-            <p class="feature-text">Participe dos nossos grupos no WhatsApp e Facebook, com comunidades ativas de diversos jogos! Anuncie seus produtos e encontre compradores de forma rápida e segura.</p>
+            <p class="feature-text">Participe dos nossos grupos no WhatsApp e Facebook, com comunidades ativas de diversos jogos! Anuncie seus produtos e encontre compradores de forma rÃ¡pida e segura.</p>
           </div>
           <div class="feature-box">
-            <div class="feature-icon">🤝</div>
-            <div class="feature-title">INTERMEDIAÇÃO</div>
-            <p class="feature-text">Realizamos intermediações para diversos tipos de serviços! Com a Daoshi Store você garante que nenhuma das partes seja prejudicada e que o processo seja seguro.</p>
+            <div class="feature-icon">ðŸ¤</div>
+            <div class="feature-title">INTERMEDIAÃ‡ÃƒO</div>
+            <p class="feature-text">Realizamos intermediaÃ§Ãµes para diversos tipos de serviÃ§os! Com a Daoshi Store vocÃª garante que nenhuma das partes seja prejudicada e que o processo seja seguro.</p>
           </div>
         </div>
       </div>
@@ -1303,28 +1314,28 @@
   <!-- CONTACT SECTION -->
   <div class="section" id="contact">
     <div class="container">
-      <h2 class="section-title">💬 ENTRE EM CONTATO 💬</h2>
+      <h2 class="section-title">ðŸ’¬ ENTRE EM CONTATO ðŸ’¬</h2>
       <div class="social-grid">
         <div class="social-card">
-          <div class="social-icon-large">💬</div>
+          <div class="social-icon-large">ðŸ’¬</div>
           <h3>Discord</h3>
-          <p>Junte-se à nossa comunidade no Discord! Suporte 24/7, promoções exclusivas e muito mais!</p>
+          <p>Junte-se Ã  nossa comunidade no Discord! Suporte 24/7, promoÃ§Ãµes exclusivas e muito mais!</p>
           <a href="https://discord.gg/daoshi" target="_blank" class="social-link">
             Entrar no Discord
           </a>
         </div>
         <div class="social-card">
-          <div class="social-icon-large">📸</div>
+          <div class="social-icon-large">ðŸ“¸</div>
           <h3>Instagram</h3>
-          <p>Siga-nos no Instagram para novidades, promoções e atualizações sobre os jogos!</p>
+          <p>Siga-nos no Instagram para novidades, promoÃ§Ãµes e atualizaÃ§Ãµes sobre os jogos!</p>
           <a href="https://www.instagram.com/daoshi.store/" target="_blank" class="social-link">
             Seguir no Instagram
           </a>
         </div>
         <div class="social-card">
-          <div class="social-icon-large">📘</div>
+          <div class="social-icon-large">ðŸ“˜</div>
           <h3>Facebook</h3>
-          <p>Curta nossa página no Facebook e fique por dentro de todas as novidades da loja!</p>
+          <p>Curta nossa pÃ¡gina no Facebook e fique por dentro de todas as novidades da loja!</p>
           <a href="https://www.facebook.com/profile.php?id=61581292253937" target="_blank" class="social-link">
             Curtir no Facebook
           </a>
@@ -1340,33 +1351,33 @@
   <footer>
     <div class="footer-content">
       <div class="footer-section">
-        <h3>⭐ DAOSHI STORE</h3>
-        <p>A sua loja premium de games. Qualidade, segurança e os melhores preços do mercado!</p>
+        <h3>â­ DAOSHI STORE</h3>
+        <p>A sua loja premium de games. Qualidade, seguranÃ§a e os melhores preÃ§os do mercado!</p>
       </div>
       <div class="footer-section">
-        <h3>🎮 JOGOS</h3>
+        <h3>ðŸŽ® JOGOS</h3>
         <a href="#" onclick="loadGame('mir4'); return false;">MIR4</a>
         <a href="#" onclick="loadGame('nightcrows'); return false;">Nightcrows</a>
         <a href="#" onclick="loadGame('odin'); return false;">Odin: Valhalla</a>
         <a href="#" onclick="loadGame('wemix'); return false;">WEMIX</a>
       </div>
       <div class="footer-section">
-        <h3>📞 CONTATO</h3>
+        <h3>ðŸ“ž CONTATO</h3>
         <a href="https://discord.gg/daoshi" target="_blank">Discord</a>
         <a href="https://www.instagram.com/daoshi.store/" target="_blank">Instagram</a>
         <a href="https://www.facebook.com/profile.php?id=61581292253937" target="_blank">Facebook</a>
       </div>
       <div class="footer-section">
-        <h3>ℹ️ INFORMAÇÕES</h3>
-        <a href="#" onclick="showSection('about'); return false;">Sobre Nós</a>
+        <h3>â„¹ï¸ INFORMAÃ‡Ã•ES</h3>
+        <a href="#" onclick="showSection('about'); return false;">Sobre NÃ³s</a>
         <a href="#" onclick="showSection('contact'); return false;">Fale Conosco</a>
         <p>Suporte 24/7</p>
       </div>
     </div>
     <div class="footer-bottom">
-      <p>⭐ DAOSHI STORE - Sua Loja Premium de Games ⭐</p>
-      <p>Feito com <span class="heart">💜</span> para a comunidade gamer</p>
-      <p>© 2025 Daoshi Store • Todos os direitos reservados</p>
+      <p>â­ DAOSHI STORE - Sua Loja Premium de Games â­</p>
+      <p>Feito com <span class="heart">ðŸ’œ</span> para a comunidade gamer</p>
+      <p>Â© 2025 Daoshi Store â€¢ Todos os direitos reservados</p>
     </div>
   </footer>
 
@@ -1380,17 +1391,17 @@
 
   <!-- Controle de Volume -->
   <div class="volume-toggle" id="volumeToggle" onclick="toggleVolumePanel()">
-    🔊
+    ðŸ”Š
   </div>
   
   <div class="volume-control" id="volumeControl">
     <div class="volume-panel" id="volumePanel">
-      <div class="volume-header">🎵 CONTROLES 🎵</div>
+      <div class="volume-header">ðŸŽµ CONTROLES ðŸŽµ</div>
       
       <div class="volume-item">
         <div class="volume-label">
-          <span class="volume-icon">🎵</span>
-          <span>Música</span>
+          <span class="volume-icon">ðŸŽµ</span>
+          <span>MÃºsica</span>
         </div>
         <input type="range" min="0" max="100" value="70" class="volume-slider" id="musicVolume" oninput="updateMusicVolume(this.value)">
         <div class="volume-value" id="musicValue">70%</div>
@@ -1398,15 +1409,15 @@
       
       <div class="volume-item">
         <div class="volume-label">
-          <span class="volume-icon">🔘</span>
-          <span>Botões</span>
+          <span class="volume-icon">ðŸ”˜</span>
+          <span>BotÃµes</span>
         </div>
         <input type="range" min="0" max="100" value="50" class="volume-slider" id="buttonVolume" oninput="updateButtonVolume(this.value)">
         <div class="volume-value" id="buttonValue">50%</div>
       </div>
       
       <button class="volume-mute-btn" id="muteBtn" onclick="toggleMuteAll()">
-        🔇 MUTAR TUDO
+        ðŸ”‡ MUTAR TUDO
       </button>
     </div>
   </div>
@@ -1432,21 +1443,21 @@
       musicParte1.volume = musicVolume;
       musicParte2.volume = musicVolume;
       
-      // Toca o áudio automaticamente quando a tela aparece
+      // Toca o Ã¡udio automaticamente quando a tela aparece
       const playPromise = startAudio.play();
       if (playPromise !== undefined) {
         playPromise.catch(error => {
-          console.log('Autoplay bloqueado, aguardando interação do usuário');
+          console.log('Autoplay bloqueado, aguardando interaÃ§Ã£o do usuÃ¡rio');
         });
       }
       
-      // Remove a tela ao clicar E toca o start2 + inicia música
+      // Remove a tela ao clicar E toca o start2 + inicia mÃºsica
       startScreen.addEventListener('click', function(e) {
         // Toca o som de clique (start2)
         clickAudio.currentTime = 0;
-        clickAudio.play().catch(err => console.log('Erro ao tocar áudio:', err));
+        clickAudio.play().catch(err => console.log('Erro ao tocar Ã¡udio:', err));
         
-        // Inicia a parte 1 da música
+        // Inicia a parte 1 da mÃºsica
         if (!isMuted) {
           musicParte1.play().catch(err => console.log('Erro ao tocar parte1:', err));
         }
@@ -1468,7 +1479,7 @@
         
         setTimeout(() => {
           startScreen.classList.add('hidden');
-          // Remove do DOM após a animação
+          // Remove do DOM apÃ³s a animaÃ§Ã£o
           setTimeout(() => {
             startScreen.remove();
           }, 500);
@@ -1477,12 +1488,12 @@
     }
     
     // ===== SISTEMA DE SONS =====
-    const buttonSound = new Audio('Sites/sounds/botão.mp3');
+    const buttonSound = new Audio('Sites/sounds/botÃ£o.mp3');
     const carrinhoSound = new Audio('Sites/sounds/carrinho.mp3');
     buttonSound.volume = 0.5;
     carrinhoSound.volume = 0.7;
     
-    // Variáveis globais de volume
+    // VariÃ¡veis globais de volume
     let musicVolume = 0.7;
     let buttonVolume = 0.5;
     let isMuted = false;
@@ -1510,7 +1521,7 @@
         isMuted = savedMuted === 'true';
         if (isMuted) {
           document.getElementById('muteBtn').classList.add('muted');
-          document.getElementById('muteBtn').innerHTML = '🔊 DESMUTAR';
+          document.getElementById('muteBtn').innerHTML = 'ðŸ”Š DESMUTAR';
         }
       }
       
@@ -1519,7 +1530,7 @@
       carrinhoSound.volume = isMuted ? 0 : buttonVolume;
     }
     
-    // Atualizar volume da música
+    // Atualizar volume da mÃºsica
     function updateMusicVolume(value) {
       musicVolume = value / 100;
       document.getElementById('musicValue').textContent = value + '%';
@@ -1531,7 +1542,7 @@
       }
     }
     
-    // Atualizar volume dos botões
+    // Atualizar volume dos botÃµes
     function updateButtonVolume(value) {
       buttonVolume = value / 100;
       document.getElementById('buttonValue').textContent = value + '%';
@@ -1552,7 +1563,7 @@
       
       if (isMuted) {
         muteBtn.classList.add('muted');
-        muteBtn.innerHTML = '🔊 DESMUTAR';
+        muteBtn.innerHTML = 'ðŸ”Š DESMUTAR';
         
         // Mutar tudo
         buttonSound.volume = 0;
@@ -1561,7 +1572,7 @@
         if (musicParte2) musicParte2.volume = 0;
       } else {
         muteBtn.classList.remove('muted');
-        muteBtn.innerHTML = '🔇 MUTAR TUDO';
+        muteBtn.innerHTML = 'ðŸ”‡ MUTAR TUDO';
         
         // Restaurar volumes
         buttonSound.volume = buttonVolume;
@@ -1597,7 +1608,7 @@
     }
     
     function addSoundToButtons() {
-      // Sons em botões normais e links de navegação
+      // Sons em botÃµes normais e links de navegaÃ§Ã£o
       document.querySelectorAll('button, .btn, .game-card, .nav-link').forEach(btn => {
         btn.addEventListener('click', playButtonSound);
       });
@@ -1608,50 +1619,50 @@
           try {
             const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
             
-            // Som de botão APENAS em botões que NÃO são de copiar
+            // Som de botÃ£o APENAS em botÃµes que NÃƒO sÃ£o de copiar
             iframeDoc.querySelectorAll('button').forEach(btn => {
               const onclickStr = btn.getAttribute('onclick') || '';
               const classList = btn.className || '';
               
-              // Se NÃO for botão de copiar, adiciona som de botão
+              // Se NÃƒO for botÃ£o de copiar, adiciona som de botÃ£o
               if (!onclickStr.includes('copy') && !classList.includes('copy')) {
                 btn.addEventListener('click', playButtonSound);
               }
             });
           } catch (e) {
-            // Erro de CORS esperado para iframes de domínios externos
-            console.log('Não foi possível acessar iframe (CORS)');
+            // Erro de CORS esperado para iframes de domÃ­nios externos
+            console.log('NÃ£o foi possÃ­vel acessar iframe (CORS)');
           }
         });
       });
     }
     
-    // ===== CARREGAMENTO DINÂMICO DO CONTEÚDO =====
+    // ===== CARREGAMENTO DINÃ‚MICO DO CONTEÃšDO =====
     
     function carregarConteudoDinamico() {
       const config = SITE_CONFIG;
       
-      // Atualizar título da página
-      document.title = `⭐ ${config.loja.nome} - Loja Premium de Games`;
+      // Atualizar tÃ­tulo da pÃ¡gina
+      document.title = `â­ ${config.loja.nome} - Loja Premium de Games`;
       
       // Atualizar logo da navbar
       const navLogo = document.querySelector('.nav-logo');
-      if (navLogo) navLogo.innerHTML = `⭐ ${config.loja.nome} ⭐`;
+      if (navLogo) navLogo.innerHTML = `â­ ${config.loja.nome} â­`;
       
-      // Atualizar hero section (com contagem automática de jogos)
+      // Atualizar hero section (com contagem automÃ¡tica de jogos)
       document.querySelector('.hero-logo').textContent = config.loja.logo;
       document.querySelector('.hero h1').textContent = config.loja.nome;
       document.querySelector('.hero-tagline').textContent = config.loja.tagline;
       
-      // Substituir número de jogos no subtitle dinamicamente
+      // Substituir nÃºmero de jogos no subtitle dinamicamente
       const subtitleComJogos = config.loja.subtitle.replace(/\d+\s+Jogos?/gi, `${config.jogos.length} Jogos`);
       document.querySelector('.hero-subtitle').textContent = subtitleComJogos;
       
-      // Atualizar estatísticas (contagem de jogos automática)
+      // Atualizar estatÃ­sticas (contagem de jogos automÃ¡tica)
       const statsBar = document.querySelector('.stats-bar');
       if (statsBar) {
         statsBar.innerHTML = config.stats.map(stat => {
-          // Se for estatística de jogos, conta automaticamente
+          // Se for estatÃ­stica de jogos, conta automaticamente
           const numero = stat.label.includes('Jogos') ? config.jogos.length : stat.numero;
           return `
             <div class="stat-item">
@@ -1706,7 +1717,7 @@
         }).join('');
       }
       
-      // Atualizar cards de jogos (seção completa)
+      // Atualizar cards de jogos (seÃ§Ã£o completa)
       const gamesGridFull = document.querySelector('#games .games-grid');
       if (gamesGridFull) {
         // Filtrar apenas jogos (excluir minigames)
@@ -1759,7 +1770,7 @@
       }
       
       
-      // Atualizar seção sobre
+      // Atualizar seÃ§Ã£o sobre
       const aboutContent = document.querySelector('.about-content');
       if (aboutContent) {
         aboutContent.querySelector('p').textContent = config.loja.descricao;
@@ -1782,7 +1793,7 @@
       const socialGrid = document.querySelector('.social-grid');
       if (socialGrid) {
         socialGrid.innerHTML = config.social.map(social => {
-          // Verificar se o ícone é URL ou emoji
+          // Verificar se o Ã­cone Ã© URL ou emoji
           const iconeHTML = social.icone.startsWith('http') 
             ? `<img src="${social.icone}" alt="${social.nome}">`
             : social.icone;
@@ -1807,7 +1818,7 @@
       }
       if (footerSections[1]) {
         footerSections[1].innerHTML = `
-          <h3>🎮 JOGOS</h3>
+          <h3>ðŸŽ® JOGOS</h3>
           ${config.jogos.map(jogo => `
             <a href="#" onclick="loadGame('${jogo.id}'); return false;">${jogo.nome}</a>
           `).join('')}
@@ -1815,7 +1826,7 @@
       }
       if (footerSections[2]) {
         footerSections[2].innerHTML = `
-          <h3>📞 CONTATO</h3>
+          <h3>ðŸ“ž CONTATO</h3>
           ${config.social.map(social => `
             <a href="${social.url}" target="_blank">${social.nome}</a>
           `).join('')}
@@ -1826,13 +1837,13 @@
       const footerBottom = document.querySelector('.footer-bottom');
       if (footerBottom) {
         footerBottom.innerHTML = `
-          <p>⭐ ${config.loja.nome} - Sua Loja Premium de Games ⭐</p>
+          <p>â­ ${config.loja.nome} - Sua Loja Premium de Games â­</p>
           <p>${config.footer.mensagem}</p>
           <p>${config.footer.copyright}</p>
         `;
       }
       
-      // Gerar seções dos jogos dinamicamente
+      // Gerar seÃ§Ãµes dos jogos dinamicamente
       const gameSectionsContainer = document.getElementById('dynamic-game-sections');
       if (gameSectionsContainer) {
         gameSectionsContainer.innerHTML = ''; // Limpa container
@@ -1852,7 +1863,7 @@
         });
       }
       
-      // Atualizar botão de voltar
+      // Atualizar botÃ£o de voltar
       const homeButton = document.getElementById('homeButton');
       if (homeButton) {
         homeButton.innerHTML = config.botoes.voltarInicio;
@@ -1943,7 +1954,7 @@
       showSection('home');
     }
     
-    // Função para esconder navbar quando mostra um jogo
+    // FunÃ§Ã£o para esconder navbar quando mostra um jogo
     function hideNavbarForGame() {
       const navbar = document.querySelector('.navbar');
       navbar.classList.add('hidden');
@@ -1955,7 +1966,7 @@
       // Quando clicar em qualquer jogo, esconde a navbar
       document.querySelectorAll('.game-card').forEach(card => {
         card.addEventListener('click', function() {
-          // Pequeno delay para permitir a navegação acontecer
+          // Pequeno delay para permitir a navegaÃ§Ã£o acontecer
           setTimeout(hideNavbarForGame, 100);
         });
       });
@@ -1981,8 +1992,8 @@
     
     // ===== CONSOLE MESSAGE =====
     
-    console.log('%c⭐ DAOSHI STORE ⭐', 'color: #ffd700; font-size: 24px; font-weight: bold; text-shadow: 2px 2px #9933ff;');
-    console.log('%c🎮 Sua loja premium de games! 🎮', 'color: #9933ff; font-size: 16px;');
+    console.log('%câ­ DAOSHI STORE â­', 'color: #ffd700; font-size: 24px; font-weight: bold; text-shadow: 2px 2px #9933ff;');
+    console.log('%cðŸŽ® Sua loja premium de games! ðŸŽ®', 'color: #9933ff; font-size: 16px;');
     console.log('%cVisite: discord.gg/daoshi', 'color: #b366ff; font-size: 12px;');
   </script>
 
