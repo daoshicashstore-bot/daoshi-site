@@ -108,15 +108,18 @@ td, th {
 }
 
 /* ===== VEU SOBRE A BONECA DE FUNDO (31/08) =====
-   Cada loja de jogo tem body{ background: url(mascote) cover fixed }. Com cover
-   a imagem era ampliada e a boneca ficava GIGANTE, dominando os cards. Este
-   veu discreto (nao troca a imagem — funciona para qualquer jogo) rebaixa a
-   mascote a ambiente e devolve o destaque ao que se compra. */
+   Cada loja tem body{ background:url(mascote) cover fixed } e um body::before
+   com um gradiente de cor FRACO no centro — a mascote vazava clara e ficava
+   GIGANTE, dominando os cards. Este CSS e' linkado ANTES do <style> inline do
+   jogo, entao o overlay do jogo venceria; o !important no background rebaixa
+   esse overlay a um veu escuro discreto (a mascote vira ambiente). Vale para
+   os 16 jogos de um lugar so. As demais props sao fallback p/ paginas sem
+   ::before proprio. */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
-  background: rgba(15, 5, 26, 0.74);
+  background: rgba(15, 5, 26, 0.70) !important;
   z-index: -1;
   pointer-events: none;
 }
