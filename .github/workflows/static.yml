@@ -52,6 +52,7 @@ jobs:
           for site_dir in \
             admin \
             CalculadoraSombra \
+            img \
             jogos \
             minigames \
             providers \
