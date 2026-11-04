@@ -4036,3 +4036,44 @@ kbd {
         padding: 8px 16px;
     }
 }
+
+/* ============================================
+   FAIXA DE VERSÃO NOVA E LISTA DE ATIVIDADE
+   ============================================ */
+.aviso-versao {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 16px;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border: 1px solid var(--info);
+    border-radius: 8px;
+    background: var(--bg-card);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.aviso-versao[hidden] {
+    display: none;
+}
+
+.aviso-versao span {
+    flex: 1 1 240px;
+}
+
+.aviso-versao button {
+    min-height: 44px;
+}
+
+.aviso-versao button:focus-visible {
+    outline: 2px solid var(--info);
+    outline-offset: 2px;
+}
+
+#live-feed-list:empty::before {
+    content: attr(data-vazio);
+    display: block;
+    padding: 8px;
+    color: var(--text-secondary);
+}

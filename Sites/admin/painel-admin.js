@@ -433,6 +433,30 @@ function addLiveFeedItem(message, type = 'info') {
 }
 
 // ============================================
+// AVISO DE VERSÃO NOVA
+// Lê um arquivo estático, ao abrir e ao voltar para a aba, no máximo a cada 10 min.
+// Não usa o Firebase. PAINEL_VERSAO e versao.json mudam juntos em toda publicação.
+// ============================================
+const PAINEL_VERSAO = 'a433394';
+const PAINEL_VERSAO_INTERVALO = 10 * 60 * 1000;
+let _painelVersaoConferidaEm = 0;
+
+async function conferirVersaoPainel() {
+    const agora = Date.now();
+    if (_painelVersaoConferidaEm && agora - _painelVersaoConferidaEm < PAINEL_VERSAO_INTERVALO) return;
+    _painelVersaoConferidaEm = agora;
+    try {
+        const resposta = await fetch(`versao.json?t=${agora}`, { cache: 'no-store' });
+        if (!resposta.ok) return;
+        const { versao } = await resposta.json();
+        const faixa = document.getElementById('aviso-versao');
+        if (faixa && versao && versao !== PAINEL_VERSAO) faixa.hidden = false;
+    } catch (erro) {
+        // Sem internet ou arquivo ausente: o painel segue normal e tenta de novo na próxima volta à aba.
+    }
+}
+
+// ============================================
 // INICIALIZAÇÃO
 // ============================================
 onDashboardDomReady(() => {
@@ -457,20 +481,10 @@ onDashboardDomReady(() => {
     setupEventListeners();
     setupPriceSyncIndicator();
 
-    // Simulação de atividade do sistema para o Live Feed
-    setInterval(() => {
-        const activities = [
-            'Monitorando transações em tempo real...',
-            'Sincronizando banco de dados Firebase...',
-            'Verificando status dos servidores de pagamento...',
-            'Atualizando cache de preços dos jogos...',
-            'Otimizando performance do dashboard...',
-            'Verificando integridade dos cupons...',
-            'Analisando métricas de conversão...'
-        ];
-        const randomActivity = activities[Math.floor(Math.random() * activities.length)];
-        addLiveFeedItem(randomActivity, 'info');
-    }, 30000); // A cada 30 segundos
+    conferirVersaoPainel();
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) conferirVersaoPainel();
+    });
 });
 
 // ============================================

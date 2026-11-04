@@ -75,30 +75,17 @@
                 </a>
             </nav>
 
-            <div class="sidebar-footer" style="margin-top: auto; padding-top: 20px; border-top: 1px solid var(--border);">
-                <div class="system-status">
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 5px;">
-                        <span>DATABASE</span>
-                        <span style="color: var(--success);">ONLINE</span>
-                    </div>
-                    <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
-                        <div style="width: 100%; height: 100%; background: var(--success); border-radius: 2px; box-shadow: 0 0 10px var(--success);"></div>
-                    </div>
-                </div>
-                <div class="system-status" style="margin-top: 15px;">
-                    <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 5px;">
-                        <span>BOT LATENCY</span>
-                        <span style="color: var(--info);">24ms</span>
-                    </div>
-                    <div style="width: 100%; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;">
-                        <div style="width: 85%; height: 100%; background: var(--info); border-radius: 2px; box-shadow: 0 0 10px var(--info);"></div>
-                    </div>
-                </div>
-            </div>
-        </aside>
+                    </aside>
 
         <!-- MAIN CONTENT -->
         <main class="main-content">
+            <!-- Faixa de versão nova: vem de versao.json, um arquivo estático, sem Firebase. -->
+            <div id="aviso-versao" class="aviso-versao" role="status" hidden>
+                <span>Saiu versão nova do painel: aperte F5.</span>
+                <button type="button" class="btn-primary" onclick="location.reload()">Atualizar agora</button>
+                <button type="button" class="btn-secondary" onclick="document.getElementById('aviso-versao').hidden = true">Depois</button>
+            </div>
+
             <!-- HEADER -->
             <header class="header">
                 <h1 id="page-title">Vendas</h1>
@@ -239,13 +226,9 @@
                 <!-- LIVE FEED (NEW) -->
                 <div class="live-feed-container">
                     <div class="live-feed-header">
-                        <h3>📡 LIVE ACTIVITY FEED</h3>
-                        <div class="live-indicator">LIVE SYSTEM MONITOR</div>
+                        <h3>Atividade desta sessão</h3>
                     </div>
-                    <div class="feed-list" id="live-feed-list">
-                        <div class="feed-item">Sistema inicializado com sucesso...</div>
-                        <div class="feed-item">Aguardando novas atividades do bot...</div>
-                    </div>
+                    <div class="feed-list" id="live-feed-list" data-vazio="O que você fizer aqui aparece nesta lista."></div>
                 </div>
             </section>
 
@@ -1650,7 +1633,7 @@
                     <label class="toggle-card" style="margin-top: 12px;">
                         <input type="checkbox" id="game-editor-hidden">
                         <div>
-                            <strong>👁️‍🗨️ Ocultar do seletor /precos</strong>
+                            <strong>👁️‍🗨️ Não aparece pro cliente</strong>
                             <small>Jogo continua editável aqui, mas não aparece pro cliente no Discord.</small>
                         </div>
                     </label>
