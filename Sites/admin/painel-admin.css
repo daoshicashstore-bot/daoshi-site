@@ -3810,7 +3810,6 @@ kbd {
     color: var(--text-secondary);
 }
 
-/* A base que vira saque é o único bloco destacado do card. */
 .crm-cupom-item.base {
     border-color: var(--accent);
 }

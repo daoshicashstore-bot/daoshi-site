@@ -499,7 +499,7 @@ function iniciarTabelasNoCelular() {
 // Lê um arquivo estático, ao abrir e ao voltar para a aba, no máximo a cada 10 min.
 // Não usa o Firebase. PAINEL_VERSAO e versao.json mudam juntos em toda publicação.
 // ============================================
-const PAINEL_VERSAO = 'os22-20261104-1';
+const PAINEL_VERSAO = 'os136-20261104-2';
 const PAINEL_VERSAO_INTERVALO = 10 * 60 * 1000;
 let _painelVersaoConferidaEm = 0;
 
@@ -1762,8 +1762,6 @@ function openCouponModal(couponId = null) {
     document.getElementById('cupom-code').value = '';
     document.getElementById('cupom-value').value = '';
     document.getElementById('cupom-max-uses').value = '';
-    const parteDonoEl = document.getElementById('cupom-owner-percent');
-    if (parteDonoEl) parteDonoEl.value = '';
 
     if (couponId) {
         const coupon = allCoupons.find(c => c.id === couponId);
@@ -1773,7 +1771,6 @@ function openCouponModal(couponId = null) {
         document.getElementById('cupom-value').value = coupon.value;
         document.getElementById('cupom-max-uses').value = coupon.maxUses !== null && coupon.maxUses !== undefined ? coupon.maxUses : 0;
 
-        if (parteDonoEl) parteDonoEl.value = coupon.ownerSharePercent ?? '';
 
         // Armazenar ID para edição
         modal.dataset.couponId = couponId;
@@ -1842,15 +1839,6 @@ function saveCoupon() {
             return;
         }
 
-        // Parte do dono: acordo deste cupom, separada do cashback (value). Vazio apaga o campo e volta ao padrão.
-        const parteDonoEl = document.getElementById('cupom-owner-percent');
-        const parteDonoTexto = String(parteDonoEl?.value ?? '').trim();
-        const parteDono = parteDonoTexto === '' ? null : Number(parteDonoTexto);
-        if (parteDonoEl?.validity?.badInput || (parteDono !== null && (!Number.isFinite(parteDono) || parteDono < 0 || parteDono > 100))) {
-            showToast('Digite a parte do dono entre 0% e 100%, ou deixe vazio para usar o padrão.', 'warning');
-            return;
-        }
-
         const agoraIso = new Date().toISOString();
 
         // Só o que o formulário muda. Donos, marca de clã, contagem de usos e o resto ficam como estão.
@@ -1869,9 +1857,6 @@ function saveCoupon() {
         if (!id) {
             Object.assign(couponData, { active: true, usedCount: 0, minPurchase: 0, expiresAt: null, createdAt: agoraIso });
         }
-
-        // Página antiga em cache, sem o campo: não mexe no acordo gravado.
-        if (parteDonoEl) couponData.ownerSharePercent = parteDono;
 
         console.log('📝 Dados a salvar:', couponData);
 
@@ -2114,7 +2099,7 @@ function saveClan() {
         const ref = id ? window.db.ref(`coupons/${id}`) : window.db.ref('coupons').push();
         const newId = id || ref.key;
 
-        // Na edição, update: set apagaria os donos e a parte do dono do cupom de organização.
+        // Na edição, update: set apagaria os donos do cupom de organização.
         (id ? ref.update(couponData) : ref.set(couponData))
             .then(() => {
                 // Inicializa contribuições; na EDIÇÃO só atualiza o canal (não apaga membros)
@@ -6162,7 +6147,7 @@ function updateCRMRankings() {
     if (rankingJogosInfo) {
         rankingJogosInfo.textContent = totalJogosAggregados === 0
             ? 'Sem dados no período'
-            : `Mostrando 1-${topJogos.length} de ${totalJogosAggregados} jogos (agregados por jogo base)`;
+            : `Mostrando 1-${topJogos.length} de ${totalJogosAggregados} jogos (agregados por jogo)`;
     }
 
     const rankingJogosDiv = document.getElementById('crm-ranking-jogos');
@@ -6299,24 +6284,6 @@ function _crmNormCupom(codigo) {
 }
 
 const CRM_CUPOM_POR_PAGINA = 10;
-// Decisão do dono: cada cupom tem acordo próprio, em ownerSharePercent. É separado do cashback de quem
-// compra (value no cadastro e referral.cashbackPercent na venda), que nunca entra nesta conta.
-const CRM_CUPOM_PERCENTUAL_PADRAO = 1;
-const CRM_CUPOM_PERCENTUAL_ROTULO = '1% (padrão)';
-
-function _crmPercentualDoCupom(cadastro) {
-    let invalido = false;
-    for (const c of cadastro) {
-        const bruto = c?.ownerSharePercent;
-        if (bruto === undefined || bruto === null || bruto === '') continue;
-        const valor = Number(bruto);
-        if (typeof bruto !== 'boolean' && Number.isFinite(valor) && valor >= 0 && valor <= 100) {
-            return { valor, rotulo: `${valor.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}% (deste cupom)`, doCupom: true, invalido: false };
-        }
-        invalido = true;
-    }
-    return { valor: CRM_CUPOM_PERCENTUAL_PADRAO, rotulo: CRM_CUPOM_PERCENTUAL_ROTULO, doCupom: false, invalido };
-}
 let _crmBuscaTextoLivre = ''; // código que a pessoa mandou tratar como texto comum na busca
 let _crmCupomEstadoCarga = ''; // '' | 'carregando' | 'erro' | 'periodo'
 let _crmCupomPagina = 1;
@@ -6348,7 +6315,7 @@ function _crmRecarregarSeAberto() {
     return document.getElementById('tab-crm')?.classList?.contains('active') ? loadOfficialSalesData(true) : undefined;
 }
 
-// Outros filtros que recortam o cupom: com eles, os números do card não são a base final.
+// Outros filtros que recortam o cupom: com eles, os números do card não são o total do período.
 function _crmOutrosFiltros() {
     const nomes = [];
     const jogo = document.getElementById('crm-filter-game');
@@ -6378,8 +6345,7 @@ function _crmDonosDoCupom(cupom) {
     return donos;
 }
 
-// Decisão do dono: a base do 1% é só o pago em dinheiro, a mesma regra do cashback (a parte paga com
-// saldo não conta). O bot grava esse valor em externalPaidBRL. Sem o campo devolve null ("sem dado"):
+// Pago em dinheiro, a mesma regra do cashback (a parte paga com saldo fica de fora). O bot grava esse valor em externalPaidBRL. Sem o campo devolve null ("sem dado"):
 // nunca assume o total nem calcula por conta própria. Fica limitado ao total, como o fatorPago do cashback.
 function _crmPagoEmDinheiroCents(sale, totalCents) {
     const bruto = sale?.externalPaidBRL;
@@ -6406,11 +6372,11 @@ function _crmSituacaoDaVenda(sale) {
 
 // Marca de cada venda na lista, com a mesma decisão da conta.
 function _crmMarcaDaVenda(destino, ehCoDono) {
-    if (destino === 'terceiros') return { texto: 'terceiro (conta)', classe: 'conta' };
-    if (destino === 'proprias') return { texto: ehCoDono ? 'co-dono (não conta)' : 'dona (não conta)', classe: 'nao-conta' };
-    if (destino === 'semComprador') return { texto: 'sem comprador (não conta)', classe: 'alerta' };
-    if (destino === 'semDono') return { texto: 'sem dono (sem base)', classe: 'alerta' };
-    return { texto: 'fora da conta', classe: 'nao-conta' };
+    if (destino === 'terceiros') return { texto: 'terceiro', classe: 'conta' };
+    if (destino === 'proprias') return { texto: ehCoDono ? 'co-dono' : 'dona', classe: 'nao-conta' };
+    if (destino === 'semComprador') return { texto: 'sem comprador', classe: 'alerta' };
+    if (destino === 'semDono') return { texto: 'sem dono', classe: 'alerta' };
+    return { texto: 'cancelada ou reembolsada', classe: 'nao-conta' };
 }
 
 // Conta pura (sem DOM, em centavos para a soma não acumular erro de ponto flutuante).
@@ -6428,7 +6394,6 @@ function calcCRMCouponDetail(sales, codigo, coupons) {
     const linhas = [];
     const grupo = () => ({ count: 0, cents: 0 });
     const g = { terceiros: grupo(), proprias: grupo(), semComprador: grupo(), semDono: grupo(), fora: grupo(), semPago: grupo() };
-    let pagoCents = 0;
 
     (sales || []).forEach(sale => {
         if (_crmCupomDaVenda(sale) !== alvo) return;
@@ -6457,16 +6422,12 @@ function calcCRMCouponDetail(sales, codigo, coupons) {
             if (pago === null) {
                 g.semPago.count++;
                 g.semPago.cents += cents;
-            } else {
-                pagoCents += pago;
             }
         }
     });
 
     const publico = (x) => ({ count: x.count, total: x.cents / 100 });
-    const percentual = _crmPercentualDoCupom(cadastro);
     const brutoCents = g.terceiros.cents + g.proprias.cents + g.semComprador.cents + g.semDono.cents;
-    const baseFechada = temDono && g.semPago.count === 0;
     return {
         codigo: alvo,
         noCadastro: cadastro.length > 0,
@@ -6480,16 +6441,6 @@ function calcCRMCouponDetail(sales, codigo, coupons) {
         vendasAtivas: g.terceiros.count + g.proprias.count + g.semComprador.count + g.semDono.count,
         bruto: brutoCents / 100,
         semPago: publico(g.semPago),
-        pagoConhecido: pagoCents / 100,
-        pagoComSaldo: (g.terceiros.cents - g.semPago.cents - pagoCents) / 100,
-        // Em aberto, nunca R$ 0: sem dono não há de quem separar as compras próprias, e venda de
-        // terceiro sem o valor pago deixa a base sem dado.
-        base: baseFechada ? pagoCents / 100 : null,
-        percentual: percentual.valor,
-        percentualRotulo: percentual.rotulo,
-        percentualDoCupom: percentual.doCupom,
-        percentualInvalido: percentual.invalido,
-        parteDoDono: baseFechada ? Math.round(pagoCents * percentual.valor / 100) / 100 : null,
         linhas: linhas.sort((a, b) => b.quando - a.quando)
     };
 }
@@ -6672,9 +6623,9 @@ function renderCRMCouponDetail(estado) {
     if (!_crmCupomCadastroLido) {
         situacao = '<p class="crm-cupom-msg erro" role="alert">O cadastro de cupons não carregou, então não dá para separar as compras do dono. Use o botão Atualizar.</p>';
     } else if (!d.noCadastro) {
-        situacao = '<p class="crm-cupom-msg alerta">Este código está nas vendas, mas não no cadastro de cupons (apagado ou renomeado): não dá para separar compras próprias, por isso não há base de saque.</p>';
+        situacao = '<p class="crm-cupom-msg alerta">Este código está nas vendas, mas não no cadastro de cupons (apagado ou renomeado): não dá para separar compras próprias.</p>';
     } else if (!d.temDono) {
-        situacao = '<p class="crm-cupom-msg alerta">Cupom sem dono cadastrado: não dá para separar compras próprias, por isso não há base de saque.</p>';
+        situacao = '<p class="crm-cupom-msg alerta">Cupom sem dono cadastrado: não dá para separar compras próprias.</p>';
     } else {
         const co = d.qtdDonos - 1;
         situacao = `<p class="crm-cupom-sub">${escapeHtmlSafe(rotuloPeriodo)} · dono cadastrado${co > 0 ? ` + ${co} co-dono${co > 1 ? 's' : ''}` : ''}</p>`;
@@ -6682,37 +6633,22 @@ function renderCRMCouponDetail(estado) {
 
     const outrosFiltros = _crmOutrosFiltros();
     if (outrosFiltros.length) {
-        situacao += `<p class="crm-cupom-msg alerta">Filtro ativo (${escapeHtmlSafe(outrosFiltros.join(', '))}): estes números são só desse recorte, não a base final do saque. Limpe o filtro para ver a base do período.</p>`;
+        situacao += `<p class="crm-cupom-msg alerta">Filtro ativo (${escapeHtmlSafe(outrosFiltros.join(', '))}): estes números são só desse recorte, não o total do período. Limpe o filtro para ver o período inteiro.</p>`;
     }
 
     const linhas = d.temDono
-        ? _crmCupomLinha('Vendas de terceiros', 'contam para saque', d.terceiros, 'conta')
-            + _crmCupomLinha('Compras da dona ou co-donos', 'não contam', d.proprias, 'nao-conta')
+        ? _crmCupomLinha('Vendas de terceiros', '', d.terceiros, 'conta')
+            + _crmCupomLinha('Compras da dona ou co-donos', 'separadas', d.proprias, 'nao-conta')
         : _crmCupomLinha('Vendas sem separação', 'dono não identificado', d.semDono, 'nao-conta');
-    let baseHtml;
-    if (!d.temDono) baseHtml = '<strong>Sem base</strong><span>falta o dono do cupom</span>';
-    else if (d.base === null) baseHtml = '<strong>Sem dado</strong><span>falta o valor pago em dinheiro</span>';
-    else baseHtml = `<strong>R$ ${formatMoney(d.base)}</strong><span>só o pago em dinheiro · ${d.percentualRotulo} = R$ ${formatMoney(d.parteDoDono)}</span>`;
-
     const notas = [];
-    if (d.temDono) {
-        notas.push(d.percentualDoCupom
-            ? `${d.percentualRotulo}: acordo cadastrado neste cupom, separado do cashback de quem compra.`
-            : d.percentualInvalido
-                ? `O percentual cadastrado neste cupom não é válido, então a conta usa ${d.percentualRotulo}. Corrija na aba Cupons.`
-                : `${d.percentualRotulo}: este cupom ainda não tem acordo cadastrado. Para informar, edite o cupom na aba Cupons.`);
-    }
     if (d.semPago.count > 0) {
-        notas.push(`${d.semPago.count} de ${d.terceiros.count} venda(s) de terceiros sem o valor pago em dinheiro (R$ ${formatMoney(d.semPago.total)} de total): a base fica sem dado. As demais somam R$ ${formatMoney(d.pagoConhecido)} pagos, que não são a base final.`);
-    }
-    if (d.pagoComSaldo > 0) {
-        notas.push(`Pago com saldo, fora da base: R$ ${formatMoney(d.pagoComSaldo)}.`);
+        notas.push(`${d.semPago.count} de ${d.terceiros.count} venda(s) de terceiros sem o valor pago em dinheiro (R$ ${formatMoney(d.semPago.total)} de total). Confira na tabela abaixo.`);
     }
     if (d.semComprador.count > 0) {
-        notas.push(`${d.semComprador.count} venda(s) sem ID do comprador (R$ ${formatMoney(d.semComprador.total)}): estão no bruto e fora da base. Confira na tabela abaixo.`);
+        notas.push(`${d.semComprador.count} venda(s) sem ID do comprador (R$ ${formatMoney(d.semComprador.total)}): estão no total bruto. Confira na tabela abaixo.`);
     }
     if (d.fora.count > 0) {
-        notas.push(`Fora da conta: ${d.fora.count} cancelada(s) ou reembolsada(s) (R$ ${formatMoney(d.fora.total)}).`);
+        notas.push(`${d.fora.count} cancelada(s) ou reembolsada(s), fora dos totais (R$ ${formatMoney(d.fora.total)}).`);
     }
 
     card.innerHTML = `
@@ -6724,9 +6660,9 @@ function renderCRMCouponDetail(estado) {
                 <dt>Total bruto</dt>
                 <dd><strong>R$ ${formatMoney(d.bruto)}</strong><span>${d.vendasAtivas.toLocaleString('pt-BR')} venda(s) válidas</span></dd>
             </div>
-            <div class="crm-cupom-item base">
-                <dt>Base do saque${outrosFiltros.length ? ' (só deste filtro)' : ''}</dt>
-                <dd>${baseHtml}</dd>
+            <div class="crm-cupom-item">
+                <dt>A receber:</dt>
+                <dd><strong>a combinar com o dono</strong></dd>
             </div>
         </dl>
         ${notas.map(n => `<p class="crm-cupom-sub">${n}</p>`).join('')}
