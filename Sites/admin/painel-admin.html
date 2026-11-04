@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard Admin - Daoshi Store</title>
-    <link rel="stylesheet" href="painel-admin.css?v=3">
+    <link rel="stylesheet" href="painel-admin.css?v=4">
     <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js" integrity="sha384-Emf5ZVIUiarAdhkgtqK+5/Z5qIvM6QoVrS+qAVtfyZVuD5lIHrac0me485+Antp0" crossorigin="anonymous"></script>
 </head>
 <body class="cyber-theme">
     <!-- ADVANCED VISUAL EFFECTS -->
@@ -710,11 +710,17 @@
                     <select id="crm-filter-game">
                         <option value="">Todos os Jogos</option>
                     </select>
-                    <input type="text" id="crm-search" placeholder="🔍 Buscar por pedido, cliente...">
+                    <input type="text" id="crm-search" placeholder="🔍 Buscar por pedido, cliente, cupom..." aria-label="Buscar por pedido, cliente ou código exato do cupom">
+                    <input type="text" id="crm-filter-cupom" class="crm-cupom-campo" list="crm-cupom-lista" placeholder="🎫 Cupom" aria-label="Cupom, código exato" autocomplete="off" autocapitalize="characters" spellcheck="false">
+                    <datalist id="crm-cupom-lista"></datalist>
                     <button class="btn-export" onclick="exportCRMToCSV()">📥 Exportar CSV Fiscal</button>
                 </div>
 
                 <!-- ANALYTICS RÁPIDOS -->
+                <!-- DETALHE DO CUPOM (OS-136): aparece com o campo Cupom preenchido ou com um código exato na busca -->
+                <p id="crm-cupom-status" class="crm-cupom-status" role="status"></p>
+                <section id="crm-cupom-detalhe" class="analytics-card crm-cupom-detalhe" aria-labelledby="crm-cupom-titulo" hidden></section>
+
                 <div class="crm-analytics" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0;">
                     <!-- RANKING JOGOS -->
                     <div class="analytics-card" style="background: var(--card-bg); border-radius: 12px; padding: 20px; border: 1px solid var(--border);">

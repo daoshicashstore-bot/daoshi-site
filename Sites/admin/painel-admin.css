@@ -3717,3 +3717,322 @@ kbd {
         grid-template-columns: 1fr;
     }
 }
+
+/* OS-136: detalhe de 1 cupom na aba CRM */
+.filters input.crm-cupom-campo {
+    text-transform: uppercase;
+}
+
+.filters input.crm-cupom-campo::placeholder {
+    text-transform: none;
+}
+
+.crm-cupom-detalhe[hidden] {
+    display: none;
+}
+
+.crm-cupom-detalhe {
+    margin: 20px 0;
+}
+
+.crm-cupom-detalhe h3 {
+    margin-bottom: 8px;
+}
+
+.crm-cupom-sub,
+.crm-cupom-msg {
+    margin: 0 0 16px;
+    font-size: 14px;
+    color: var(--text-secondary);
+}
+
+.crm-cupom-msg.alerta {
+    color: var(--warning);
+}
+
+.crm-cupom-msg.erro {
+    color: var(--danger);
+}
+
+.crm-cupom-detalhe .crm-cupom-sub:last-child,
+.crm-cupom-detalhe .crm-cupom-msg:last-child {
+    margin-bottom: 0;
+}
+
+.crm-cupom-grade {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(216px, 1fr));
+    gap: 16px;
+    margin: 0 0 16px;
+}
+
+.crm-cupom-grade:last-child {
+    margin-bottom: 0;
+}
+
+.crm-cupom-item {
+    padding: 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+}
+
+.crm-cupom-item dt {
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.crm-cupom-item dd {
+    margin: 0;
+}
+
+.crm-cupom-item dd strong {
+    display: block;
+    font-size: 20px;
+    color: var(--text-primary);
+    overflow-wrap: anywhere;
+}
+
+.crm-cupom-item dd span {
+    display: block;
+    margin-top: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.crm-cupom-item.conta dd strong {
+    color: var(--success);
+}
+
+.crm-cupom-item.nao-conta dd strong {
+    color: var(--text-secondary);
+}
+
+/* A base que vira saque é o único bloco destacado do card. */
+.crm-cupom-item.base {
+    border-color: var(--accent);
+}
+
+.crm-cupom-item.base dd strong {
+    color: var(--accent);
+}
+
+/* OS-136: link que alterna a busca, lista das vendas do cupom e celular */
+.crm-cupom-status {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+.crm-cupom-link {
+    padding: 4px 0;
+    background: none;
+    border: none;
+    color: var(--info);
+    font: inherit;
+    font-size: 12px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.crm-cupom-link:hover {
+    color: var(--text-primary);
+}
+
+.crm-cupom-link:focus-visible,
+.crm-cupom-paginas button:focus-visible {
+    outline: 2px solid var(--info);
+    outline-offset: 2px;
+}
+
+.crm-cupom-lista-titulo {
+    margin: 24px 0 8px;
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.crm-cupom-tabela th {
+    padding: 8px 16px;
+    font-size: 12px;
+}
+
+.crm-cupom-tabela td {
+    padding: 8px 16px;
+    overflow-wrap: anywhere;
+}
+
+.crm-cupom-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.crm-cupom-tabela th:nth-child(5),
+.crm-cupom-tabela th:nth-child(6) {
+    text-align: right;
+}
+
+.crm-cupom-pedido {
+    display: block;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.crm-cupom-marca {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.crm-cupom-marca.conta {
+    color: var(--success);
+}
+
+.crm-cupom-marca.nao-conta {
+    color: var(--text-secondary);
+}
+
+.crm-cupom-marca.alerta {
+    color: var(--warning);
+}
+
+.crm-cupom-paginas {
+    margin-top: 16px;
+}
+
+/* Com a barra lateral, as colunas Staff e Data ficavam cortadas sem como rolar. */
+#tab-crm .table-container {
+    overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+    /* A tabela grande rola por dentro; sem isto ela alarga a pagina inteira no flex do painel. */
+    .admin-container {
+        flex-direction: column;
+    }
+
+    .main-content {
+        min-width: 0;
+        padding: 16px;
+    }
+
+    /* Menu em uma faixa que rola de lado: em coluna ele empurrava o conteúdo das abas para baixo. */
+    .sidebar {
+        padding: 8px 16px;
+    }
+
+    .sidebar .logo {
+        margin-bottom: 8px;
+        padding: 0;
+    }
+
+    .sidebar .logo h2 {
+        font-size: 16px;
+    }
+
+    .sidebar .nav-menu {
+        flex-direction: row;
+        flex: 0 0 auto;
+        gap: 8px;
+        overflow-x: auto;
+        overflow-y: hidden;
+        padding: 0 0 8px;
+    }
+
+    .sidebar .nav-item {
+        flex: 0 0 auto;
+        gap: 8px;
+        min-height: 44px;
+        padding: 8px 16px;
+        white-space: nowrap;
+    }
+
+    .sidebar .sidebar-footer {
+        display: none;
+    }
+
+    /* O style inline da grade dos rankings vence a regra antiga de .crm-analytics. */
+    #tab-crm .crm-analytics {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #tab-crm .stats-grid {
+        display: grid !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    #tab-crm .stats-grid .stat-card {
+        grid-column: 1 / -1 !important;
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    #tab-crm .filters input,
+    #tab-crm .filters select,
+    #tab-crm .filters button {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .crm-cupom-grade {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .crm-cupom-tabela,
+    .crm-cupom-tabela tbody,
+    .crm-cupom-tabela tr {
+        display: block;
+        width: 100%;
+    }
+
+    .crm-cupom-tabela thead {
+        display: block;
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip-path: inset(50%);
+    }
+
+    .crm-cupom-tabela tr {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .crm-cupom-tabela td {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 4px 0;
+        border-bottom: none;
+        text-align: right;
+        white-space: normal;
+    }
+
+    .crm-cupom-tabela td::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        font-size: 12px;
+        color: var(--text-secondary);
+    }
+
+    .crm-cupom-pedido {
+        display: block;
+    }
+
+    .crm-cupom-paginas {
+        gap: 8px;
+    }
+
+    .crm-cupom-paginas button {
+        padding: 8px 16px;
+    }
+}

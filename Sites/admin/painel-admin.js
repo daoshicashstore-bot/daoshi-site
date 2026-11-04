@@ -4,6 +4,7 @@
 
 let allSales = [];
 let allCoupons = [];
+let _crmCupomCadastroLido = false; // OS-136: o card do cupom diferencia "sem dono" de "cadastro não carregou"
 let allPrices = {};
 let allClientes = [];
 let _clientesLoaded = false; // lazy-load guard: clientes só baixa ao abrir a aba
@@ -35,7 +36,7 @@ function setTableState(tbodyId, colspan, message, type = 'loading') {
     if (!tbody) return;
     const color = type === 'error' ? 'var(--danger)' : 'var(--text-secondary)';
     const icon = type === 'error' ? '⚠️' : '⏳';
-    tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:32px; color:${color};">${icon} ${message}</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="${colspan}" style="text-align:center; padding:32px; color:${color};">${icon} ${escapeHtmlSafe(message)}</td></tr>`;
 }
 
 // Uma venda conta nos totais/receita/cashback apenas se NÃO estiver
@@ -386,7 +387,7 @@ function showToast(message, type = 'success', duration = 3000) {
         backdrop-filter: blur(10px);
     `;
 
-    toast.innerHTML = `<span style="font-size: 22px;">${icons[type] || icons.info}</span><span>${message}</span>`;
+    toast.innerHTML = `<span style="font-size: 22px;">${icons[type] || icons.info}</span><span>${escapeHtmlSafe(message)}</span>`;
 
     if (type === 'success') playSound('success');
     if (type === 'error' || type === 'warning') playSound('alert');
@@ -421,7 +422,7 @@ function addLiveFeedItem(message, type = 'info') {
     const now = new Date();
     const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
-    item.innerHTML = `<span style="color: var(--text-secondary); font-family: monospace;">[${timeStr}]</span> ${message}`;
+    item.innerHTML = `<span style="color: var(--text-secondary); font-family: monospace;">[${timeStr}]</span> ${escapeHtmlSafe(message)}`;
 
     feedList.insertBefore(item, feedList.firstChild);
 
@@ -750,7 +751,8 @@ function setupEventListeners() {
             loadSalesData(true),
             loadDashboardGlobalSummary(),
             loadCouponsData(),
-            loadPricesData()
+            loadPricesData(),
+            _crmRecarregarSeAberto()
         ]);
         showToast('Dados recentes atualizados!', 'success', 2500);
     };
@@ -1120,37 +1122,37 @@ function updateSalesTable() {
         row.innerHTML = `
             <td>
                 <div class="action-buttons">
-                    <button class="btn-icon btn-edit" onclick="editSale('${sale.id}')" title="Editar">✏️</button>
-                    <button class="btn-icon btn-view" onclick="viewSaleDetails('${sale.id}')" title="Ver Detalhes">📄</button>
-                    <button class="btn-icon btn-delete" onclick="deleteSale('${sale.id}')" title="Deletar">🗑️</button>
+                    <button class="btn-icon btn-edit" onclick="editSale(${escapeHtmlSafe(JSON.stringify(String(sale.id)))})" title="Editar">✏️</button>
+                    <button class="btn-icon btn-view" onclick="viewSaleDetails(${escapeHtmlSafe(JSON.stringify(String(sale.id)))})" title="Ver Detalhes">📄</button>
+                    <button class="btn-icon btn-delete" onclick="deleteSale(${escapeHtmlSafe(JSON.stringify(String(sale.id)))})" title="Deletar">🗑️</button>
                 </div>
             </td>
-            <td style="font-family: monospace; font-size: 12px; color: var(--text-secondary);">${sale.userId || 'N/A'}</td>
+            <td style="font-family: monospace; font-size: 12px; color: var(--text-secondary);">${escapeHtmlSafe(sale.userId || 'N/A')}</td>
             <td>
                 <div style="display: flex; align-items: center; gap: 10px;">
                     <div style="width: 30px; height: 30px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">
-                        ${(sale.username || 'A').charAt(0).toUpperCase()}
+                        ${escapeHtmlSafe((sale.username || 'A').charAt(0).toUpperCase())}
                     </div>
-                    <span>${sale.username || 'N/A'}</span>
+                    <span>${escapeHtmlSafe(sale.username || 'N/A')}</span>
                 </div>
             </td>
             <td>
                 <span style="display: flex; align-items: center; gap: 8px;">
                     <span>${gameInfo.emoji}</span>
-                    <span>${gameInfo.name}</span>
+                    <span>${escapeHtmlSafe(gameInfo.name)}</span>
                 </span>
             </td>
-            <td><span class="status-badge status-${sale.status}">${sale.status}</span></td>
+            <td><span class="status-badge status-${escapeHtmlSafe(sale.status)}">${escapeHtmlSafe(sale.status)}</span></td>
             <td style="font-weight: 700; color: var(--success);">R$ ${(sale.totalBRL || 0).toFixed(2)}</td>
             <td style="color: var(--info);">$ ${(sale.totalUSD || 0).toFixed(2)}</td>
             <td style="font-size: 12px; color: var(--text-secondary);">${(sale.exchangeRate || 0).toFixed(4)}</td>
             <td>
-                <span class="payment-method-badge">${sale.paymentMethod || 'PIX'}</span>
+                <span class="payment-method-badge">${escapeHtmlSafe(sale.paymentMethod || 'PIX')}</span>
             </td>
             <td style="font-size: 12px;">${formatDate(sale.createdAt)}</td>
             <td style="font-size: 12px;">${formatDate(sale.updatedAt)}</td>
             <td>
-                <span class="cupom-tag">${sale.referralCode || sale.couponCode || '-'}</span>
+                <span class="cupom-tag">${escapeHtmlSafe(sale.referralCode || sale.couponCode || '-')}</span>
             </td>
         `;
         tbody.appendChild(row);
@@ -1187,9 +1189,16 @@ function previousPage() {
 }
 
 // Função para escapar campos CSV corretamente
+function neutralizeCSVFormula(field) {
+    const str = String(field);
+    if (typeof field !== 'string' || str.length < 2) return str;
+    if (/^[+-]?\d[\d\s.,]*$/.test(str)) return str;
+    return /^[=+\-@\t\r]/.test(str) ? "'" + str : str;
+}
+
 function escapeCSVField(field) {
     if (field === null || field === undefined) return '';
-    const str = String(field);
+    const str = neutralizeCSVFormula(field);
     // Se contém aspas, ponto-e-vírgula, vírgula ou quebra de linha, precisa escapar
     if (str.includes('"') || str.includes(';') || str.includes(',') || str.includes('\n') || str.includes('\r')) {
         return '"' + str.replace(/"/g, '""') + '"';
@@ -1281,7 +1290,7 @@ function viewSaleDetails(saleId) {
                 <p style="font-size: 10px; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 10px;">Itens do Carrinho</p>
                 ${sale.cart.map(item => `
                     <div class="receipt-item">
-                        <span class="receipt-label">${item.packageLabel || item.productName || 'Item'}</span>
+                        <span class="receipt-label">${escapeHtmlSafe(item.packageLabel || item.productName || 'Item')}</span>
                         <span class="receipt-value">R$ ${(item.priceBRL || 0).toFixed(2)}</span>
                     </div>
                 `).join('')}
@@ -1292,23 +1301,23 @@ function viewSaleDetails(saleId) {
     content.innerHTML = `
         <div class="receipt-item">
             <span class="receipt-label">ID DA TRANSAÇÃO</span>
-            <span class="receipt-value" style="font-size: 10px;">${sale.id}</span>
+            <span class="receipt-value" style="font-size: 10px;">${escapeHtmlSafe(sale.id)}</span>
         </div>
         <div class="receipt-item">
             <span class="receipt-label">CLIENTE</span>
-            <span class="receipt-value">${sale.username || 'N/A'}</span>
+            <span class="receipt-value">${escapeHtmlSafe(sale.username || 'N/A')}</span>
         </div>
         <div class="receipt-item">
             <span class="receipt-label">DISCORD ID</span>
-            <span class="receipt-value">${sale.userId || 'N/A'}</span>
+            <span class="receipt-value">${escapeHtmlSafe(sale.userId || 'N/A')}</span>
         </div>
         <div class="receipt-item">
             <span class="receipt-label">JOGO</span>
-            <span class="receipt-value">${gameInfo.emoji} ${gameInfo.name}</span>
+            <span class="receipt-value">${gameInfo.emoji} ${escapeHtmlSafe(gameInfo.name)}</span>
         </div>
         <div class="receipt-item">
             <span class="receipt-label">MÉTODO</span>
-            <span class="receipt-value">${sale.paymentMethod || 'PIX'}</span>
+            <span class="receipt-value">${escapeHtmlSafe(sale.paymentMethod || 'PIX')}</span>
         </div>
         <div class="receipt-item">
             <span class="receipt-label">DATA</span>
@@ -1316,7 +1325,7 @@ function viewSaleDetails(saleId) {
         </div>
         <div class="receipt-item">
             <span class="receipt-label">STATUS</span>
-            <span class="receipt-value" style="color: var(--${sale.status === 'completed' ? 'success' : (sale.status === 'pending' ? 'warning' : 'danger')})">${sale.status.toUpperCase()}</span>
+            <span class="receipt-value" style="color: var(--${sale.status === 'completed' ? 'success' : (sale.status === 'pending' ? 'warning' : 'danger')})">${escapeHtmlSafe(sale.status.toUpperCase())}</span>
         </div>
         
         ${cartHtml}
@@ -1352,11 +1361,17 @@ async function loadCouponsData() {
             });
         });
 
+        _crmCupomCadastroLido = true;
         renderCoupons();
         console.log(`✅ ${allCoupons.length} cupons carregados`);
     } catch (error) {
+        _crmCupomCadastroLido = false;
         console.error('❌ Erro ao carregar cupons:', error);
     }
+    // OS-136: o cadastro pode chegar depois de a aba CRM abrir.
+    populateCRMCouponList();
+    if (document.getElementById('crm-search')?.value && allOfficialSales.length) applyCRMFilters();
+    else renderCRMCouponDetail();
 }
 
 // OS-79: a aba Cupons lê o RESUMO pronto em stats/cupons/<AAAA-MM>/<CUPOM>, que o job da VPS
@@ -1571,11 +1586,11 @@ function renderCoupons() {
         card.innerHTML = `
             <div class="cupom-header">
                 <div class="cupom-code-wrapper">
-                    <span class="cupom-code">${coupon.code}</span>
+                    <span class="cupom-code">${escapeHtmlSafe(coupon.code)}</span>
                     <span class="cupom-type">${coupon.type === 'percentage' ? 'Cashback' : 'Desconto Fixo'}</span>
                 </div>
                 <div class="cupom-value-badge">
-                    ${coupon.type === 'percentage' ? coupon.value + '%' : 'R$ ' + coupon.value}
+                    ${escapeHtmlSafe(coupon.type === 'percentage' ? coupon.value + '%' : 'R$ ' + coupon.value)}
                 </div>
             </div>
             
@@ -1598,7 +1613,7 @@ function renderCoupons() {
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Usos Totais</span>
-                    <span class="stat-val">${totalUsedCount} / ${coupon.maxUses || '∞'}</span>
+                    <span class="stat-val">${totalUsedCount} / ${escapeHtmlSafe(coupon.maxUses || '∞')}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Status</span>
@@ -1619,10 +1634,10 @@ function renderCoupons() {
             </div>
             
             <div class="cupom-actions">
-                <button class="btn-cupom-action btn-cupom-edit" onclick="editCoupon('${coupon.id}')">
+                <button class="btn-cupom-action btn-cupom-edit" onclick="editCoupon(${escapeHtmlSafe(JSON.stringify(String(coupon.id)))})">
                     <span>✏️ Editar</span>
                 </button>
-                <button class="btn-cupom-action btn-cupom-delete" onclick="deleteCoupon('${coupon.id}')">
+                <button class="btn-cupom-action btn-cupom-delete" onclick="deleteCoupon(${escapeHtmlSafe(JSON.stringify(String(coupon.id)))})">
                     <span>🗑️ Excluir</span>
                 </button>
             </div>
@@ -1653,7 +1668,7 @@ function renderTop20Coupons(coupons) {
     container.innerHTML = top20.map((coupon, idx) => `
         <div class="top-cupom-mini-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; position: relative; overflow: hidden; border-left: 4px solid ${idx === 0 ? '#ffd700' : idx === 1 ? '#c0c0c0' : idx === 2 ? '#cd7f32' : 'var(--primary)'};">
             <div style="position: absolute; right: -10px; top: -10px; font-size: 40px; opacity: 0.05; font-weight: 900;">#${idx + 1}</div>
-            <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 5px; font-family: monospace;">${coupon.code}</div>
+            <div style="font-weight: 800; color: var(--text-primary); margin-bottom: 5px; font-family: monospace;">${escapeHtmlSafe(coupon.code)}</div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
                 <span style="font-size: 12px; color: var(--text-secondary);">${coupon.periodCount} usos</span>
                 <span style="font-size: 13px; font-weight: bold; color: var(--success);">R$ ${coupon.periodTotalValue.toFixed(0)}</span>
@@ -3783,47 +3798,47 @@ function updateClientesTable() {
         row.innerHTML = `
             <td>
                 <div class="cliente-avatar-wrap">
-                    <img src="${avatarUrl}" alt="${cliente.username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/${defaultAvatar}.png'">
+                    <img src="${escapeHtmlSafe(avatarUrl)}" alt="${escapeHtmlSafe(cliente.username)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/${defaultAvatar}.png'">
                 </div>
             </td>
             <td>
                 <div class="cliente-name-cell">
-                    <span class="name">${cliente.username || 'N/A'}</span>
-                    ${cliente.discordTag && cliente.discordTag !== cliente.username ? `<span class="tag">${cliente.discordTag}</span>` : ''}
+                    <span class="name">${escapeHtmlSafe(cliente.username || 'N/A')}</span>
+                    ${cliente.discordTag && cliente.discordTag !== cliente.username ? `<span class="tag">${escapeHtmlSafe(cliente.discordTag)}</span>` : ''}
                 </div>
             </td>
             <td>
-                <span class="cliente-discord-id" onclick="copyDiscordId('${cliente.userId}')" title="Clique para copiar">${cliente.userId}</span>
+                <span class="cliente-discord-id" onclick="copyDiscordId(${escapeHtmlSafe(JSON.stringify(String(cliente.userId)))})" title="Clique para copiar">${escapeHtmlSafe(cliente.userId)}</span>
             </td>
             <td>
                 ${cliente.phone
-                    ? `<span class="cliente-phone" onclick="copyDiscordId('${(cliente.phone || '').replace(/'/g, "\\'")}')" title="Clique para copiar" style="cursor:pointer;">${cliente.phone}</span>`
+                    ? `<span class="cliente-phone" onclick="copyDiscordId(${escapeHtmlSafe(JSON.stringify(String(cliente.phone || '')))})" title="Clique para copiar" style="cursor:pointer;">${escapeHtmlSafe(cliente.phone)}</span>`
                     : '<span style="color: #555;">—</span>'}
             </td>
             <td>
                 ${cliente.email
-                    ? `<span class="cliente-email" onclick="copyDiscordId('${(cliente.email || '').replace(/'/g, "\\'")}')" title="Clique para copiar" style="cursor:pointer;">${cliente.email}</span>`
+                    ? `<span class="cliente-email" onclick="copyDiscordId(${escapeHtmlSafe(JSON.stringify(String(cliente.email || '')))})" title="Clique para copiar" style="cursor:pointer;">${escapeHtmlSafe(cliente.email)}</span>`
                     : '<span style="color: #555;">—</span>'}
             </td>
             <td>
                 ${cliente.referralCode
-                    ? `<span class="cupom-badge ${hasReferral ? 'active' : 'inactive'}" title="${hasReferral ? 'Ativo' : 'Desativado'}">${cliente.referralCode}</span>`
+                    ? `<span class="cupom-badge ${hasReferral ? 'active' : 'inactive'}" title="${hasReferral ? 'Ativo' : 'Desativado'}">${escapeHtmlSafe(cliente.referralCode)}</span>`
                     : '<span style="color: #555;">—</span>'}
             </td>
             <td>
                 <span class="cliente-saldo ${saldoDisponivel > 0 ? 'has-saldo' : 'no-saldo'}">R$ ${saldoDisponivel.toFixed(2)}</span>
             </td>
-            <td style="text-align: center; font-weight: 600;">${cliente.compras || 0}</td>
+            <td style="text-align: center; font-weight: 600;">${escapeHtmlSafe(cliente.compras || 0)}</td>
             <td style="font-weight: 600;">R$ ${(cliente.totalComprado || 0).toFixed(2)}</td>
             <td style="color: #34d399;">R$ ${totalCashback.toFixed(2)}</td>
             <td><span class="cliente-date">${createdAtStr}</span></td>
             <td>
                 <div class="clientes-actions">
-                    <button class="btn-action view-info" onclick="viewClienteDetails('${cliente.userId}')" title="Ver Detalhes">📋</button>
-                    <button class="btn-action add-saldo" onclick="addSaldoManual('${cliente.userId}')" title="Adicionar Saldo">➕</button>
-                    <button class="btn-action remove-saldo" onclick="removeSaldoManual('${cliente.userId}')" title="Remover Saldo">➖</button>
-                    ${cliente.referralCode ? `<button class="btn-action remove-cupom" onclick="removeReferralCoupon('${cliente.userId}')" title="Remover Cupom">🎫</button>` : ''}
-                    <button class="btn-action view-history" onclick="viewClienteHistory('${cliente.userId}')" title="Ver Histórico">📊</button>
+                    <button class="btn-action view-info" onclick="viewClienteDetails(${escapeHtmlSafe(JSON.stringify(String(cliente.userId)))})" title="Ver Detalhes">📋</button>
+                    <button class="btn-action add-saldo" onclick="addSaldoManual(${escapeHtmlSafe(JSON.stringify(String(cliente.userId)))})" title="Adicionar Saldo">➕</button>
+                    <button class="btn-action remove-saldo" onclick="removeSaldoManual(${escapeHtmlSafe(JSON.stringify(String(cliente.userId)))})" title="Remover Saldo">➖</button>
+                    ${cliente.referralCode ? `<button class="btn-action remove-cupom" onclick="removeReferralCoupon(${escapeHtmlSafe(JSON.stringify(String(cliente.userId)))})" title="Remover Cupom">🎫</button>` : ''}
+                    <button class="btn-action view-history" onclick="viewClienteHistory(${escapeHtmlSafe(JSON.stringify(String(cliente.userId)))})" title="Ver Histórico">📊</button>
                 </div>
             </td>
         `;
@@ -3959,11 +3974,11 @@ function viewClienteDetails(userId) {
             </div>
 
             <div class="cliente-modal-profile">
-                <img src="${avatarUrl}" alt="${cliente.username}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/${defaultAvatar}.png'">
+                <img src="${escapeHtmlSafe(avatarUrl)}" alt="${escapeHtmlSafe(cliente.username)}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/${defaultAvatar}.png'">
                 <div class="cliente-modal-profile-info">
-                    <span class="modal-username">${cliente.username || 'Cliente'}</span>
-                    ${cliente.discordTag ? `<span class="modal-tag">${cliente.discordTag}</span>` : ''}
-                    <span class="modal-id" onclick="copyDiscordId('${cliente.userId}')" title="Clique para copiar">📋 ${cliente.userId}</span>
+                    <span class="modal-username">${escapeHtmlSafe(cliente.username || 'Cliente')}</span>
+                    ${cliente.discordTag ? `<span class="modal-tag">${escapeHtmlSafe(cliente.discordTag)}</span>` : ''}
+                    <span class="modal-id" onclick="copyDiscordId(${escapeHtmlSafe(JSON.stringify(String(cliente.userId)))})" title="Clique para copiar">📋 ${escapeHtmlSafe(cliente.userId)}</span>
                 </div>
             </div>
 
@@ -3992,11 +4007,11 @@ function viewClienteDetails(userId) {
                 <div class="modal-data-grid">
                     <div class="modal-data-item">
                         <div class="data-label">📱 WhatsApp</div>
-                        <div class="data-value ${cliente.phone ? '' : ''}" style="cursor:${cliente.phone ? 'pointer' : 'default'};" ${cliente.phone ? `onclick="copyDiscordId('${(cliente.phone || '').replace(/'/g, "\\'")}')" title="Clique para copiar"` : ''}>${cliente.phone || '—'}</div>
+                        <div class="data-value ${cliente.phone ? '' : ''}" style="cursor:${cliente.phone ? 'pointer' : 'default'};" ${cliente.phone ? `onclick="copyDiscordId(${escapeHtmlSafe(JSON.stringify(String(cliente.phone || '')))})" title="Clique para copiar"` : ''}>${escapeHtmlSafe(cliente.phone || '—')}</div>
                     </div>
                     <div class="modal-data-item">
                         <div class="data-label">📧 E-mail</div>
-                        <div class="data-value" style="cursor:${cliente.email ? 'pointer' : 'default'}; font-size: 13px;" ${cliente.email ? `onclick="copyDiscordId('${(cliente.email || '').replace(/'/g, "\\'")}')" title="Clique para copiar"` : ''}>${cliente.email || '—'}</div>
+                        <div class="data-value" style="cursor:${cliente.email ? 'pointer' : 'default'}; font-size: 13px;" ${cliente.email ? `onclick="copyDiscordId(${escapeHtmlSafe(JSON.stringify(String(cliente.email || '')))})" title="Clique para copiar"` : ''}>${escapeHtmlSafe(cliente.email || '—')}</div>
                     </div>
                 </div>
 
@@ -4004,7 +4019,7 @@ function viewClienteDetails(userId) {
                 <div class="modal-data-grid">
                     <div class="modal-data-item">
                         <div class="data-label">🛒 Nº de Compras</div>
-                        <div class="data-value">${compras}</div>
+                        <div class="data-value">${escapeHtmlSafe(compras)}</div>
                     </div>
                     <div class="modal-data-item">
                         <div class="data-label">💵 Total Comprado</div>
@@ -4024,7 +4039,7 @@ function viewClienteDetails(userId) {
                 <div class="modal-data-grid">
                     <div class="modal-data-item">
                         <div class="data-label">🎫 Cupom Vinculado</div>
-                        <div class="data-value ${cliente.referralCode ? 'purple' : ''}">${cliente.referralCode || 'Nenhum'}</div>
+                        <div class="data-value ${cliente.referralCode ? 'purple' : ''}">${escapeHtmlSafe(cliente.referralCode || 'Nenhum')}</div>
                     </div>
                     <div class="modal-data-item">
                         <div class="data-label">🔄 Auto-Aplicar</div>
@@ -4032,11 +4047,11 @@ function viewClienteDetails(userId) {
                     </div>
                     <div class="modal-data-item">
                         <div class="data-label">💰 % Cashback Cupom</div>
-                        <div class="data-value">${cliente.referralCashbackPercent !== undefined ? cliente.referralCashbackPercent + '%' : '—'}</div>
+                        <div class="data-value">${escapeHtmlSafe(cliente.referralCashbackPercent !== undefined ? cliente.referralCashbackPercent + '%' : '—')}</div>
                     </div>
                     <div class="modal-data-item">
                         <div class="data-label">🎯 Cashback Custom</div>
-                        <div class="data-value">${cliente.customCashback !== undefined && cliente.customCashback !== null ? cliente.customCashback + '%' : 'Padrão'}</div>
+                        <div class="data-value">${escapeHtmlSafe(cliente.customCashback !== undefined && cliente.customCashback !== null ? cliente.customCashback + '%' : 'Padrão')}</div>
                     </div>
                 </div>
 
@@ -4052,7 +4067,7 @@ function viewClienteDetails(userId) {
                     </div>
                     <div class="modal-data-item full-width">
                         <div class="data-label">👨‍💼 Atualizado Por</div>
-                        <div class="data-value" style="font-size: 13px;">${cliente.updatedBy || '—'}</div>
+                        <div class="data-value" style="font-size: 13px;">${escapeHtmlSafe(cliente.updatedBy || '—')}</div>
                     </div>
                     ${cliente.referralLinkedAt ? `
                     <div class="modal-data-item full-width">
@@ -4106,7 +4121,7 @@ function exportClientesCSV() {
         ];
     });
 
-    const csvContent = '\uFEFF' + [headers, ...rows].map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
+    const csvContent = '\uFEFF' + [headers, ...rows].map(r => r.map(v => `"${neutralizeCSVFormula(v).replace(/"/g, '""')}"`).join(',')).join('\n');
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
@@ -4336,11 +4351,11 @@ function viewAffiliateInfo(userId) {
             </div>
             
             <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 20px; padding: 15px; background: var(--bg-dark, #0f172a); border-radius: 12px;">
-                <img src="${cliente.avatarUrl || `https://cdn.discordapp.com/embed/avatars/${parseInt(cliente.userId) % 5}.png`}" 
+                <img src="${escapeHtmlSafe(cliente.avatarUrl || `https://cdn.discordapp.com/embed/avatars/${parseInt(cliente.userId) % 5}.png`)}" 
                      style="width: 60px; height: 60px; border-radius: 50%;">
                 <div>
-                    <h3 style="margin: 0; color: var(--text-primary, #f1f5f9);">${cliente.username || 'Cliente'}</h3>
-                    <span style="color: var(--text-secondary, #94a3b8); font-size: 12px; font-family: monospace;">${cliente.userId}</span>
+                    <h3 style="margin: 0; color: var(--text-primary, #f1f5f9);">${escapeHtmlSafe(cliente.username || 'Cliente')}</h3>
+                    <span style="color: var(--text-secondary, #94a3b8); font-size: 12px; font-family: monospace;">${escapeHtmlSafe(cliente.userId)}</span>
                 </div>
             </div>
             
@@ -4349,28 +4364,28 @@ function viewAffiliateInfo(userId) {
                     ${cliente.referralCode ? `
                         <div style="padding: 12px; background: linear-gradient(135deg, rgba(155,89,182,0.2), rgba(155,89,182,0.05)); border-radius: 10px; border-left: 4px solid #9b59b6;">
                             <span style="color: var(--text-secondary, #94a3b8); font-size: 12px;">🎫 Cupom de Afiliado</span>
-                            <p style="margin: 5px 0 0; color: var(--text-primary, #f1f5f9); font-size: 18px; font-weight: bold;">${cliente.referralCode}</p>
+                            <p style="margin: 5px 0 0; color: var(--text-primary, #f1f5f9); font-size: 18px; font-weight: bold;">${escapeHtmlSafe(cliente.referralCode)}</p>
                         </div>
                     ` : ''}
                     
                     ${cliente.email ? `
                         <div style="padding: 12px; background: var(--bg-dark, #0f172a); border-radius: 10px;">
                             <span style="color: var(--text-secondary, #94a3b8); font-size: 12px;">📧 E-mail</span>
-                            <p style="margin: 5px 0 0; color: var(--text-primary, #f1f5f9);">${cliente.email}</p>
+                            <p style="margin: 5px 0 0; color: var(--text-primary, #f1f5f9);">${escapeHtmlSafe(cliente.email)}</p>
                         </div>
                     ` : ''}
                     
                     ${cliente.phone ? `
                         <div style="padding: 12px; background: var(--bg-dark, #0f172a); border-radius: 10px;">
                             <span style="color: var(--text-secondary, #94a3b8); font-size: 12px;">📱 Telefone</span>
-                            <p style="margin: 5px 0 0; color: var(--text-primary, #f1f5f9);">${cliente.phone}</p>
+                            <p style="margin: 5px 0 0; color: var(--text-primary, #f1f5f9);">${escapeHtmlSafe(cliente.phone)}</p>
                         </div>
                     ` : ''}
                     
                     ${cliente.referralCashbackPercent !== undefined ? `
                         <div style="padding: 12px; background: var(--bg-dark, #0f172a); border-radius: 10px;">
                             <span style="color: var(--text-secondary, #94a3b8); font-size: 12px;">💰 Cashback do Cupom</span>
-                            <p style="margin: 5px 0 0; color: #10b981; font-size: 18px; font-weight: bold;">${cliente.referralCashbackPercent}%</p>
+                            <p style="margin: 5px 0 0; color: #10b981; font-size: 18px; font-weight: bold;">${escapeHtmlSafe(cliente.referralCashbackPercent)}%</p>
                         </div>
                     ` : ''}
                     
@@ -5736,9 +5751,9 @@ function renderCRMRankingClientes() {
             const color = rank === 1 ? '#ffd700' : rank === 2 ? '#c0c0c0' : rank === 3 ? '#cd7f32' : '#ff8fce';
             return `
                 <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 45, 149, 0.22);">
-                    <span title="${nome}" style="color: #ffd9ec;">
+                    <span title="${escapeHtmlSafe(nome)}" style="color: #ffd9ec;">
                         <span style="font-weight: bold; color: ${color};">#${rank}</span>
-                        ${nome.length > 20 ? nome.substring(0, 17) + '...' : nome}
+                        ${escapeHtmlSafe(nome.length > 20 ? nome.substring(0, 17) + '...' : nome)}
                     </span>
                     <span style="color: #10b981; font-weight: bold;">
                         ${data.count} compras | R$ ${formatMoney(data.total)}
@@ -5788,18 +5803,33 @@ function getCRMPeriodRange() {
 // Carregar CRM apenas no período escolhido. "Todo período" continua disponível,
 // mas só baixa o histórico completo quando a pessoa seleciona essa opção.
 async function loadOfficialSalesData(forceRefresh = false) {
+    const carga = ++_crmCargaSeq; // OS-136: só a resposta do último pedido vale
     try {
         console.log('📡 Carregando vendas oficiais (CRM)...');
         const range = getCRMPeriodRange();
         if (range.incomplete) {
+            _crmEsvaziarVendas();
             setTableState('crm-tbody', 11, 'Escolha a data inicial e final para carregar o período.');
+            _crmEscreverEscopo('Escolha a data inicial e a final para carregar o período.');
+            renderCRMCouponDetail('periodo');
             return;
         }
+        const faixa = _crmChaveFaixa(range);
         setTableState('crm-tbody', 11, `Carregando vendas de ${range.label}...`);
+        // Recarga da mesma faixa mantém os números, que são desse período. Faixa nova ou carga que
+        // falhou não: o que está na memória é de outro recorte e não pode aparecer como se fosse este.
+        if (!_crmCupomEstadoCarga && faixa === _crmFaixaCarregada) {
+            renderCRMCouponDetail();
+        } else {
+            _crmEsvaziarVendas();
+            _crmEscreverEscopo(`Carregando vendas de ${range.label}...`);
+            renderCRMCouponDetail('carregando');
+        }
 
         const oficiaisData = range.period === 'all'
             ? await _fetchAllOfficialSales(forceRefresh)
             : await _fetchOfficialSalesRange(range.start, range.end, forceRefresh);
+        if (carga !== _crmCargaSeq) return;
 
         allOfficialSales = [];
 
@@ -5827,11 +5857,18 @@ async function loadOfficialSalesData(forceRefresh = false) {
         if (gameSelect && [...gameSelect.options].some(option => option.value === selectedGame)) {
             gameSelect.value = selectedGame;
         }
+        populateCRMCouponList();
+        _crmFaixaCarregada = faixa;
+        _crmCupomEstadoCarga = '';
         applyCRMFilters();
 
     } catch (error) {
+        if (carga !== _crmCargaSeq) return;
         console.error('❌ Erro ao carregar vendas oficiais:', error);
+        _crmEsvaziarVendas();
         setTableState('crm-tbody', 11, error.message, 'error');
+        _crmEscreverEscopo(`Não deu para carregar as vendas de ${getCRMPeriodRange().label}. Use o botão Atualizar para tentar de novo.`);
+        renderCRMCouponDetail('erro');
         showToast('Erro ao carregar CRM: ' + error.message, 'error');
     }
 }
@@ -5880,7 +5917,7 @@ function populateGameFilter() {
         html += '<optgroup label="━━━ Outros Jogos ━━━">';
         customGames.forEach(game => {
             const salesCount = activeOfficialSales.filter(s => s.game === game || s.gameName === game).length;
-            html += `<option value="${game}">🎮 ${game} (${salesCount})</option>`;
+            html += `<option value="${escapeHtmlSafe(game)}">🎮 ${escapeHtmlSafe(game)} (${salesCount})</option>`;
         });
         html += '</optgroup>';
     }
@@ -5968,7 +6005,7 @@ function updateCRMStats() {
         topClienteEl.style.whiteSpace = 'normal';
         topClienteEl.style.lineHeight = '1.2';
         topClienteEl.innerHTML = `
-            <div style="font-size: 12px; color: var(--text-secondary); font-weight: 400; margin-bottom: 2px;">${nomeExibicao}</div>
+            <div style="font-size: 12px; color: var(--text-secondary); font-weight: 400; margin-bottom: 2px;">${escapeHtmlSafe(nomeExibicao)}</div>
             <div style="font-size: 18px; font-weight: 800; color: #ec4899;">R$ ${formatStat(total)}</div>
         `;
         topClienteEl.title = `${nome} - Total: R$ ${formatMoney(total)}`; // Tooltip com nome completo
@@ -6014,26 +6051,26 @@ function updateCRMTable() {
         tr.innerHTML = `
             <td>
                 <div class="action-buttons">
-                    <button class="btn-icon btn-view" onclick="openCRMDetails('${sale.orderNumber}')" title="Ver Detalhes">
+                    <button class="btn-icon btn-view" onclick="openCRMDetails(${escapeHtmlSafe(JSON.stringify(String(sale.orderNumber)))})" title="Ver Detalhes">
                         👁️
                     </button>
-                    <button class="btn-icon btn-edit" onclick="openCRMEditModal('${sale.orderNumber}')" title="Editar">
+                    <button class="btn-icon btn-edit" onclick="openCRMEditModal(${escapeHtmlSafe(JSON.stringify(String(sale.orderNumber)))})" title="Editar">
                         ✏️
                     </button>
-                    <button class="btn-icon btn-delete" onclick="deleteCRMEntry('${sale.orderNumber}')" title="Excluir">
+                    <button class="btn-icon btn-delete" onclick="deleteCRMEntry(${escapeHtmlSafe(JSON.stringify(String(sale.orderNumber)))})" title="Excluir">
                         🗑️
                     </button>
                 </div>
             </td>
-            <td><code style="color: #10b981; font-weight: bold;">${sale.orderNumber}</code></td>
-            <td>${sale.clientName || sale.clientId || 'N/A'}</td>
-            <td>${sale.gameName || '-'}</td>
-            <td title="${Array.isArray(sale.items) ? sale.items.map(i => i.name).join(', ') : ''}">${itensText}</td>
+            <td><code style="color: #10b981; font-weight: bold;">${escapeHtmlSafe(sale.orderNumber)}</code></td>
+            <td>${escapeHtmlSafe(sale.clientName || sale.clientId || 'N/A')}</td>
+            <td>${escapeHtmlSafe(sale.gameName || '-')}</td>
+            <td title="${escapeHtmlSafe(Array.isArray(sale.items) ? sale.items.map(i => i.name).join(', ') : '')}">${escapeHtmlSafe(itensText)}</td>
             <td><strong>R$ ${formatMoney(sale.totalBRL || 0)}</strong></td>
             <td>$ ${formatMoney(sale.totalUSD || 0)}</td>
-            <td>${sale.paymentMethod || '-'}</td>
-            <td>${sale.referral?.code ? `<code style="color: #9b59b6;">${sale.referral.code}</code>` : (sale.couponCode ? `<code style="color: #f59e0b;">${sale.couponCode}</code>` : '-')}</td>
-            <td>${sale.finalizedBy?.username || '-'}</td>
+            <td>${escapeHtmlSafe(sale.paymentMethod || '-')}</td>
+            <td>${sale.referral?.code ? `<code style="color: #9b59b6;">${escapeHtmlSafe(sale.referral.code)}</code>` : (sale.couponCode ? `<code style="color: #f59e0b;">${escapeHtmlSafe(sale.couponCode)}</code>` : '-')}</td>
+            <td>${escapeHtmlSafe(sale.finalizedBy?.username || '-')}</td>
             <td>${formatDate(sale.timestamp)}</td>
         `;
 
@@ -6182,7 +6219,7 @@ function updateCRMRankings() {
                         const temBreakdown = variantes.length > 1;
                         const breakdownHtml = temBreakdown
                             ? `<div style="margin-top: 6px; padding: 6px 10px; font-size: 11px; color: #ff8fce; background: rgba(255, 45, 149, 0.06); border-left: 2px solid rgba(255, 45, 149, 0.45); border-radius: 4px;">
-                                ${variantes.map(v => `<div style="padding: 1px 0;">↳ ${v.name}: <span style="color: #ffd9ec;">${v.count}×</span> | <span style="color: #ffd9ec;">R$ ${formatMoney(v.total)}</span></div>`).join('')}
+                                ${variantes.map(v => `<div style="padding: 1px 0;">↳ ${escapeHtmlSafe(v.name)}: <span style="color: #ffd9ec;">${v.count}×</span> | <span style="color: #ffd9ec;">R$ ${formatMoney(v.total)}</span></div>`).join('')}
                                </div>`
                             : '';
                         return `
@@ -6190,7 +6227,7 @@ function updateCRMRankings() {
                                 <div style="display: flex; justify-content: space-between; align-items: center;">
                                     <span>
                                         <span style="font-weight: bold; color: ${idx === 0 ? '#ffd700' : idx === 1 ? '#c0c0c0' : idx === 2 ? '#cd7f32' : '#ff8fce'};">#${idx + 1}</span>
-                                        ${data.name}${temBreakdown ? ` <span style="font-size: 10px; color: #ff8fce;">(${variantes.length} variantes)</span>` : ''}
+                                        ${escapeHtmlSafe(data.name)}${temBreakdown ? ` <span style="font-size: 10px; color: #ff8fce;">(${variantes.length} variantes)</span>` : ''}
                                     </span>
                                     <span style="color: #10b981; font-weight: bold;">
                                         ${data.count} vendas | R$ ${formatMoney(data.total)}
@@ -6248,7 +6285,7 @@ function updateCRMRankings() {
     // Ranking de Cupons
     const cupomStats = {};
     sales.forEach(s => {
-        const cupom = s.referral?.code || s.couponCode;
+        const cupom = _crmCupomDaVenda(s);
         if (cupom) {
             if (!cupomStats[cupom]) cupomStats[cupom] = { count: 0, total: 0 };
             cupomStats[cupom].count++;
@@ -6279,7 +6316,7 @@ function updateCRMRankings() {
                         <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255, 45, 149, 0.22);">
                             <span>
                                 <span style="font-weight: bold; color: ${idx === 0 ? '#ffd700' : idx === 1 ? '#c0c0c0' : idx === 2 ? '#cd7f32' : '#ff8fce'};">#${idx + 1}</span>
-                                🎫 ${cupom}
+                                🎫 ${escapeHtmlSafe(cupom)}
                             </span>
                             <div style="text-align: right;">
                                 <div style="color: #ffd9ec; font-weight: bold;">${data.count} usos</div>
@@ -6293,11 +6330,471 @@ function updateCRMRankings() {
     }
 }
 
+// ═══════════════════════════════════════════════════════════════
+// 🎫 OS-136: DETALHE DE 1 CUPOM (aba CRM)
+// ═══════════════════════════════════════════════════════════════
+// Não lê nada novo no banco: usa as vendas do período já carregadas (allOfficialSales)
+// e o cadastro de cupons que o painel já lê ao abrir (allCoupons).
+function _crmNormCupom(codigo) {
+    return String(codigo == null ? '' : codigo).trim().toUpperCase();
+}
+
+const CRM_CUPOM_POR_PAGINA = 10;
+// Padrão desta conta: o cadastro do cupom só guarda o cashback de quem compra (type/value), e a venda
+// só guarda esse cashback (referral.cashbackPercent). Nenhum campo guarda a parte da dona do cupom.
+const CRM_CUPOM_PERCENTUAL = 1;
+const CRM_CUPOM_PERCENTUAL_ROTULO = '1% (padrão desta conta)';
+let _crmBuscaTextoLivre = ''; // código que a pessoa mandou tratar como texto comum na busca
+let _crmCupomEstadoCarga = ''; // '' | 'carregando' | 'erro' | 'periodo'
+let _crmCupomPagina = 1;
+let _crmCupomLinhas = [];
+let _crmCargaSeq = 0;
+let _crmFaixaCarregada = ''; // período das vendas em memória; vazio se não valem para nenhum
+
+function _crmChaveFaixa(range) {
+    return range.period === 'custom' ? `custom:${range.start}:${range.end}` : range.period;
+}
+
+function _crmEscreverEscopo(texto) {
+    const scope = document.getElementById('crm-data-scope');
+    if (scope) scope.textContent = texto;
+}
+
+function _crmEsvaziarVendas() {
+    allOfficialSales = [];
+    filteredOfficialSales = [];
+    _crmFaixaCarregada = '';
+    crmCurrentPage = 1;
+    updateCRMStats();
+    updateCRMRankings();
+    updateCRMPagination();
+}
+
+// Botão Atualizar: baixa as vendas de novo só se a aba CRM estiver aberta.
+function _crmRecarregarSeAberto() {
+    return document.getElementById('tab-crm')?.classList?.contains('active') ? loadOfficialSalesData(true) : undefined;
+}
+
+// Outros filtros que recortam o cupom: com eles, os números do card não são a base final.
+function _crmOutrosFiltros() {
+    const nomes = [];
+    const jogo = document.getElementById('crm-filter-game');
+    if (jogo?.value) nomes.push(`jogo ${(jogo.options?.[jogo.selectedIndex]?.text || jogo.value).replace(/\s*\(\d[\d.]*\)\s*$/, '').trim()}`);
+    const busca = (document.getElementById('crm-search')?.value || '').trim();
+    if (busca && _crmCupomDoCampo()) nomes.push(`busca "${busca}"`);
+    return nomes;
+}
+
+// Mesma origem do código que o Top Cupons e a tabela usam.
+function _crmCupomDaVenda(sale) {
+    return _crmNormCupom(sale?.referral?.code || sale?.couponCode);
+}
+
+// Dono principal + co-donos. coOwnerDiscordIds é um mapa { <discordId>: true }: valem as CHAVES
+// cujo valor é true, nunca Object.values.
+function _crmDonosDoCupom(cupom) {
+    const donos = new Set();
+    const principal = String(cupom?.ownerDiscordId || '').trim();
+    if (principal) donos.add(principal);
+    const co = cupom?.coOwnerDiscordIds;
+    if (co && typeof co === 'object') {
+        Object.keys(co).forEach(id => {
+            if (co[id] === true && id.trim()) donos.add(id.trim());
+        });
+    }
+    return donos;
+}
+
+// Decisão do dono: a base do 1% é só o pago em dinheiro, a mesma regra do cashback (a parte paga com
+// saldo não conta). O bot grava esse valor em externalPaidBRL. Sem o campo devolve null ("sem dado"):
+// nunca assume o total nem calcula por conta própria. Fica limitado ao total, como o fatorPago do cashback.
+function _crmPagoEmDinheiroCents(sale, totalCents) {
+    const bruto = sale?.externalPaidBRL;
+    if (typeof bruto !== 'number' && (typeof bruto !== 'string' || !bruto.trim())) return null;
+    const valor = Number(bruto);
+    if (!Number.isFinite(valor) || valor < 0) return null;
+    const cents = Math.round(valor * 100);
+    return totalCents > 0 ? Math.min(cents, totalCents) : cents;
+}
+
+function _crmDataDaVenda(sale) {
+    return sale?.timestamp || sale?.createdAt || sale?.paidAt || 0;
+}
+
+function _crmSituacaoDaVenda(sale) {
+    const s = String(sale?.status || '').trim();
+    const nomes = {
+        finalizado: 'concluída', completed: 'concluída',
+        cancelado: 'cancelada', cancelled: 'cancelada',
+        refunded: 'reembolsada', reembolsado: 'reembolsada', estornado: 'estornada'
+    };
+    return nomes[s.toLowerCase()] || s || 'sem situação';
+}
+
+// Marca de cada venda na lista, com a mesma decisão da conta.
+function _crmMarcaDaVenda(destino, ehCoDono) {
+    if (destino === 'terceiros') return { texto: 'terceiro (conta)', classe: 'conta' };
+    if (destino === 'proprias') return { texto: ehCoDono ? 'co-dono (não conta)' : 'dona (não conta)', classe: 'nao-conta' };
+    if (destino === 'semComprador') return { texto: 'sem comprador (não conta)', classe: 'alerta' };
+    if (destino === 'semDono') return { texto: 'sem dono (sem base)', classe: 'alerta' };
+    return { texto: 'fora da conta', classe: 'nao-conta' };
+}
+
+// Conta pura (sem DOM, em centavos para a soma não acumular erro de ponto flutuante).
+function calcCRMCouponDetail(sales, codigo, coupons) {
+    const alvo = _crmNormCupom(codigo);
+    const cadastro = (coupons || []).filter(c => _crmNormCupom(c?.code) === alvo);
+    const donos = new Set();
+    const principais = new Set();
+    cadastro.forEach(c => {
+        _crmDonosDoCupom(c).forEach(id => donos.add(id));
+        const principal = String(c?.ownerDiscordId || '').trim();
+        if (principal) principais.add(principal);
+    });
+    const temDono = donos.size > 0;
+    const linhas = [];
+    const grupo = () => ({ count: 0, cents: 0 });
+    const g = { terceiros: grupo(), proprias: grupo(), semComprador: grupo(), semDono: grupo(), fora: grupo(), semPago: grupo() };
+    let pagoCents = 0;
+
+    (sales || []).forEach(sale => {
+        if (_crmCupomDaVenda(sale) !== alvo) return;
+        const cents = Math.round((parseFloat(sale.totalBRL) || 0) * 100);
+        const comprador = String(sale.clientId || sale.userId || '').trim();
+        let nomeDestino;
+        if (!isSaleActive(sale)) nomeDestino = 'fora';
+        else if (!temDono) nomeDestino = 'semDono';
+        else if (!comprador) nomeDestino = 'semComprador';
+        else nomeDestino = donos.has(comprador) ? 'proprias' : 'terceiros';
+        const destino = g[nomeDestino];
+        destino.count++;
+        destino.cents += cents;
+        const pago = _crmPagoEmDinheiroCents(sale, cents);
+        linhas.push({
+            pedido: sale.orderNumber || '',
+            quando: _crmDataDaVenda(sale),
+            jogo: sale.gameName || sale.game || '',
+            comprador: sale.clientName || comprador || '',
+            total: cents / 100,
+            pago: pago === null ? null : pago / 100,
+            situacao: _crmSituacaoDaVenda(sale),
+            marca: _crmMarcaDaVenda(nomeDestino, !principais.has(comprador))
+        });
+        if (destino === g.terceiros) {
+            if (pago === null) {
+                g.semPago.count++;
+                g.semPago.cents += cents;
+            } else {
+                pagoCents += pago;
+            }
+        }
+    });
+
+    const publico = (x) => ({ count: x.count, total: x.cents / 100 });
+    const brutoCents = g.terceiros.cents + g.proprias.cents + g.semComprador.cents + g.semDono.cents;
+    const baseFechada = temDono && g.semPago.count === 0;
+    return {
+        codigo: alvo,
+        noCadastro: cadastro.length > 0,
+        temDono,
+        qtdDonos: donos.size,
+        terceiros: publico(g.terceiros),
+        proprias: publico(g.proprias),
+        semComprador: publico(g.semComprador),
+        semDono: publico(g.semDono),
+        fora: publico(g.fora),
+        vendasAtivas: g.terceiros.count + g.proprias.count + g.semComprador.count + g.semDono.count,
+        bruto: brutoCents / 100,
+        semPago: publico(g.semPago),
+        pagoConhecido: pagoCents / 100,
+        pagoComSaldo: (g.terceiros.cents - g.semPago.cents - pagoCents) / 100,
+        // Em aberto, nunca R$ 0: sem dono não há de quem separar as compras próprias, e venda de
+        // terceiro sem o valor pago deixa a base sem dado.
+        base: baseFechada ? pagoCents / 100 : null,
+        percentual: CRM_CUPOM_PERCENTUAL,
+        percentualRotulo: CRM_CUPOM_PERCENTUAL_ROTULO,
+        umPorCento: baseFechada ? Math.round(pagoCents * CRM_CUPOM_PERCENTUAL / 100) / 100 : null,
+        linhas: linhas.sort((a, b) => b.quando - a.quando)
+    };
+}
+
+function _crmCupomDoCampo() {
+    return _crmNormCupom(document.getElementById('crm-filter-cupom')?.value);
+}
+
+// O código que está na caixa de busca, se for EXATAMENTE um cupom do cadastro ou das vendas baixadas.
+// Cupom apagado, ou cadastro que não carregou, não pode virar busca por nome e esconder as vendas
+// dele. Só consulta o que já está em memória: nenhuma leitura nova.
+function _crmCodigoNaBusca() {
+    const texto = _crmNormCupom(document.getElementById('crm-search')?.value);
+    if (!texto) return '';
+    return allCoupons.some(c => _crmNormCupom(c?.code) === texto)
+        || allOfficialSales.some(s => _crmCupomDaVenda(s) === texto) ? texto : '';
+}
+
+// A busca só vira filtro de cupom se o campo Cupom estiver vazio e a pessoa não tiver pedido o texto comum.
+function _crmCupomDaBusca() {
+    const codigo = _crmCodigoNaBusca();
+    return codigo && codigo !== _crmBuscaTextoLivre && !_crmCupomDoCampo() ? codigo : '';
+}
+
+function _crmCupomSelecionado() {
+    return _crmCupomDoCampo() || _crmCupomDaBusca();
+}
+
+// O link do card alterna o mesmo texto entre "cupom" e "pedidos e clientes".
+function crmBuscaAlternarCupom() {
+    const codigo = _crmCodigoNaBusca();
+    _crmBuscaTextoLivre = _crmBuscaTextoLivre === codigo ? '' : codigo;
+    applyCRMFilters();
+    document.getElementById('crm-cupom-alternar')?.focus?.();
+}
+
+function _crmCupomAnunciar(texto) {
+    const status = document.getElementById('crm-cupom-status');
+    if (status) status.textContent = texto;
+}
+
+// Só o que está em _crmCupomLinhas, que veio das vendas já baixadas: paginar não lê o banco.
+function _crmDesenharVendasCupom() {
+    const alvo = document.getElementById('crm-cupom-vendas');
+    if (!alvo) return;
+    const paginas = Math.max(1, Math.ceil(_crmCupomLinhas.length / CRM_CUPOM_POR_PAGINA));
+    _crmCupomPagina = Math.min(Math.max(1, _crmCupomPagina), paginas);
+    const inicio = (_crmCupomPagina - 1) * CRM_CUPOM_POR_PAGINA;
+    const dinheiro = (v) => `R$ ${formatMoney(v)}`;
+    const celula = (rotulo, conteudo, classe = '') =>
+        `<td role="cell" data-label="${rotulo}"${classe ? ` class="${classe}"` : ''}>${conteudo}</td>`;
+    const corpo = _crmCupomLinhas.slice(inicio, inicio + CRM_CUPOM_POR_PAGINA).map(l => `
+        <tr role="row">
+            ${celula('Marca', `<span class="crm-cupom-marca ${l.marca.classe}">${l.marca.texto}</span>`)}
+            ${celula('Data', `<span>${escapeHtmlSafe(formatDate(l.quando))}${l.pedido ? `<span class="crm-cupom-pedido">${escapeHtmlSafe(l.pedido)}</span>` : ''}</span>`)}
+            ${celula('Jogo', `<span>${escapeHtmlSafe(l.jogo || '-')}</span>`)}
+            ${celula('Comprador', `<span>${escapeHtmlSafe(l.comprador || 'sem ID')}</span>`)}
+            ${celula('Total', `<span>${dinheiro(l.total)}</span>`, 'crm-cupom-num')}
+            ${celula('Pago em dinheiro', l.pago === null ? '<span class="crm-cupom-marca alerta">Sem dado</span>' : `<span>${dinheiro(l.pago)}</span>`, 'crm-cupom-num')}
+            ${celula('Situação', `<span>${escapeHtmlSafe(l.situacao)}</span>`)}
+        </tr>`).join('');
+    const cabecalho = ['Marca', 'Data', 'Jogo', 'Comprador', 'Total', 'Pago em dinheiro', 'Situação']
+        .map(t => `<th role="columnheader" scope="col">${t}</th>`).join('');
+    alvo.innerHTML = `
+        <table class="data-table crm-cupom-tabela" role="table" aria-labelledby="crm-cupom-lista-titulo">
+            <thead role="rowgroup"><tr role="row">${cabecalho}</tr></thead>
+            <tbody role="rowgroup">${corpo}</tbody>
+        </table>`;
+    const info = document.getElementById('crm-cupom-pagina-info');
+    if (info) info.textContent = `Página ${_crmCupomPagina} de ${paginas}`;
+    const anterior = document.getElementById('crm-cupom-ant');
+    const proxima = document.getElementById('crm-cupom-prox');
+    if (anterior) anterior.disabled = _crmCupomPagina <= 1;
+    if (proxima) proxima.disabled = _crmCupomPagina >= paginas;
+}
+
+function crmCupomMudarPagina(delta) {
+    _crmCupomPagina += delta;
+    _crmDesenharVendasCupom();
+    // Botão que acabou de desligar perderia o foco do teclado.
+    const anterior = document.getElementById('crm-cupom-ant');
+    const proxima = document.getElementById('crm-cupom-prox');
+    if (anterior?.disabled) proxima?.focus?.();
+    else if (proxima?.disabled) anterior?.focus?.();
+    const info = document.getElementById('crm-cupom-pagina-info');
+    if (info) _crmCupomAnunciar(info.textContent);
+}
+
+// Lista do campo: só códigos, do cadastro e das vendas já carregadas.
+function populateCRMCouponList() {
+    const lista = document.getElementById('crm-cupom-lista');
+    if (!lista) return;
+    const codigos = new Set();
+    allCoupons.forEach(c => { const k = _crmNormCupom(c?.code); if (k) codigos.add(k); });
+    allOfficialSales.forEach(s => { const k = _crmCupomDaVenda(s); if (k) codigos.add(k); });
+    lista.innerHTML = [...codigos].sort((a, b) => a.localeCompare(b))
+        .map(k => `<option value="${escapeHtmlSafe(k)}"></option>`).join('');
+}
+
+function _crmCupomLinha(rotulo, nota, grupo, classe) {
+    const vendas = grupo.count === 1 ? '1 venda' : `${grupo.count.toLocaleString('pt-BR')} vendas`;
+    return `
+        <div class="crm-cupom-item ${classe}">
+            <dt>${rotulo}</dt>
+            <dd>
+                <strong>R$ ${formatMoney(grupo.total)}</strong>
+                <span>${vendas}${nota ? ` · ${nota}` : ''}</span>
+            </dd>
+        </div>`;
+}
+
+// Desenha o card. estado: 'carregando' | 'erro' | 'periodo' (datas faltando) | nada = conta.
+function renderCRMCouponDetail(estado) {
+    const card = document.getElementById('crm-cupom-detalhe');
+    if (!card) return;
+    // Sem argumento, repinta mantendo o estado da carga: o cadastro pode chegar no meio dela.
+    if (estado !== undefined) _crmCupomEstadoCarga = estado;
+    const codigo = _crmCupomSelecionado();
+    if (!codigo) {
+        _crmCupomLinhas = [];
+        // Mesmo código, mas como texto comum: um aviso curto com o caminho de volta.
+        const textoLivre = _crmCupomDoCampo() ? '' : _crmCodigoNaBusca();
+        if (textoLivre) {
+            const seguro = escapeHtmlSafe(textoLivre);
+            card.hidden = false;
+            card.innerHTML = `<p id="crm-cupom-titulo" class="crm-cupom-msg">Buscando '${seguro}' em pedidos e clientes. <button type="button" id="crm-cupom-alternar" class="crm-cupom-link" onclick="crmBuscaAlternarCupom()">ver o cupom ${seguro}</button></p>`;
+            _crmCupomAnunciar(`Buscando ${textoLivre} em pedidos e clientes.`);
+            return;
+        }
+        // Sem cadastro não dá para dizer que o texto não é cupom: avisa em vez de só listar nomes.
+        const buscado = (document.getElementById('crm-search')?.value || '').trim();
+        if (buscado && !_crmCupomCadastroLido && !_crmCupomEstadoCarga) {
+            card.hidden = false;
+            card.innerHTML = `<p id="crm-cupom-titulo" class="crm-cupom-msg erro" role="alert">O cadastro de cupons não carregou: '${escapeHtmlSafe(buscado)}' foi buscado só em pedidos e clientes. Um cupom sem venda neste período não aparece aqui. Use o botão Atualizar.</p>`;
+            return;
+        }
+        card.hidden = true;
+        card.innerHTML = '';
+        _crmCupomAnunciar('');
+        return;
+    }
+    card.hidden = false;
+    const seguro = escapeHtmlSafe(codigo);
+    const titulo = `<h3 id="crm-cupom-titulo">🎫 Detalhe do cupom ${seguro}</h3>${_crmCupomDaBusca()
+        ? `<p class="crm-cupom-sub"><button type="button" id="crm-cupom-alternar" class="crm-cupom-link" onclick="crmBuscaAlternarCupom()">buscar '${seguro}' em pedidos e clientes</button></p>`
+        : ''}`;
+    const aviso = (texto, tipo = '') => `${titulo}<p class="crm-cupom-msg ${tipo}"${tipo === 'erro' ? ' role="alert"' : ''}>${texto}</p>`;
+
+    if (_crmCupomEstadoCarga === 'carregando') {
+        _crmCupomLinhas = [];
+        card.innerHTML = aviso('Carregando as vendas do período...');
+        _crmCupomAnunciar(`Carregando as vendas do cupom ${codigo}.`);
+        return;
+    }
+    if (_crmCupomEstadoCarga === 'erro') {
+        _crmCupomLinhas = [];
+        card.innerHTML = aviso('Não deu para carregar as vendas deste período, e nada foi calculado. Use o botão Atualizar para tentar de novo.', 'erro');
+        return;
+    }
+    if (_crmCupomEstadoCarga === 'periodo') {
+        _crmCupomLinhas = [];
+        card.innerHTML = aviso('Escolha a data inicial e a final para ver este cupom.');
+        return;
+    }
+
+    const d = calcCRMCouponDetail(filteredOfficialSales, codigo, allCoupons);
+    const rotuloPeriodo = getCRMPeriodRange().label || 'este período';
+
+    _crmCupomLinhas = d.linhas;
+    _crmCupomAnunciar(`Cupom ${codigo}: ${d.vendasAtivas} venda(s) válidas, ${d.terceiros.count} de terceiros.`);
+
+    if (d.vendasAtivas === 0 && d.fora.count === 0) {
+        card.innerHTML = aviso(d.noCadastro || !_crmCupomCadastroLido
+            ? `Nenhuma venda deste cupom em ${escapeHtmlSafe(rotuloPeriodo)}. Tente um período maior.`
+            : 'Este código não está no cadastro nem nas vendas do período. Confira o código ou escolha um na lista.');
+        return;
+    }
+
+    let situacao;
+    if (!_crmCupomCadastroLido) {
+        situacao = '<p class="crm-cupom-msg erro" role="alert">O cadastro de cupons não carregou, então não dá para separar as compras do dono. Use o botão Atualizar.</p>';
+    } else if (!d.noCadastro) {
+        situacao = '<p class="crm-cupom-msg alerta">Este código está nas vendas, mas não no cadastro de cupons (apagado ou renomeado): não dá para separar compras próprias, por isso não há base de saque.</p>';
+    } else if (!d.temDono) {
+        situacao = '<p class="crm-cupom-msg alerta">Cupom sem dono cadastrado: não dá para separar compras próprias, por isso não há base de saque.</p>';
+    } else {
+        const co = d.qtdDonos - 1;
+        situacao = `<p class="crm-cupom-sub">${escapeHtmlSafe(rotuloPeriodo)} · dono cadastrado${co > 0 ? ` + ${co} co-dono${co > 1 ? 's' : ''}` : ''}</p>`;
+    }
+
+    const outrosFiltros = _crmOutrosFiltros();
+    if (outrosFiltros.length) {
+        situacao += `<p class="crm-cupom-msg alerta">Filtro ativo (${escapeHtmlSafe(outrosFiltros.join(', '))}): estes números são só desse recorte, não a base final do saque. Limpe o filtro para ver a base do período.</p>`;
+    }
+
+    const linhas = d.temDono
+        ? _crmCupomLinha('Vendas de terceiros', 'contam para saque', d.terceiros, 'conta')
+            + _crmCupomLinha('Compras da dona ou co-donos', 'não contam', d.proprias, 'nao-conta')
+        : _crmCupomLinha('Vendas sem separação', 'dono não identificado', d.semDono, 'nao-conta');
+    let baseHtml;
+    if (!d.temDono) baseHtml = '<strong>Sem base</strong><span>falta o dono do cupom</span>';
+    else if (d.base === null) baseHtml = '<strong>Sem dado</strong><span>falta o valor pago em dinheiro</span>';
+    else baseHtml = `<strong>R$ ${formatMoney(d.base)}</strong><span>só o pago em dinheiro · ${d.percentualRotulo} = R$ ${formatMoney(d.umPorCento)}</span>`;
+
+    const notas = [];
+    if (d.temDono) {
+        notas.push(`${d.percentualRotulo}: o cadastro do cupom guarda só o cashback de quem compra, não a parte da dona.`);
+    }
+    if (d.semPago.count > 0) {
+        notas.push(`${d.semPago.count} de ${d.terceiros.count} venda(s) de terceiros sem o valor pago em dinheiro (R$ ${formatMoney(d.semPago.total)} de total): a base fica sem dado. As demais somam R$ ${formatMoney(d.pagoConhecido)} pagos, que não são a base final.`);
+    }
+    if (d.pagoComSaldo > 0) {
+        notas.push(`Pago com saldo, fora da base: R$ ${formatMoney(d.pagoComSaldo)}.`);
+    }
+    if (d.semComprador.count > 0) {
+        notas.push(`${d.semComprador.count} venda(s) sem ID do comprador (R$ ${formatMoney(d.semComprador.total)}): estão no bruto e fora da base. Confira na tabela abaixo.`);
+    }
+    if (d.fora.count > 0) {
+        notas.push(`Fora da conta: ${d.fora.count} cancelada(s) ou reembolsada(s) (R$ ${formatMoney(d.fora.total)}).`);
+    }
+
+    card.innerHTML = `
+        ${titulo}
+        ${situacao}
+        <dl class="crm-cupom-grade">
+            ${linhas}
+            <div class="crm-cupom-item">
+                <dt>Total bruto</dt>
+                <dd><strong>R$ ${formatMoney(d.bruto)}</strong><span>${d.vendasAtivas.toLocaleString('pt-BR')} venda(s) válidas</span></dd>
+            </div>
+            <div class="crm-cupom-item base">
+                <dt>Base do saque${outrosFiltros.length ? ' (só deste filtro)' : ''}</dt>
+                <dd>${baseHtml}</dd>
+            </div>
+        </dl>
+        ${notas.map(n => `<p class="crm-cupom-sub">${n}</p>`).join('')}
+        <h4 id="crm-cupom-lista-titulo" class="crm-cupom-lista-titulo">Vendas do cupom ${seguro}, uma a uma (${d.linhas.length.toLocaleString('pt-BR')})</h4>
+        <div id="crm-cupom-vendas"></div>
+        ${d.linhas.length > CRM_CUPOM_POR_PAGINA ? `
+        <nav class="pagination crm-cupom-paginas" aria-label="Páginas das vendas do cupom">
+            <button type="button" id="crm-cupom-ant" onclick="crmCupomMudarPagina(-1)">‹ Anterior</button>
+            <span id="crm-cupom-pagina-info"></span>
+            <button type="button" id="crm-cupom-prox" onclick="crmCupomMudarPagina(1)">Próxima ›</button>
+        </nav>` : ''}`;
+    _crmDesenharVendasCupom();
+}
+
+// O subtítulo acompanha os cartões e a tabela: com filtro, diz quantas das vendas baixadas estão na tela.
+function _crmAtualizarEscopo(temFiltro, cupom) {
+    const scope = document.getElementById('crm-data-scope');
+    if (!scope) return;
+    const range = getCRMPeriodRange();
+    if (range.incomplete) return;
+    const baixadas = allOfficialSales.length.toLocaleString('pt-BR');
+    if (!temFiltro) {
+        scope.textContent = `Exibindo ${baixadas} vendas de ${range.label}.`;
+        return;
+    }
+    const naTela = filteredOfficialSales.length;
+    const foraDosTotais = filteredOfficialSales.filter(s => !isSaleActive(s)).length;
+    scope.textContent = `Exibindo ${naTela.toLocaleString('pt-BR')} de ${baixadas} vendas de ${range.label}`
+        + `${cupom ? ` · cupom ${cupom}` : ''}`
+        + `${_crmOutrosFiltros().map(f => ` · ${f}`).join('')}`
+        + `${foraDosTotais ? ` · ${foraDosTotais} cancelada(s) ou reembolsada(s) fora dos totais` : ''}.`;
+}
+
 // Aplicar filtros CRM
 function applyCRMFilters() {
     const period = document.getElementById('crm-filter-period')?.value || 'all';
     const game = document.getElementById('crm-filter-game')?.value || '';
-    const search = document.getElementById('crm-search')?.value.toLowerCase() || '';
+    // Carga em andamento, com erro ou sem datas: o que há na memória não é deste período.
+    if (_crmCupomEstadoCarga) {
+        renderCRMCouponDetail();
+        return;
+    }
+    const cupomExato = _crmCupomSelecionado();
+    // A4, só com cupom ativo: o fim do dia abaixo cai às 21h de Brasília e perderia venda da base do
+    // saque. Sem cupom, cartões e CSV seguem como estão até o dono decidir.
+    const faixaDoCupom = cupomExato && period === 'custom' ? getCRMPeriodRange() : null;
+    // Texto que já virou cupom não filtra também pedido e cliente.
+    const search = _crmCupomDaBusca() ? '' : (document.getElementById('crm-search')?.value.toLowerCase() || '');
 
     const now = Date.now();
     const dayMs = 24 * 60 * 60 * 1000;
@@ -6330,7 +6827,9 @@ function applyCRMFilters() {
                     if (startDate && endDate) {
                         const start = new Date(startDate).getTime();
                         const end = new Date(endDate).getTime() + dayMs;
-                        matchPeriod = saleTime >= start && saleTime <= end;
+                        matchPeriod = faixaDoCupom
+                            ? saleTime >= faixaDoCupom.start && saleTime <= faixaDoCupom.end
+                            : saleTime >= start && saleTime <= end;
                     }
                     break;
             }
@@ -6357,20 +6856,26 @@ function applyCRMFilters() {
             }
         }
 
-        // Filtro de busca
+        // Filtro de busca (pedido e cliente). OS-136: trecho de cupom saiu daqui, porque "CH" também
+        // trazia outros cupons. O código exato vira filtro de cupom logo acima.
         const matchSearch = !search ||
             (sale.orderNumber || '').toLowerCase().includes(search) ||
             (sale.clientName || '').toLowerCase().includes(search) ||
-            (sale.clientId || '').toLowerCase().includes(search) ||
-            (sale.referral?.code || sale.couponCode || '').toLowerCase().includes(search);
+            (sale.clientId || '').toLowerCase().includes(search);
 
-        return matchPeriod && matchGame && matchSearch;
+        // OS-136: cupom por código EXATO, sem diferenciar maiúsculas.
+        const matchCupom = !cupomExato || _crmCupomDaVenda(sale) === cupomExato;
+
+        return matchPeriod && matchGame && matchSearch && matchCupom;
     });
 
     crmCurrentPage = 1;
+    _crmCupomPagina = 1;
     updateCRMStats();
     updateCRMTable();
     updateCRMRankings();
+    _crmAtualizarEscopo(Boolean(search || game || cupomExato), cupomExato);
+    renderCRMCouponDetail();
 }
 
 // Abrir modal de edição CRM
@@ -6499,8 +7004,8 @@ function openCRMDetails(orderNumber) {
         itensHtml = `<ul style="list-style: none; padding: 0;">` +
             sale.items.map(item => `
                 <li style="padding: 8px 0; border-bottom: 1px solid var(--border);">
-                    <strong>${item.name || item.description || 'Item'}</strong>
-                    ${item.quantity ? ` x${item.quantity}` : ''}
+                    <strong>${escapeHtmlSafe(item.name || item.description || 'Item')}</strong>
+                    ${item.quantity ? ` x${escapeHtmlSafe(item.quantity)}` : ''}
                     ${item.price ? ` - R$ ${formatMoney(item.price)}` : ''}
                 </li>
             `).join('') +
@@ -6509,7 +7014,7 @@ function openCRMDetails(orderNumber) {
 
     content.innerHTML = `
         <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; text-align: center;">
-            <h2 style="color: white; margin: 0; font-family: monospace; font-size: 24px;">${sale.orderNumber}</h2>
+            <h2 style="color: white; margin: 0; font-family: monospace; font-size: 24px;">${escapeHtmlSafe(sale.orderNumber)}</h2>
             <p style="color: rgba(255,255,255,0.8); margin: 5px 0 0 0;">Pedido Oficial</p>
         </div>
         
@@ -6517,9 +7022,9 @@ function openCRMDetails(orderNumber) {
             <div>
                 <h4 style="color: var(--text-secondary); margin-bottom: 10px;">📋 Informações Gerais</h4>
                 <div style="background: var(--input-bg); padding: 15px; border-radius: 8px;">
-                    <p><strong>Cliente:</strong> ${sale.clientName || 'N/A'}</p>
-                    <p><strong>ID Discord:</strong> ${sale.clientId || 'N/A'}</p>
-                    <p><strong>Jogo:</strong> ${sale.gameName || 'N/A'}</p>
+                    <p><strong>Cliente:</strong> ${escapeHtmlSafe(sale.clientName || 'N/A')}</p>
+                    <p><strong>ID Discord:</strong> ${escapeHtmlSafe(sale.clientId || 'N/A')}</p>
+                    <p><strong>Jogo:</strong> ${escapeHtmlSafe(sale.gameName || 'N/A')}</p>
                     <p><strong>Data:</strong> ${formatDate(sale.timestamp)}</p>
                 </div>
             </div>
@@ -6529,10 +7034,10 @@ function openCRMDetails(orderNumber) {
                 <div style="background: var(--input-bg); padding: 15px; border-radius: 8px;">
                     <p><strong>Total BRL:</strong> <span style="color: #10b981; font-size: 18px;">R$ ${formatMoney(sale.totalBRL || 0)}</span></p>
                     <p><strong>Total USD:</strong> $ ${formatMoney(sale.totalUSD || 0)}</p>
-                    <p><strong>Pagamento:</strong> ${sale.paymentMethod || 'N/A'}</p>
-                    <p><strong>Cupom Referência:</strong> ${sale.referral?.code || sale.couponCode || 'Nenhum'}</p>
+                    <p><strong>Pagamento:</strong> ${escapeHtmlSafe(sale.paymentMethod || 'N/A')}</p>
+                    <p><strong>Cupom Referência:</strong> ${escapeHtmlSafe(sale.referral?.code || sale.couponCode || 'Nenhum')}</p>
                     ${sale.usedBalance ? `<p><strong>Saldo Usado:</strong> <span style="color: #f59e0b;">-R$ ${formatMoney(sale.usedBalance)}</span></p>` : ''}
-                    ${sale.cashback?.valor ? `<p><strong>Cashback:</strong> <span style="color: #9b59b6;">+R$ ${formatMoney(sale.cashback.valor)} (${sale.cashback.percentual}%)</span></p>` : ''}
+                    ${sale.cashback?.valor ? `<p><strong>Cashback:</strong> <span style="color: #9b59b6;">+R$ ${formatMoney(sale.cashback.valor)} (${escapeHtmlSafe(sale.cashback.percentual)}%)</span></p>` : ''}
                 </div>
             </div>
         </div>
@@ -6547,8 +7052,8 @@ function openCRMDetails(orderNumber) {
         <div style="margin-top: 20px;">
             <h4 style="color: var(--text-secondary); margin-bottom: 10px;">👤 Responsável</h4>
             <div style="background: var(--input-bg); padding: 15px; border-radius: 8px;">
-                <p><strong>Finalizado por:</strong> ${sale.finalizedBy?.username || 'N/A'}</p>
-                <p><strong>ID Staff:</strong> ${sale.finalizedBy?.id || 'N/A'}</p>
+                <p><strong>Finalizado por:</strong> ${escapeHtmlSafe(sale.finalizedBy?.username || 'N/A')}</p>
+                <p><strong>ID Staff:</strong> ${escapeHtmlSafe(sale.finalizedBy?.id || 'N/A')}</p>
             </div>
         </div>
         
@@ -6556,7 +7061,7 @@ function openCRMDetails(orderNumber) {
         <div style="margin-top: 20px;">
             <h4 style="color: var(--text-secondary); margin-bottom: 10px;">📝 Observações</h4>
             <div style="background: var(--input-bg); padding: 15px; border-radius: 8px;">
-                <p>${sale.observacoes}</p>
+                <p>${escapeHtmlSafe(sale.observacoes)}</p>
             </div>
         </div>
         ` : ''}
@@ -6655,6 +7160,7 @@ function setupCRMListeners() {
     const periodFilter = document.getElementById('crm-filter-period');
     const gameFilter = document.getElementById('crm-filter-game');
     const searchInput = document.getElementById('crm-search');
+    const cupomInput = document.getElementById('crm-filter-cupom');
     const dateStart = document.getElementById('crm-date-start');
     const dateEnd = document.getElementById('crm-date-end');
 
@@ -6677,7 +7183,11 @@ function setupCRMListeners() {
     }
 
     if (gameFilter) gameFilter.addEventListener('change', applyCRMFilters);
-    if (searchInput) searchInput.addEventListener('input', applyCRMFilters);
+    if (searchInput) searchInput.addEventListener('input', () => {
+        _crmBuscaTextoLivre = ''; // digitou de novo: um código exato volta a valer como cupom
+        applyCRMFilters();
+    });
+    if (cupomInput) cupomInput.addEventListener('input', applyCRMFilters);
     const reloadCustomRange = () => {
         if (periodFilter?.value === 'custom' && dateStart?.value && dateEnd?.value) {
             loadOfficialSalesData();
@@ -6775,6 +7285,8 @@ window.loadOfficialSalesData = loadOfficialSalesData;
 window.applyCRMFilters = applyCRMFilters;
 window.crmNextPage = crmNextPage;
 window.crmPreviousPage = crmPreviousPage;
+window.crmBuscaAlternarCupom = crmBuscaAlternarCupom;
+window.crmCupomMudarPagina = crmCupomMudarPagina;
 window.crmRankingClientesNextPage = crmRankingClientesNextPage;
 window.crmRankingClientesPreviousPage = crmRankingClientesPreviousPage;
 window.openCRMEditModal = openCRMEditModal;
@@ -6915,16 +7427,16 @@ async function loadIntermedioData() {
         tbody.innerHTML = registrations.map(reg => `
             <tr>
                 <td>${reg.timestamp ? new Date(reg.timestamp).toLocaleString('pt-BR') : '—'}</td>
-                <td style="font-weight: 600; color: var(--text-primary);">${reg.nome || '—'}</td>
-                <td>${reg.cpf || '—'}</td>
-                <td>${reg.telefone || '—'}</td>
-                <td>${reg.email || '—'}</td>
-                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${reg.observacoes || ''}">
-                    ${reg.observacoes || '—'}
+                <td style="font-weight: 600; color: var(--text-primary);">${escapeHtmlSafe(reg.nome || '—')}</td>
+                <td>${escapeHtmlSafe(reg.cpf || '—')}</td>
+                <td>${escapeHtmlSafe(reg.telefone || '—')}</td>
+                <td>${escapeHtmlSafe(reg.email || '—')}</td>
+                <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHtmlSafe(reg.observacoes || '')}">
+                    ${escapeHtmlSafe(reg.observacoes || '—')}
                 </td>
-                <td>${reg.registradoPor?.username || '—'}</td>
+                <td>${escapeHtmlSafe(reg.registradoPor?.username || '—')}</td>
                 <td>
-                    <button onclick="deleteIntermedio('${reg.id}')" class="btn-action btn-delete" title="Excluir">
+                    <button onclick="deleteIntermedio(${escapeHtmlSafe(JSON.stringify(String(reg.id)))})" class="btn-action btn-delete" title="Excluir">
                         <i class="fas fa-trash"></i>
                     </button>
                 </td>
@@ -7109,7 +7621,7 @@ function generateCouponReport() {
             <div>
                 <span style="color: var(--text-secondary); font-size: 12px;">#${index + 1}</span>
                 <span style="margin-left: 8px; font-weight: 500; color: ${coupon === 'Sem cupom' ? 'var(--text-secondary)' : '#10b981'};">
-                    ${coupon === 'Sem cupom' ? '—' : '🎫 ' + coupon}
+                    ${coupon === 'Sem cupom' ? '—' : '🎫 ' + escapeHtmlSafe(coupon)}
                 </span>
             </div>
             <div style="text-align: right;">
@@ -7152,7 +7664,7 @@ function generateClientReport() {
                 <span style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold;">
                     ${index + 1}
                 </span>
-                <span style="font-weight: 500; color: var(--text-primary);">👤 ${stats.name}</span>
+                <span style="font-weight: 500; color: var(--text-primary);">👤 ${escapeHtmlSafe(stats.name)}</span>
             </div>
             <div style="text-align: right;">
                 <span style="font-weight: 600; color: #10b981;">R$ ${stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</span>
@@ -7194,7 +7706,7 @@ function generateGameReport() {
             <div style="margin-bottom: 12px;">
                 <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
                     <span style="font-weight: 500; color: var(--text-primary);">
-                        🎮 ${game}
+                        🎮 ${escapeHtmlSafe(game)}
                     </span>
                     <span style="font-weight: 600; color: var(--text-primary);">
                         R$ ${stats.revenue.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
@@ -7230,12 +7742,12 @@ function updateTransactionsTable() {
         return `
             <tr>
                 <td>${date}</td>
-                <td>${sale.clientName || '—'}</td>
-                <td>${sale.gameName || sale.game || '—'}</td>
-                <td title="${items}">${items.length > 30 ? items.substring(0, 30) + '...' : items}</td>
+                <td>${escapeHtmlSafe(sale.clientName || '—')}</td>
+                <td>${escapeHtmlSafe(sale.gameName || sale.game || '—')}</td>
+                <td title="${escapeHtmlSafe(items)}">${escapeHtmlSafe(items.length > 30 ? items.substring(0, 30) + '...' : items)}</td>
                 <td style="font-weight: 600; color: #10b981;">R$ ${(sale.totalBRL || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</td>
-                <td>${sale.couponCode ? '🎫 ' + sale.couponCode : '—'}</td>
-                <td>${sale.paymentMethod || '—'}</td>
+                <td>${sale.couponCode ? '🎫 ' + escapeHtmlSafe(sale.couponCode) : '—'}</td>
+                <td>${escapeHtmlSafe(sale.paymentMethod || '—')}</td>
             </tr>
         `;
     }).join('');
@@ -7261,11 +7773,11 @@ function updateCashbackTable() {
         return `
             <tr>
                 <td>${date}</td>
-                <td style="font-weight: 500;">🎫 ${reg.couponCode || '—'}</td>
-                <td>${reg.cpf || '—'}</td>
-                <td>${reg.phone || '—'}</td>
-                <td>${reg.email || '—'}</td>
-                <td>${reg.username || '—'}</td>
+                <td style="font-weight: 500;">🎫 ${escapeHtmlSafe(reg.couponCode || '—')}</td>
+                <td>${escapeHtmlSafe(reg.cpf || '—')}</td>
+                <td>${escapeHtmlSafe(reg.phone || '—')}</td>
+                <td>${escapeHtmlSafe(reg.email || '—')}</td>
+                <td>${escapeHtmlSafe(reg.username || '—')}</td>
                 <td style="${statusClass}">${statusText}</td>
             </tr>
         `;
@@ -7578,7 +8090,7 @@ function renderIndicacoesRanking() {
     tbody.innerHTML = indicacoesRanking.map((e, i) => `
         <tr>
             <td>${medals[i] || (i + 1)}</td>
-            <td><strong>${escapeHtml(e.username)}</strong><br><small style="color: var(--text-secondary);">${e.userId}</small></td>
+            <td><strong>${escapeHtml(e.username)}</strong><br><small style="color: var(--text-secondary);">${escapeHtmlSafe(e.userId)}</small></td>
             <td><strong>${e.convites}</strong></td>
             <td>${e.compraram} / ${e.convites}</td>
             <td><strong style="color: ${e.receitaTotal > 0 ? '#00b894' : 'var(--text-secondary)'};">R$ ${e.receitaTotal.toFixed(2)}</strong></td>
@@ -7613,7 +8125,7 @@ function renderIndicacoesHistory() {
                 <td>${date}</td>
                 <td><strong>${escapeHtml(r.inviterUsername || '-')}</strong></td>
                 <td>${escapeHtml(r.invitedUsername || '-')}</td>
-                <td><code>${r.inviteCode || '-'}</code></td>
+                <td><code>${escapeHtmlSafe(r.inviteCode || '-')}</code></td>
                 <td><strong style="color: ${gastoColor};">R$ ${r.gastoTotal.toFixed(2)}</strong></td>
                 <td>${r.compras > 0 ? r.compras : '<span style="color: var(--text-secondary);">0</span>'}</td>
             </tr>
@@ -7623,7 +8135,7 @@ function renderIndicacoesHistory() {
 
 function escapeHtml(str) {
     if (!str) return '';
-    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    return escapeHtmlSafe(str);
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -7720,11 +8232,11 @@ function renderTicketLogsTable() {
         const totalBRL = log.totalBRL ? `R$ ${Number(log.totalBRL).toFixed(2)}` : '—';
 
         return `<tr>
-            <td><code style="background: rgba(139,92,246,0.2); color: #a78bfa; padding: 2px 8px; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="copyLogCode('${escapeHtml(log.logCode || '')}')" title="Clique para copiar">${escapeHtml(log.logCode || '—')}</code></td>
-            <td>${typeLabel}</td>
+            <td><code style="background: rgba(139,92,246,0.2); color: #a78bfa; padding: 2px 8px; border-radius: 4px; font-weight: bold; cursor: pointer;" onclick="copyLogCode(${escapeHtmlSafe(JSON.stringify(String(log.logCode || '')))})" title="Clique para copiar">${escapeHtml(log.logCode || '—')}</code></td>
+            <td>${escapeHtmlSafe(typeLabel)}</td>
             <td>
                 <span style="font-weight: 600;">${escapeHtml(log.username || '—')}</span>
-                ${log.userId ? `<br><span style="font-size: 11px; color: var(--text-secondary); font-family: monospace;">${log.userId}</span>` : ''}
+                ${log.userId ? `<br><span style="font-size: 11px; color: var(--text-secondary); font-family: monospace;">${escapeHtmlSafe(log.userId)}</span>` : ''}
             </td>
             <td>${escapeHtml(log.gameName || log.game || '—')}</td>
             <td style="font-weight: 600;">${totalBRL}</td>
@@ -7732,7 +8244,7 @@ function renderTicketLogsTable() {
             <td>${log.officialOrderNumber ? `<code>${escapeHtml(String(log.officialOrderNumber))}</code>` : '—'}</td>
             <td>${escapeHtml(log.finalizedBy || '—')}</td>
             <td><span style="font-size: 12px;">${date}</span></td>
-            <td style="text-align: center;">${log.messageCount || '—'}</td>
+            <td style="text-align: center;">${escapeHtmlSafe(log.messageCount || '—')}</td>
         </tr>`;
     }).join('');
 
@@ -7908,7 +8420,7 @@ async function gerarRelatorio() {
     const byGameRows = [...byGame.entries()].sort((a, b) => b[1].count - a[1].count);
     byGameTbody.innerHTML = byGameRows.map(([gid, g]) => `
         <tr>
-            <td>${g.gameName} <span style="color: var(--text-secondary); font-size: 11px;">(${gid})</span></td>
+            <td>${escapeHtmlSafe(g.gameName)} <span style="color: var(--text-secondary); font-size: 11px;">(${escapeHtmlSafe(gid)})</span></td>
             <td>${g.count}</td>
             <td>R$ ${g.totalBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td>${g.users.size}</td>
@@ -7922,8 +8434,8 @@ async function gerarRelatorio() {
         .sort((a, b) => b.totalBRL - a.totalBRL);
     usersTbody.innerHTML = userRows.map(u => `
         <tr>
-            <td>${u.username}${u.userTag ? ` <span style="color: var(--text-secondary); font-size: 11px;">[${u.userTag}]</span>` : ''}</td>
-            <td style="font-family: monospace; font-size: 12px;">${u.uid}</td>
+            <td>${escapeHtmlSafe(u.username)}${u.userTag ? ` <span style="color: var(--text-secondary); font-size: 11px;">[${escapeHtmlSafe(u.userTag)}]</span>` : ''}</td>
+            <td style="font-family: monospace; font-size: 12px;">${escapeHtmlSafe(u.uid)}</td>
             <td>${u.count}</td>
             <td>R$ ${u.totalBRL.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
             <td style="font-size: 11px;">${[...u.games].join(', ')}</td>
@@ -7949,7 +8461,7 @@ function exportarRelatorioCSV() {
         [...u.games].join('|')
     ]);
     const csv = [header, ...rows]
-        .map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(','))
+        .map(r => r.map(v => `"${neutralizeCSVFormula(v).replace(/"/g, '""')}"`).join(','))
         .join('\n');
     const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -8016,7 +8528,7 @@ async function loadBlacklistData() {
     } catch (err) {
         console.error('❌ Erro ao carregar blacklist:', err);
         if (tbody) {
-            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--danger);">Erro ao carregar: ${err.message}<br><small>Verifique se as regras Firebase liberam o path <code>wemixBlacklist</code>.</small></td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px; color: var(--danger);">Erro ao carregar: ${escapeHtmlSafe(err.message)}<br><small>Verifique se as regras Firebase liberam o path <code>wemixBlacklist</code>.</small></td></tr>`;
         }
     }
 }
@@ -8045,11 +8557,11 @@ function renderBlacklistTable() {
         const walletShort = `${item.wallet.slice(0, 10)}...${item.wallet.slice(-8)}`;
         return `
             <tr>
-                <td><code style="font-size: 11px;" title="${item.wallet}">${walletShort}</code> <button class="btn-link" onclick="navigator.clipboard.writeText('${item.wallet}'); this.textContent='✓'" style="background:none;border:none;cursor:pointer;color:var(--primary);font-size:11px;">📋</button></td>
+                <td><code style="font-size: 11px;" title="${escapeHtmlSafe(item.wallet)}">${escapeHtmlSafe(walletShort)}</code> <button class="btn-link" onclick="navigator.clipboard.writeText(${escapeHtmlSafe(JSON.stringify(String(item.wallet)))}); this.textContent='✓'" style="background:none;border:none;cursor:pointer;color:var(--primary);font-size:11px;">📋</button></td>
                 <td>${dateStr}</td>
                 <td>${escapeHtml(by)}</td>
                 <td>${escapeHtml(reason)}</td>
-                <td><button class="btn-danger" onclick="removeWalletFromBlacklist('${item.wallet}')" style="padding: 4px 10px; font-size: 12px;">🗑️ Remover</button></td>
+                <td><button class="btn-danger" onclick="removeWalletFromBlacklist(${escapeHtmlSafe(JSON.stringify(String(item.wallet)))})" style="padding: 4px 10px; font-size: 12px;">🗑️ Remover</button></td>
             </tr>
         `;
     }).join('');
