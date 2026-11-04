@@ -63,6 +63,9 @@ jobs:
             cp -a "Sites/${site_dir}" "${public_dir}/Sites/"
           done
 
+          # Automated tests stay in the repository and never reach the public artifact.
+          find "${public_dir}/Sites" -type f -name '*.test.js' -delete
+
           touch "${public_dir}/.nojekyll"
 
           # Fail closed if a future edit accidentally copies sensitive exports.

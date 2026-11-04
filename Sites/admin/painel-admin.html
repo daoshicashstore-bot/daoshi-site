@@ -1223,64 +1223,6 @@
         </div>
     </div>
 
-    <!-- MODAL: EDITAR VENDA -->
-    <div id="modal-edit-venda" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>✏️ Editar Venda</h2>
-                <button class="btn-close" onclick="closeEditModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="edit-venda-id">
-                
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="edit-status">
-                        <option value="pending">Pendente</option>
-                        <option value="completed">Concluído</option>
-                        <option value="cancelled">Cancelado</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Total (BRL)</label>
-                    <input type="number" id="edit-total-brl" step="0.01">
-                </div>
-
-                <div class="form-group">
-                    <label>Total (USD)</label>
-                    <input type="number" id="edit-total-usd" step="0.01">
-                </div>
-
-                <div class="form-group">
-                    <label>Taxa de Câmbio</label>
-                    <input type="number" id="edit-exchange-rate" step="0.0001">
-                </div>
-
-                <div class="form-group">
-                    <label>Método de Pagamento</label>
-                    <select id="edit-payment-method">
-                        <option value="pix">PIX</option>
-                        <option value="arbitrum">Arbitrum</option>
-                        <option value="erc20">ERC-20</option>
-                        <option value="bep20">BEP-20</option>
-                        <option value="trc20">TRC-20</option>
-                        <option value="wemix">Wemix</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Código de Cupom</label>
-                    <input type="text" id="edit-cupom-code" placeholder="Ex: WELCOME10">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeEditModal()">Cancelar</button>
-                <button class="btn-primary" onclick="saveVendaEdit()">💾 Salvar Alterações</button>
-            </div>
-        </div>
-    </div>
-
     <!-- MODAL: CRIAR/EDITAR CUPOM -->
     <div id="modal-cupom" class="modal">
         <div class="modal-content">
@@ -1326,41 +1268,6 @@
             <div class="modal-footer">
                 <button class="btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
                 <button class="btn-danger" onclick="confirmDelete()">🗑️ Excluir</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- MODAL: EDITAR JOGO -->
-    <div id="modal-edit-game" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🎮 Editar Informações do Jogo</h2>
-                <button class="btn-close" onclick="closeGameModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="game-id">
-                
-                <div class="form-group">
-                    <label>Nome do Jogo:</label>
-                    <input type="text" id="game-name" placeholder="Ex: Mir4" readonly style="background: #2a2a2a; cursor: not-allowed;">
-                </div>
-
-                <div class="form-group">
-                    <label>Emoji (opcional):</label>
-                    <input type="text" id="game-emoji" placeholder="Ex: ⚔️ ou <:mir4:1386686325830455347>">
-                    <small style="color: #888;">Use emoji padrão ou custom do Discord (&lt;:name:id&gt;)</small>
-                </div>
-
-                <div class="form-group">
-                    <label>URL da Imagem (opcional):</label>
-                    <input type="text" id="game-image" placeholder="https://i.ibb.co/x81Dyk8s/mir4.png">
-                    <small style="color: #888;">URL da imagem que aparece no embed de preços</small>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn-secondary" onclick="closeGameModal()">Cancelar</button>
-                <button class="btn-danger" onclick="deleteGame()">Deletar Jogo</button>
-                <button class="btn-primary" onclick="saveGameInfo()">Atualizar Jogo</button>
             </div>
         </div>
     </div>
