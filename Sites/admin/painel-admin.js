@@ -50,6 +50,30 @@ function isSaleActive(sale) {
     return !INACTIVE_SALE_STATUSES.has(s);
 }
 
+// OS-79: venda concluída tem DOIS nomes no banco: "finalizado" (bot) e
+// "completed" (o editor deste painel grava esse). Os dois contam como concluída.
+const COMPLETED_SALE_STATUSES = new Set(['finalizado', 'completed']);
+function isSaleCompleted(sale) {
+    return COMPLETED_SALE_STATUSES.has(String(sale?.status || '').toLowerCase());
+}
+
+// OS-79: o dia do painel é sempre o dia de Brasília (UTC-3, sem horário de verão),
+// do mesmo jeito que o Relatório já fazia (_brtRangeToUTC).
+const BRT_OFFSET_MS = 3 * 60 * 60 * 1000;
+function _brtTodayStr(nowMs = Date.now()) {
+    return new Date(nowMs - BRT_OFFSET_MS).toISOString().slice(0, 10);
+}
+function _saleTimeMs(sale) {
+    const raw = sale?.createdAt ?? sale?.timestamp ?? sale?.paidAt;
+    const n = typeof raw === 'number' ? raw : (Number(raw) || Date.parse(raw));
+    return Number.isFinite(n) ? n : 0;
+}
+// Cupom esgotado = tem limite e o contador chegou nele. Esgotado não é "Ativo".
+function isCouponExhausted(coupon) {
+    const max = Number(coupon?.maxUses) || 0;
+    return max > 0 && (Number(coupon?.usedCount) || 0) >= max;
+}
+
 // Paginação de clientes
 let clientesCurrentPage = 1;
 const clientesItemsPerPage = 25;
@@ -665,22 +689,15 @@ function setupEventListeners() {
 
     const filterCupomPeriod = document.getElementById('filter-cupom-period');
     if (filterCupomPeriod) {
-        filterCupomPeriod.addEventListener('change', () => {
-            const customDateDiv = document.getElementById('cupom-custom-date');
-            if (customDateDiv) {
-                customDateDiv.style.display = filterCupomPeriod.value === 'custom' ? 'flex' : 'none';
-            }
-            renderCoupons();
-        });
+        // OS-79: "Escolher o mês" mostra a lista de meses (o renderCoupons mostra/esconde).
+        filterCupomPeriod.addEventListener('change', () => renderCoupons());
     }
 
-    const cupomDateStart = document.getElementById('cupom-date-start');
-    const cupomDateEnd = document.getElementById('cupom-date-end');
-    if (cupomDateStart) cupomDateStart.addEventListener('change', () => renderCoupons());
-    if (cupomDateEnd) cupomDateEnd.addEventListener('change', () => renderCoupons());
+    const cupomMes = document.getElementById('cupom-mes');
+    if (cupomMes) cupomMes.addEventListener('change', () => renderCoupons());
 
     // Filtros de vendas
-    const filterElements = ['filter-period', 'filter-status', 'filter-payment', 'search-vendas', 'filter-search-type'];
+    const filterElements = ['filter-period', 'filter-status', 'filter-payment', 'search-vendas', 'filter-search-type', 'filter-date-start', 'filter-date-end'];
     filterElements.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
@@ -727,6 +744,8 @@ function setupEventListeners() {
     window.deleteCoupon = deleteCoupon;
     window.refreshData = async () => {
         _invalidateOfficialSalesCache();
+        // OS-79: o Atualizar também renova os números de Cupons (lê o resumo de novo).
+        _invalidateCouponSummary();
         await Promise.all([
             loadSalesData(true),
             loadDashboardGlobalSummary(),
@@ -784,6 +803,11 @@ function switchTab(tabName) {
     // Carregar relatórios quando abrir a aba (o HTML usa "relatorio" no singular).
     if (tabName === 'relatorio' || tabName === 'relatorios') {
         initializeMonthlyReports();
+    }
+
+    // OS-79: a aba Cupons busca as vendas do período escolhido só quando é aberta.
+    if (tabName === 'cupons') {
+        renderCoupons();
     }
 
     // Carregar CRM quando abrir a aba
@@ -991,25 +1015,41 @@ function updateSalesTable() {
     // Filtro de período
     const periodFilter = document.getElementById('filter-period')?.value || 'all';
     console.log('📅 Filtro de período:', periodFilter);
+    // OS-79: "Personalizado" agora tem data inicial e final (dia de Brasília).
+    const customBox = document.getElementById('vendas-custom-date');
+    if (customBox && customBox.style) customBox.style.display = periodFilter === 'custom' ? 'flex' : 'none';
+    const customAviso = document.getElementById('vendas-custom-aviso');
+    if (customAviso && customAviso.style) customAviso.style.display = 'none';
     if (periodFilter !== 'all') {
-        const now = new Date();
-        let startDate;
+        const nowMs = Date.now();
+        let startMs = 0;
+        let endMs = Infinity;
 
         if (periodFilter === 'today') {
-            startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const hoje = _brtTodayStr(nowMs);
+            ({ startMs, endMs } = _brtRangeToUTC(hoje, hoje));
         } else if (periodFilter === 'custom') {
-            // Implementar futuramente
-            startDate = new Date(0);
+            const ini = document.getElementById('filter-date-start')?.value;
+            const fim = document.getElementById('filter-date-end')?.value;
+            if (ini && fim) {
+                ({ startMs, endMs } = _brtRangeToUTC(ini, fim));
+                const maisAntiga = allSales.reduce((min, s) => {
+                    const t = _saleTimeMs(s);
+                    return t && t < min ? t : min;
+                }, Infinity);
+                if (customAviso && startMs < maisAntiga && allSales.length >= DASHBOARD_SALES_LIMIT) {
+                    customAviso.textContent = `A tabela tem só as ${DASHBOARD_SALES_LIMIT} vendas mais recentes. Para datas mais antigas, use o CRM.`;
+                    if (customAviso.style) customAviso.style.display = 'block';
+                }
+            }
         } else {
             const days = parseInt(periodFilter);
-            startDate = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+            startMs = nowMs - (days * 24 * 60 * 60 * 1000);
         }
 
         filteredSales = filteredSales.filter(sale => {
-            if (!sale.createdAt) return false;
-            // Aceita tanto timestamp numérico quanto string ISO
-            const saleDate = typeof sale.createdAt === 'number' ? new Date(sale.createdAt) : new Date(sale.createdAt);
-            return saleDate >= startDate;
+            const t = _saleTimeMs(sale);
+            return Boolean(t) && t >= startMs && t <= endMs;
         });
     }
 
@@ -1032,13 +1072,17 @@ function updateSalesTable() {
         filteredSales = filteredSales.filter(sale => {
             switch (searchType) {
                 case 'id':
-                    return sale.userId?.toLowerCase().includes(searchValue);
+                    return String(sale.id || '').toLowerCase().includes(searchValue) ||
+                        String(sale.userId || '').toLowerCase().includes(searchValue);
                 case 'cupom':
                     // Buscar em referralCode (bot) e couponCode (legado)
                     const cupom = (sale.referralCode || sale.couponCode || '').toLowerCase();
                     return cupom.includes(searchValue);
                 case 'usuario':
-                    return sale.username?.toLowerCase().includes(searchValue);
+                    // OS-79: "ID do Usuário" pesquisa o ID (antes pesquisava o apelido).
+                    return String(sale.userId || sale.clientId || '').toLowerCase().includes(searchValue);
+                case 'apelido':
+                    return String(sale.username || sale.userName || sale.clientName || '').toLowerCase().includes(searchValue);
                 case 'nome-pacote':
                     return sale.cart?.some(item =>
                         item.packageLabel?.toLowerCase().includes(searchValue) ||
@@ -1315,70 +1359,188 @@ async function loadCouponsData() {
     }
 }
 
+// OS-79: a aba Cupons lê o RESUMO pronto em stats/cupons/<AAAA-MM>/<CUPOM>, que o job da VPS
+// recalcula a cada 10 min a partir só das vendas novas. Abrir a aba baixa poucos KB (o mês
+// escolhido + _meta), nunca as vendas. "Todo o período" e "Este ano" leem o nó inteiro
+// (~85 KB) e somam os meses. Nada aqui grava no banco.
+const COUPON_SUMMARY_TTL = 10 * 60 * 1000; // o mesmo ritmo do job
+const _couponSummaryCache = new Map();     // caminho -> { at, data } ou { at, error }
+const _couponSummaryInflight = new Map();  // caminho -> Promise (nunca 2 leituras iguais juntas)
+
+// A mesma troca de caracteres proibidos que o job faz na chave do Firebase.
+function _couponKey(code) {
+    return String(code || '').toUpperCase().trim().replace(/[.#$[\]/\u0000-\u001f\u007f]/g, '_').slice(0, 200);
+}
+function _couponMonthShift(mes, delta) {
+    const [a, m] = mes.split('-').map(Number);
+    return new Date(Date.UTC(a, m - 1 + delta, 1)).toISOString().slice(0, 7);
+}
+function _couponMonthLabel(mes) {
+    const [a, m] = String(mes).split('-');
+    return `${m}/${a}`;
+}
+
+function getCouponPeriodRange(nowMs = Date.now()) {
+    const period = document.getElementById('filter-cupom-period')?.value || 'mes';
+    const atual = _brtTodayStr(nowMs).slice(0, 7); // mês de Brasília
+    const ano = atual.slice(0, 4);
+    if (period === 'all') {
+        return { period, path: 'stats/cupons', label: 'todo o período (soma dos meses)', months: (m) => m <= atual };
+    }
+    if (period === 'ano') {
+        return { period, path: 'stats/cupons', label: `${ano} (soma dos meses)`, months: (m) => m.startsWith(`${ano}-`) && m <= atual };
+    }
+    let mes = atual;
+    if (period === 'mes-passado') mes = _couponMonthShift(atual, -1);
+    if (period === 'escolher') {
+        mes = document.getElementById('cupom-mes')?.value || '';
+        if (!/^\d{4}-\d{2}$/.test(mes)) return { period, incomplete: true, needMeta: true, label: 'Escolha o mês.' };
+    }
+    return { period, path: `stats/cupons/${mes}`, mes, label: _couponMonthLabel(mes), months: (m) => m === mes };
+}
+
+function _couponFresh(entry, nowMs) {
+    return Boolean(entry) && (nowMs - entry.at) < COUPON_SUMMARY_TTL;
+}
+// aceitarVelho: para montar a lista de meses serve um _meta com mais de 10 min (não relê por isso).
+function _couponMetaCached(nowMs = Date.now(), aceitarVelho = false) {
+    const ok = (e) => Boolean(e) && !e.error && (aceitarVelho || _couponFresh(e, nowMs));
+    const tudo = _couponSummaryCache.get('stats/cupons');
+    if (ok(tudo) && tudo.data) return tudo.data._meta || null;
+    const meta = _couponSummaryCache.get('stats/cupons/_meta');
+    return ok(meta) ? (meta.data || null) : null;
+}
+
+// O que falta ler para mostrar o período: { missing: [caminhos] }, { error } ou { months, meta }.
+function _couponSummaryFor(range, nowMs = Date.now()) {
+    const tudo = _couponSummaryCache.get('stats/cupons');
+    if (range.path === 'stats/cupons') {
+        if (!_couponFresh(tudo, nowMs)) return { missing: ['stats/cupons'] };
+        if (tudo.error) return { error: tudo.error };
+        return { months: tudo.data || {}, meta: (tudo.data || {})._meta || null };
+    }
+    // Se o nó inteiro já foi lido há pouco, o mês sai dele sem ler de novo.
+    if (_couponFresh(tudo, nowMs) && !tudo.error) {
+        return { months: { [range.mes]: (tudo.data || {})[range.mes] || {} }, meta: (tudo.data || {})._meta || null };
+    }
+    const paths = [range.path, 'stats/cupons/_meta'];
+    const missing = paths.filter((p) => !_couponFresh(_couponSummaryCache.get(p), nowMs));
+    if (missing.length) return { missing };
+    const error = paths.map((p) => _couponSummaryCache.get(p).error).find(Boolean);
+    if (error) return { error };
+    return { months: { [range.mes]: _couponSummaryCache.get(range.path).data || {} }, meta: _couponSummaryCache.get('stats/cupons/_meta').data || null };
+}
+
+function _loadCouponSummary(paths) {
+    return Promise.all(paths.map((p) => {
+        if (_couponSummaryInflight.has(p)) return _couponSummaryInflight.get(p);
+        const leitura = (async () => {
+            try {
+                const snap = await withTimeout(window.db.ref(p).once('value'), 15_000, 'resumo dos cupons');
+                _couponSummaryCache.set(p, { at: Date.now(), data: snap.val() });
+            } catch (error) {
+                // O erro também vale 10 min: sem nova tentativa sozinha (o 🔄 Atualizar tenta de novo).
+                _couponSummaryCache.set(p, { at: Date.now(), error: error.message || 'erro ao ler o resumo' });
+            } finally {
+                _couponSummaryInflight.delete(p);
+            }
+        })();
+        _couponSummaryInflight.set(p, leitura);
+        return leitura;
+    })).then(() => renderCoupons());
+}
+
+function _invalidateCouponSummary() {
+    _couponSummaryCache.clear();
+}
+
+function _couponAgeText(meta, nowMs = Date.now()) {
+    if (!meta || !Number(meta.atualizadoEm)) return 'O resumo ainda não foi publicado pelo job.';
+    const min = Math.max(0, Math.round((nowMs - Number(meta.atualizadoEm)) / 60000));
+    const quando = min < 1 ? 'atualizado agora há pouco' : `atualizado há ${min} min`;
+    return min > 30 ? `${quando}. Atenção: o resumo está atrasado (o job roda a cada 10 min).` : `${quando}.`;
+}
+
+function _fillCouponMonthOptions(meta, nowMs = Date.now()) {
+    const sel = document.getElementById('cupom-mes');
+    if (!sel) return;
+    const atual = _brtTodayStr(nowMs).slice(0, 7);
+    const escolhido = sel.value;
+    let mes = /^\d{4}-\d{2}$/.test(meta?.primeiroMes || '') ? meta.primeiroMes : atual;
+    // O mês já escolhido nunca some da lista (nem quando o _meta ainda não chegou).
+    if (/^\d{4}-\d{2}$/.test(escolhido) && escolhido < mes) mes = escolhido;
+    const meses = [];
+    for (let i = 0; mes <= atual && i < 240; i++, mes = _couponMonthShift(mes, 1)) meses.push(mes);
+    const chave = meses.join(',');
+    if (sel.dataset?.meses === chave) return;
+    sel.innerHTML = meses.reverse().map((m) => `<option value="${m}">${_couponMonthLabel(m)}</option>`).join('');
+    if (sel.dataset) sel.dataset.meses = chave;
+    sel.value = meses.includes(escolhido) ? escolhido : atual;
+}
+
 function renderCoupons() {
     const list = document.getElementById('cupons-grid');
     if (!list) return;
 
     const searchTerm = document.getElementById('search-cupons')?.value.toLowerCase() || '';
     const statusFilter = document.getElementById('filter-cupom-status')?.value || 'all';
-    const periodFilter = document.getElementById('filter-cupom-period')?.value || 'all';
 
-    // 1. Filtrar vendas pelo período selecionado para calcular estatísticas reais
-    const now = Date.now();
-    const dayMs = 24 * 60 * 60 * 1000;
-    
-    const filteredSalesForStats = allSales.filter(sale => {
-        if (periodFilter === 'all') return true;
-        
-        const saleTime = sale.timestamp || (sale.createdAt ? new Date(sale.createdAt).getTime() : 0);
-        if (!saleTime) return false;
-
-        switch (periodFilter) {
-            case 'today': return (now - saleTime) < dayMs;
-            case '7': return (now - saleTime) < (7 * dayMs);
-            case '30': return (now - saleTime) < (30 * dayMs);
-            case '90': return (now - saleTime) < (90 * dayMs);
-            case 'year': return new Date(saleTime).getFullYear() === new Date().getFullYear();
-            case 'custom':
-                const start = document.getElementById('cupom-date-start')?.value;
-                const end = document.getElementById('cupom-date-end')?.value;
-                if (start && end) {
-                    const startTime = new Date(start).getTime();
-                    const endTime = new Date(end).getTime() + dayMs;
-                    return saleTime >= startTime && saleTime <= endTime;
-                }
-                return true;
-            default: return true;
-        }
-    });
-
-    // 2. Calcular estatísticas por cupom (canceladas não contam)
+    // 1. Resumo do período escolhido (lido do banco só com a aba aberta, no máximo 1x a cada 10 min)
+    const nowMs = Date.now();
+    const tabAberta = document.getElementById('tab-cupons')?.classList?.contains('active');
+    const mesSel = document.getElementById('cupom-mes');
+    const periodSel = document.getElementById('filter-cupom-period')?.value || 'mes';
+    if (mesSel && mesSel.style) mesSel.style.display = periodSel === 'escolher' ? '' : 'none';
+    if (periodSel === 'escolher') _fillCouponMonthOptions(_couponMetaCached(nowMs, true), nowMs);
+    const range = getCouponPeriodRange(nowMs);
+    const scopeEl = document.getElementById('cupom-data-scope');
+    const setScope = (msg) => { if (scopeEl) scopeEl.textContent = msg; };
+    let statsReady = false;
     const couponStats = {};
-    filteredSalesForStats.forEach(sale => {
-        if (!isSaleActive(sale)) return;
-        const code = (sale.referralCode || sale.couponCode || sale.referral?.code || '').toUpperCase().trim();
-        if (!code) return;
-
-        if (!couponStats[code]) {
-            couponStats[code] = { count: 0, totalValue: 0 };
+    if (range.incomplete) {
+        if (range.needMeta && tabAberta && !_couponMetaCached(nowMs)) _loadCouponSummary(['stats/cupons/_meta']);
+        setScope(range.label);
+    } else {
+        const r = _couponSummaryFor(range, nowMs);
+        if (r.missing) {
+            if (tabAberta) _loadCouponSummary(r.missing);
+            setScope(`Carregando o resumo de ${range.label}...`);
+        } else if (r.error) {
+            setScope(`Não consegui ler o resumo dos cupons: ${r.error}. Use 🔄 Atualizar para tentar de novo.`);
+        } else {
+            // 2. Soma os meses do período (cada mês já vem somado pelo job)
+            for (const [mes, cods] of Object.entries(r.months || {})) {
+                if (!/^\d{4}-\d{2}$/.test(mes) || !range.months(mes)) continue;
+                for (const [k, v] of Object.entries(cods || {})) {
+                    const s = couponStats[k] || (couponStats[k] = { count: 0, totalValue: 0, liquido: 0, cashback: 0 });
+                    s.count += Number(v?.vendas) || 0;
+                    s.totalValue += Number(v?.bruto) || 0;
+                    s.liquido += Number(v?.liquido) || 0;
+                    s.cashback += Number(v?.cashback) || 0;
+                }
+            }
+            statsReady = true;
+            const n = Object.keys(couponStats).length;
+            setScope(`Resumo de ${range.label}: ${n.toLocaleString('pt-BR')} ${n === 1 ? 'cupom' : 'cupons'} com venda. ${_couponAgeText(r.meta, nowMs)}`);
         }
-        couponStats[code].count++;
-        couponStats[code].totalValue += (parseFloat(sale.totalBRL) || 0);
-    });
+    }
 
     // 3. Filtrar e preparar lista de cupons
     const filteredCoupons = allCoupons.filter(coupon => {
         const matchesSearch = coupon.code.toLowerCase().includes(searchTerm);
+        const esgotado = isCouponExhausted(coupon);
         const matchesStatus = statusFilter === 'all' ||
-            (statusFilter === 'active' && coupon.active) ||
-            (statusFilter === 'expired' && !coupon.active);
+            (statusFilter === 'active' && coupon.active && !esgotado) ||
+            (statusFilter === 'expired' && (!coupon.active || esgotado));
         return matchesSearch && matchesStatus;
     }).map(coupon => {
-        const stats = couponStats[coupon.code.toUpperCase()] || { count: 0, totalValue: 0 };
+        const stats = couponStats[_couponKey(coupon.code)] || { count: 0, totalValue: 0, liquido: 0, cashback: 0 };
         return {
             ...coupon,
-            periodCount: stats.count,
-            periodTotalValue: stats.totalValue
+            periodCount: statsReady ? stats.count : null,
+            periodTotalValue: statsReady ? stats.totalValue : null,
+            periodLiquido: statsReady ? stats.liquido : null,
+            periodCashback: statsReady ? stats.cashback : null
         };
     });
 
@@ -1420,11 +1582,19 @@ function renderCoupons() {
             <div class="cupom-stats">
                 <div class="stat-item">
                     <span class="stat-label">Usos (Período)</span>
-                    <span class="stat-val">${coupon.periodCount}</span>
+                    <span class="stat-val">${coupon.periodCount ?? '…'}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Total (Período)</span>
-                    <span class="stat-val" style="color: var(--success);">R$ ${coupon.periodTotalValue.toFixed(2)}</span>
+                    <span class="stat-val" style="color: var(--success);">${coupon.periodTotalValue === null ? '…' : 'R$ ' + coupon.periodTotalValue.toFixed(2)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Cashback (Período)</span>
+                    <span class="stat-val">${coupon.periodCashback === null ? '…' : 'R$ ' + coupon.periodCashback.toFixed(2)}</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Líquido (Período)</span>
+                    <span class="stat-val">${coupon.periodLiquido === null ? '…' : 'R$ ' + coupon.periodLiquido.toFixed(2)}</span>
                 </div>
                 <div class="stat-item">
                     <span class="stat-label">Usos Totais</span>
@@ -4559,7 +4729,9 @@ function updateAdvancedStats() {
     if (searchValue) {
         filtered = filtered.filter(sale => {
             if (searchType === 'id') return (sale.id || '').toLowerCase().includes(searchValue);
-            if (searchType === 'client') return (sale.userName || sale.userId || '').toLowerCase().includes(searchValue);
+            // OS-79: Vendas carrega "username" (o campo "userName" quase nunca existe).
+            if (searchType === 'client') return [sale.username, sale.userName, sale.clientName, sale.userId]
+                .filter(Boolean).join(' ').toLowerCase().includes(searchValue);
             if (searchType === 'game') return (sale.game || '').toLowerCase().includes(searchValue);
             return true;
         });
@@ -7498,8 +7670,9 @@ function getFilteredLogs() {
     const typeFilter = document.getElementById('filter-logs-type')?.value || '';
     const fromDate = document.getElementById('filter-logs-from')?.value;
     const toDate = document.getElementById('filter-logs-to')?.value;
-    const fromTs = fromDate ? new Date(fromDate).getTime() : 0;
-    const toTs = toDate ? new Date(toDate + 'T23:59:59').getTime() : Infinity;
+    // OS-79: início e fim no dia de Brasília (antes o início era lido em UTC).
+    const fromTs = fromDate ? _brtRangeToUTC(fromDate, fromDate).startMs : 0;
+    const toTs = toDate ? _brtRangeToUTC(toDate, toDate).endMs : Infinity;
 
     return ticketLogsData.filter(log => {
         if (typeFilter && log.ticketType !== typeFilter) return false;
@@ -7686,7 +7859,8 @@ async function gerarRelatorio() {
     let totalBRL = 0;
 
     for (const [orderKey, sale] of Object.entries(salesObj)) {
-        if (!sale || sale.status !== 'finalizado') continue;
+        // OS-79: "completed" é o Concluído gravado pelo editor do painel.
+        if (!sale || !isSaleCompleted(sale)) continue;
         const ts = Number(sale.paidAt) || Number(sale.timestamp) || Number(sale.createdAt) || 0;
         if (ts < startMs || ts > endMs) continue;
         if (filterByGame && !selectedGames.includes(sale.game)) continue;
