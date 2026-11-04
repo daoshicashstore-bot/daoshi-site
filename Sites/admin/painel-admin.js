@@ -1762,6 +1762,8 @@ function openCouponModal(couponId = null) {
     document.getElementById('cupom-code').value = '';
     document.getElementById('cupom-value').value = '';
     document.getElementById('cupom-max-uses').value = '';
+    const parteDonoEl = document.getElementById('cupom-owner-percent');
+    if (parteDonoEl) parteDonoEl.value = '';
 
     if (couponId) {
         const coupon = allCoupons.find(c => c.id === couponId);
@@ -1770,6 +1772,8 @@ function openCouponModal(couponId = null) {
         document.getElementById('cupom-code').value = coupon.code;
         document.getElementById('cupom-value').value = coupon.value;
         document.getElementById('cupom-max-uses').value = coupon.maxUses !== null && coupon.maxUses !== undefined ? coupon.maxUses : 0;
+
+        if (parteDonoEl) parteDonoEl.value = coupon.ownerSharePercent ?? '';
 
         // Armazenar ID para edição
         modal.dataset.couponId = couponId;
@@ -1838,34 +1842,42 @@ function saveCoupon() {
             return;
         }
 
-        const description = maxUses === 0
-            ? `Cupom de ${value}% de cashback (ilimitado)`
-            : `Cupom de ${value}% de cashback`;
+        // Parte do dono: acordo deste cupom, separada do cashback (value). Vazio apaga o campo e volta ao padrão.
+        const parteDonoEl = document.getElementById('cupom-owner-percent');
+        const parteDonoTexto = String(parteDonoEl?.value ?? '').trim();
+        const parteDono = parteDonoTexto === '' ? null : Number(parteDonoTexto);
+        if (parteDonoEl?.validity?.badInput || (parteDono !== null && (!Number.isFinite(parteDono) || parteDono < 0 || parteDono > 100))) {
+            showToast('Digite a parte do dono entre 0% e 100%, ou deixe vazio para usar o padrão.', 'warning');
+            return;
+        }
+
         const agoraIso = new Date().toISOString();
 
-        // OS-22: editar grava só o que o formulário muda. O set() de antes trocava o cupom
-        // inteiro e apagava ownerDiscordId, coOwnerDiscordIds, isClan e o que mais houvesse.
+        // Só o que o formulário muda. Donos, marca de clã, contagem de usos e o resto ficam como estão.
+        const dadosDoFormulario = {
+            code,
+            type: 'percentage',
+            value,
+            maxUses: maxUses === 0 ? null : maxUses,
+            description: maxUses === 0
+                ? `Cupom de ${value}% de cashback (ilimitado)`
+                : `Cupom de ${value}% de cashback`,
+            updatedAt: agoraIso
+        };
+
+        // Página antiga em cache, sem o campo: não mexe no acordo gravado.
+        if (parteDonoEl) dadosDoFormulario.ownerSharePercent = parteDono;
+
+        // Na edição, update: set apagaria o que o formulário não conhece, como os donos do cupom.
         const gravacao = id
-            ? window.db.ref(`coupons/${id}`).update({
-                code,
-                type: 'percentage',
-                value,
-                maxUses: maxUses === 0 ? null : maxUses,
-                description,
-                updatedAt: agoraIso
-            })
+            ? window.db.ref(`coupons/${id}`).update(dadosDoFormulario)
             : window.db.ref('coupons').push().set({
-                code,
-                type: 'percentage',
-                value,
-                maxUses: maxUses === 0 ? null : maxUses,
+                ...dadosDoFormulario,
                 active: true,
                 usedCount: 0,
                 minPurchase: 0,
                 expiresAt: null,
-                description,
-                createdAt: agoraIso,
-                updatedAt: agoraIso
+                createdAt: agoraIso
             });
 
         gravacao
@@ -2104,7 +2116,8 @@ function saveClan() {
         const ref = id ? window.db.ref(`coupons/${id}`) : window.db.ref('coupons').push();
         const newId = id || ref.key;
 
-        ref.set(couponData)
+        // Na edição, update: set apagaria os donos e a parte do dono do cupom de organização.
+        (id ? ref.update(couponData) : ref.set(couponData))
             .then(() => {
                 // Inicializa contribuições; na EDIÇÃO só atualiza o canal (não apaga membros)
                 if (id) {
@@ -6288,10 +6301,24 @@ function _crmNormCupom(codigo) {
 }
 
 const CRM_CUPOM_POR_PAGINA = 10;
-// Padrão desta conta: o cadastro do cupom só guarda o cashback de quem compra (type/value), e a venda
-// só guarda esse cashback (referral.cashbackPercent). Nenhum campo guarda a parte da dona do cupom.
-const CRM_CUPOM_PERCENTUAL = 1;
-const CRM_CUPOM_PERCENTUAL_ROTULO = '1% (padrão desta conta)';
+// Decisão do dono: cada cupom tem acordo próprio, em ownerSharePercent. É separado do cashback de quem
+// compra (value no cadastro e referral.cashbackPercent na venda), que nunca entra nesta conta.
+const CRM_CUPOM_PERCENTUAL_PADRAO = 1;
+const CRM_CUPOM_PERCENTUAL_ROTULO = '1% (padrão)';
+
+function _crmPercentualDoCupom(cadastro) {
+    let invalido = false;
+    for (const c of cadastro) {
+        const bruto = c?.ownerSharePercent;
+        if (bruto === undefined || bruto === null || bruto === '') continue;
+        const valor = Number(bruto);
+        if (typeof bruto !== 'boolean' && Number.isFinite(valor) && valor >= 0 && valor <= 100) {
+            return { valor, rotulo: `${valor.toLocaleString('pt-BR', { maximumFractionDigits: 2 })}% (deste cupom)`, doCupom: true, invalido: false };
+        }
+        invalido = true;
+    }
+    return { valor: CRM_CUPOM_PERCENTUAL_PADRAO, rotulo: CRM_CUPOM_PERCENTUAL_ROTULO, doCupom: false, invalido };
+}
 let _crmBuscaTextoLivre = ''; // código que a pessoa mandou tratar como texto comum na busca
 let _crmCupomEstadoCarga = ''; // '' | 'carregando' | 'erro' | 'periodo'
 let _crmCupomPagina = 1;
@@ -6439,6 +6466,7 @@ function calcCRMCouponDetail(sales, codigo, coupons) {
     });
 
     const publico = (x) => ({ count: x.count, total: x.cents / 100 });
+    const percentual = _crmPercentualDoCupom(cadastro);
     const brutoCents = g.terceiros.cents + g.proprias.cents + g.semComprador.cents + g.semDono.cents;
     const baseFechada = temDono && g.semPago.count === 0;
     return {
@@ -6459,9 +6487,11 @@ function calcCRMCouponDetail(sales, codigo, coupons) {
         // Em aberto, nunca R$ 0: sem dono não há de quem separar as compras próprias, e venda de
         // terceiro sem o valor pago deixa a base sem dado.
         base: baseFechada ? pagoCents / 100 : null,
-        percentual: CRM_CUPOM_PERCENTUAL,
-        percentualRotulo: CRM_CUPOM_PERCENTUAL_ROTULO,
-        umPorCento: baseFechada ? Math.round(pagoCents * CRM_CUPOM_PERCENTUAL / 100) / 100 : null,
+        percentual: percentual.valor,
+        percentualRotulo: percentual.rotulo,
+        percentualDoCupom: percentual.doCupom,
+        percentualInvalido: percentual.invalido,
+        parteDoDono: baseFechada ? Math.round(pagoCents * percentual.valor / 100) / 100 : null,
         linhas: linhas.sort((a, b) => b.quando - a.quando)
     };
 }
@@ -6664,11 +6694,15 @@ function renderCRMCouponDetail(estado) {
     let baseHtml;
     if (!d.temDono) baseHtml = '<strong>Sem base</strong><span>falta o dono do cupom</span>';
     else if (d.base === null) baseHtml = '<strong>Sem dado</strong><span>falta o valor pago em dinheiro</span>';
-    else baseHtml = `<strong>R$ ${formatMoney(d.base)}</strong><span>só o pago em dinheiro · ${d.percentualRotulo} = R$ ${formatMoney(d.umPorCento)}</span>`;
+    else baseHtml = `<strong>R$ ${formatMoney(d.base)}</strong><span>só o pago em dinheiro · ${d.percentualRotulo} = R$ ${formatMoney(d.parteDoDono)}</span>`;
 
     const notas = [];
     if (d.temDono) {
-        notas.push(`${d.percentualRotulo}: o cadastro do cupom guarda só o cashback de quem compra, não a parte da dona.`);
+        notas.push(d.percentualDoCupom
+            ? `${d.percentualRotulo}: acordo cadastrado neste cupom, separado do cashback de quem compra.`
+            : d.percentualInvalido
+                ? `O percentual cadastrado neste cupom não é válido, então a conta usa ${d.percentualRotulo}. Corrija na aba Cupons.`
+                : `${d.percentualRotulo}: este cupom ainda não tem acordo cadastrado. Para informar, edite o cupom na aba Cupons.`);
     }
     if (d.semPago.count > 0) {
         notas.push(`${d.semPago.count} de ${d.terceiros.count} venda(s) de terceiros sem o valor pago em dinheiro (R$ ${formatMoney(d.semPago.total)} de total): a base fica sem dado. As demais somam R$ ${formatMoney(d.pagoConhecido)} pagos, que não são a base final.`);
@@ -6738,9 +6772,9 @@ function applyCRMFilters() {
         return;
     }
     const cupomExato = _crmCupomSelecionado();
-    // A4, só com cupom ativo: o fim do dia abaixo cai às 21h de Brasília e perderia venda da base do
-    // saque. Sem cupom, cartões e CSV seguem como estão até o dono decidir.
-    const faixaDoCupom = cupomExato && period === 'custom' ? getCRMPeriodRange() : null;
+    // A4: período personalizado usa a mesma faixa da carga. new Date('AAAA-MM-DD') é meia-noite UTC, o
+    // que tirava as vendas das 21h às 24h do último dia de cartões, rankings, tabela e CSV.
+    const faixaPersonalizada = period === 'custom' ? getCRMPeriodRange() : null;
     // Texto que já virou cupom não filtra também pedido e cliente.
     const search = _crmCupomDaBusca() ? '' : (document.getElementById('crm-search')?.value.toLowerCase() || '');
 
@@ -6770,14 +6804,11 @@ function applyCRMFilters() {
                     matchPeriod = saleYear === new Date().getFullYear();
                     break;
                 case 'custom':
-                    const startDate = document.getElementById('crm-date-start')?.value;
-                    const endDate = document.getElementById('crm-date-end')?.value;
-                    if (startDate && endDate) {
-                        const start = new Date(startDate).getTime();
-                        const end = new Date(endDate).getTime() + dayMs;
-                        matchPeriod = faixaDoCupom
-                            ? saleTime >= faixaDoCupom.start && saleTime <= faixaDoCupom.end
-                            : saleTime >= start && saleTime <= end;
+                    // Mesmo campo da carga (createdAt primeiro): venda criada antes da meia-noite e
+                    // fechada depois fica em um único período, em vez de sair dos dois fechamentos.
+                    if (faixaPersonalizada && !faixaPersonalizada.incomplete) {
+                        const criadaEm = _saleTimeMs(sale);
+                        matchPeriod = criadaEm >= faixaPersonalizada.start && criadaEm <= faixaPersonalizada.end;
                     }
                     break;
             }
