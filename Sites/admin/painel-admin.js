@@ -450,6 +450,51 @@ function addLiveFeedItem(message, type = 'info') {
 }
 
 // ============================================
+// CELULAR: A TABELA VIRA CARTÕES
+// O CSS mostra o título da coluna a partir de data-label. Fora do celular nada disso roda.
+// ============================================
+function rotularTabelasDaAba() {
+    document.querySelectorAll('.tab-content.active table.data-table, .modal.active table.data-table').forEach(tabela => {
+        const titulos = [...tabela.querySelectorAll('thead th')].map(th => th.textContent.trim());
+        if (!titulos.length || tabela.classList.contains('crm-cupom-tabela')) return;
+        tabela.setAttribute('role', 'table');
+        tabela.querySelectorAll('tbody tr').forEach(linha => {
+            linha.setAttribute('role', 'row');
+            [...linha.children].forEach((celula, indice) => {
+                celula.setAttribute('role', 'cell');
+                if (!celula.hasAttribute('colspan') && titulos[indice] && celula.dataset.label !== titulos[indice]) {
+                    celula.dataset.label = titulos[indice];
+                }
+            });
+        });
+    });
+}
+
+function iniciarTabelasNoCelular() {
+    const celular = window.matchMedia('(max-width: 768px)');
+    const conteudo = document.querySelector('.main-content');
+    if (!conteudo) return;
+    let agendado = false;
+    const agendar = () => {
+        if (agendado) return;
+        agendado = true;
+        requestAnimationFrame(() => {
+            agendado = false;
+            rotularTabelasDaAba();
+        });
+    };
+    const observador = new MutationObserver(agendar);
+    const ajustar = () => {
+        observador.disconnect();
+        if (!celular.matches) return;
+        observador.observe(conteudo, { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+        agendar();
+    };
+    celular.addEventListener('change', ajustar);
+    ajustar();
+}
+
+// ============================================
 // AVISO DE VERSÃO NOVA
 // Lê um arquivo estático, ao abrir e ao voltar para a aba, no máximo a cada 10 min.
 // Não usa o Firebase. PAINEL_VERSAO e versao.json mudam juntos em toda publicação.
@@ -498,6 +543,7 @@ onDashboardDomReady(() => {
     setupEventListeners();
     setupPriceSyncIndicator();
 
+    iniciarTabelasNoCelular();
     conferirVersaoPainel();
     document.addEventListener('visibilitychange', () => {
         if (!document.hidden) conferirVersaoPainel();
