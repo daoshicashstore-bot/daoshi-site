@@ -4093,3 +4093,42 @@ kbd {
         backdrop-filter: none;
     }
 }
+
+/* OS-22: foto e nome do cliente; o clique copia o ID. */
+.cliente-com-foto {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    overflow-wrap: anywhere;
+}
+
+button.cliente-com-foto {
+    cursor: pointer;
+}
+
+button.cliente-com-foto:hover span {
+    color: var(--info);
+    text-decoration: underline;
+}
+
+button.cliente-com-foto:focus-visible {
+    outline: 2px solid var(--info);
+    outline-offset: 2px;
+}
+
+.cliente-foto {
+    flex: 0 0 32px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--bg-hover);
+    object-fit: cover;
+}

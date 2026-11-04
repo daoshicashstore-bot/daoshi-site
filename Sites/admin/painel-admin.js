@@ -51,6 +51,23 @@ function isSaleActive(sale) {
     return !INACTIVE_SALE_STATUSES.has(s);
 }
 
+// OS-22: foto + nome do cliente; o clique copia o ID. Só usa o que já veio na venda.
+// A foto só é aceita do Discord: o valor vem do cliente e não pode fazer o navegador do admin chamar outro site.
+function clienteComFoto(sale, aba) {
+    const nomeBruto = aba === 'crm'
+        ? (sale.clientName || sale.clientId)
+        : (sale.username || sale.userName || sale.clientName || sale.clientId);
+    const idBruto = aba === 'crm' ? sale.clientId : (sale.userId || sale.clientId);
+    const numero = parseInt(idBruto, 10);
+    const padrao = `https://cdn.discordapp.com/embed/avatars/${Number.isNaN(numero) ? 0 : numero % 5}.png`;
+    const foto = String(sale.avatarUrl || '');
+    const endereco = /^https:\/\/(cdn\.discordapp\.com|media\.discordapp\.net)\//.test(foto) ? foto : padrao;
+    const nomeSeguro = escapeHtmlSafe(nomeBruto || 'N/A');
+    const imagem = `<img class="cliente-foto" src="${escapeHtmlSafe(endereco)}" alt="" width="32" height="32" loading="lazy" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src='${escapeHtmlSafe(padrao)}'">`;
+    if (!idBruto) return `<span class="cliente-com-foto">${imagem}<span>${nomeSeguro}</span></span>`;
+    return `<button type="button" class="cliente-com-foto" onclick="copyDiscordId(${escapeHtmlSafe(JSON.stringify(String(idBruto)))})" title="Clique para copiar o ID" aria-label="Copiar ID de ${nomeSeguro}">${imagem}<span>${nomeSeguro}</span></button>`;
+}
+
 // OS-79: venda concluída tem DOIS nomes no banco: "finalizado" (bot) e
 // "completed" (o editor deste painel grava esse). Os dois contam como concluída.
 const COMPLETED_SALE_STATUSES = new Set(['finalizado', 'completed']);
@@ -1143,14 +1160,7 @@ function updateSalesTable() {
                 </div>
             </td>
             <td style="font-family: monospace; font-size: 12px; color: var(--text-secondary);">${escapeHtmlSafe(sale.userId || 'N/A')}</td>
-            <td>
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <div style="width: 30px; height: 30px; background: var(--bg-hover); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px;">
-                        ${escapeHtmlSafe((sale.username || 'A').charAt(0).toUpperCase())}
-                    </div>
-                    <span>${escapeHtmlSafe(sale.username || 'N/A')}</span>
-                </div>
-            </td>
+            <td>${clienteComFoto(sale)}</td>
             <td>
                 <span style="display: flex; align-items: center; gap: 8px;">
                     <span>${gameInfo.emoji}</span>
@@ -5955,7 +5965,7 @@ function updateCRMTable() {
                 </div>
             </td>
             <td><code style="color: #10b981; font-weight: bold;">${escapeHtmlSafe(sale.orderNumber)}</code></td>
-            <td>${escapeHtmlSafe(sale.clientName || sale.clientId || 'N/A')}</td>
+            <td>${clienteComFoto(sale, 'crm')}</td>
             <td>${escapeHtmlSafe(sale.gameName || '-')}</td>
             <td title="${escapeHtmlSafe(Array.isArray(sale.items) ? sale.items.map(i => i.name).join(', ') : '')}">${escapeHtmlSafe(itensText)}</td>
             <td><strong>R$ ${formatMoney(sale.totalBRL || 0)}</strong></td>
