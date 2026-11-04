@@ -499,7 +499,7 @@ function iniciarTabelasNoCelular() {
 // Lê um arquivo estático, ao abrir e ao voltar para a aba, no máximo a cada 10 min.
 // Não usa o Firebase. PAINEL_VERSAO e versao.json mudam juntos em toda publicação.
 // ============================================
-const PAINEL_VERSAO = 'a433394';
+const PAINEL_VERSAO = 'os22-20261104-1';
 const PAINEL_VERSAO_INTERVALO = 10 * 60 * 1000;
 let _painelVersaoConferidaEm = 0;
 

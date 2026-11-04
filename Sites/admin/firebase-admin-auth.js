@@ -2,7 +2,7 @@
     'use strict';
 
     const HUB_ADMIN_EMAIL = 'hub-admin@daoshi.com.br';
-    const DASHBOARD_SCRIPT = 'painel-admin.js?v=12';
+    const DASHBOARD_SCRIPT = 'painel-admin.js?v=13';
     let dashboardLoaded = false;
 
     function ensureLoginUi() {
