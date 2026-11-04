@@ -830,9 +830,9 @@ function setupEventListeners() {
             loadSalesData(true),
             loadDashboardGlobalSummary(),
             loadCouponsData(),
+            document.getElementById('tab-intermedio')?.classList.contains('active') ? loadIntermedioData() : null,
             loadPricesData(),
-            _crmRecarregarSeAberto(),
-            document.getElementById('tab-intermedio')?.classList.contains('active') ? loadIntermedioData() : null
+            _crmRecarregarSeAberto()
         ]);
         showToast('Dados recentes atualizados!', 'success', 2500);
     };
@@ -1854,7 +1854,7 @@ function saveCoupon() {
         const agoraIso = new Date().toISOString();
 
         // Só o que o formulário muda. Donos, marca de clã, contagem de usos e o resto ficam como estão.
-        const dadosDoFormulario = {
+        const couponData = {
             code,
             type: 'percentage',
             value,
@@ -1865,22 +1865,20 @@ function saveCoupon() {
             updatedAt: agoraIso
         };
 
+        // Cupom novo nasce completo.
+        if (!id) {
+            Object.assign(couponData, { active: true, usedCount: 0, minPurchase: 0, expiresAt: null, createdAt: agoraIso });
+        }
+
         // Página antiga em cache, sem o campo: não mexe no acordo gravado.
-        if (parteDonoEl) dadosDoFormulario.ownerSharePercent = parteDono;
+        if (parteDonoEl) couponData.ownerSharePercent = parteDono;
+
+        console.log('📝 Dados a salvar:', couponData);
+
+        const ref = id ? window.db.ref(`coupons/${id}`) : window.db.ref('coupons').push();
 
         // Na edição, update: set apagaria o que o formulário não conhece, como os donos do cupom.
-        const gravacao = id
-            ? window.db.ref(`coupons/${id}`).update(dadosDoFormulario)
-            : window.db.ref('coupons').push().set({
-                ...dadosDoFormulario,
-                active: true,
-                usedCount: 0,
-                minPurchase: 0,
-                expiresAt: null,
-                createdAt: agoraIso
-            });
-
-        gravacao
+        (id ? ref.update(couponData) : ref.set(couponData))
             .then(() => {
                 const action = id ? 'atualizado' : 'criado';
                 console.log(`✅ Cupom ${code} ${action}!`);
