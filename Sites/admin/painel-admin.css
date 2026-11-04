@@ -4077,3 +4077,19 @@ kbd {
     padding: 8px;
     color: var(--text-secondary);
 }
+
+/* OS-22: fundo animado e desfoque pesam no celular e não mudam nada na tarefa. */
+@media (max-width: 768px), (prefers-reduced-motion: reduce) {
+    #particle-canvas,
+    .scanlines,
+    .cyber-grid {
+        display: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .sidebar,
+    .modal {
+        backdrop-filter: none;
+    }
+}

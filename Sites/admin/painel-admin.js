@@ -493,6 +493,8 @@ onDashboardDomReady(() => {
 function initParticleSystem() {
     const canvas = document.getElementById('particle-canvas');
     if (!canvas) return;
+    // OS-22: no celular e com "menos movimento" não roda (o CSS também esconde o fundo).
+    if (window.matchMedia('(max-width: 768px), (prefers-reduced-motion: reduce)').matches) return;
     const ctx = canvas.getContext('2d');
 
     let particles = [];
@@ -766,7 +768,8 @@ function setupEventListeners() {
             loadDashboardGlobalSummary(),
             loadCouponsData(),
             loadPricesData(),
-            _crmRecarregarSeAberto()
+            _crmRecarregarSeAberto(),
+            document.getElementById('tab-intermedio')?.classList.contains('active') ? loadIntermedioData() : null
         ]);
         showToast('Dados recentes atualizados!', 'success', 2500);
     };
@@ -814,6 +817,10 @@ function switchTab(tabName) {
     };
     const pageTitle = document.getElementById('page-title');
     if (pageTitle) pageTitle.textContent = titles[tabName] || 'Dashboard';
+
+    if (tabName === 'estatisticas') {
+        abrirGraficosEstatisticas();
+    }
 
     // OS-79: a aba Cupons busca as vendas do período escolhido só quando é aberta.
     if (tabName === 'cupons') {
@@ -4053,8 +4060,43 @@ function exportClientesCSV() {
     showToast(`${filtered.length} clientes exportados com sucesso!`, 'success');
 }
 
+// OS-22: relê só este cliente em vez da árvore inteira (22 MB a cada ajuste).
+async function relerCliente(userId) {
+    const snapshot = await window.db.ref(`clientes/${userId}`).once('value');
+    const data = snapshot.val();
+    if (!data) return null;
+    const atual = { id: userId, userId: data.userId || userId, username: data.username || data.discordUsername || 'Cliente', ...data };
+    const indice = allClientes.findIndex(c => c.userId === userId);
+    if (indice >= 0) allClientes[indice] = atual;
+    return atual;
+}
+
+// O saldo sempre parte do que está no banco agora: a lista pode ter sido carregada há horas.
+async function clienteComSaldoAtual(userId) {
+    if (!allClientes.some(c => c.userId === userId)) return null;
+    try {
+        const cliente = await relerCliente(userId);
+        if (!cliente) showToast('Este cliente não está mais no banco. Nada mudou.', 'warning');
+        return cliente;
+    } catch (error) {
+        showToast('Não consegui ler o saldo atual. Nada mudou: tente de novo.', 'error');
+        return null;
+    }
+}
+
+// Depois de gravar: uma falha aqui não desfaz a gravação, então o aviso não pode dizer que deu erro nela.
+async function atualizarClienteNaLista(userId) {
+    try {
+        await relerCliente(userId);
+    } catch (error) {
+        showToast('A alteração foi gravada, mas a lista não atualizou. Recarregue a aba Clientes para ver.', 'warning', 6000);
+    }
+    updateClientesStats();
+    updateClientesTable();
+}
+
 async function addSaldoManual(userId) {
-    const cliente = allClientes.find(c => c.userId === userId);
+    const cliente = await clienteComSaldoAtual(userId);
     if (!cliente) return;
 
     const saldoManualAtual = cliente.saldoManual || 0;
@@ -4094,14 +4136,14 @@ async function addSaldoManual(userId) {
         });
 
         showToast(`R$ ${amount.toFixed(2)} adicionado ao saldo de ${cliente.username}! Novo saldo: R$ ${novoSaldoTotal.toFixed(2)}`, 'success');
-        await loadClientesData();
-    } catch (error) {
+        await atualizarClienteNaLista(userId);
+} catch (error) {
         showToast('Erro: ' + error.message, 'error');
     }
 }
 
 async function removeSaldoManual(userId) {
-    const cliente = allClientes.find(c => c.userId === userId);
+    const cliente = await clienteComSaldoAtual(userId);
     if (!cliente) return;
 
     const saldoManualAtual = cliente.saldoManual || 0;
@@ -4169,8 +4211,8 @@ async function removeSaldoManual(userId) {
         });
 
         showToast(`R$ ${amount.toFixed(2)} removido do saldo de ${cliente.username}! Novo saldo: R$ ${novoSaldoTotal.toFixed(2)}`, 'success');
-        await loadClientesData();
-    } catch (error) {
+        await atualizarClienteNaLista(userId);
+} catch (error) {
         showToast('Erro: ' + error.message, 'error');
     }
 }
@@ -4203,8 +4245,8 @@ async function removeReferralCoupon(userId) {
 
         showToast(`Cupom removido com sucesso de ${cliente.username}!`, 'success');
         addLiveFeedItem(`Cupom removido do cliente ${cliente.username}.`, 'success');
-        
-        await loadClientesData();
+
+        await atualizarClienteNaLista(userId);
     } catch (error) {
         console.error('Erro ao remover cupom:', error);
         showToast('Erro ao remover cupom: ' + error.message, 'error');
@@ -4485,6 +4527,38 @@ let statsPaymentChart = null;
 let statsCurrentCurrency = 'brl';
 let statsFilteredData = [];
 
+// OS-22: Chart.js só baixa ao abrir Estatísticas. Mesma versão e mesma integridade que estavam no <head>.
+let _chartJsPromessa = null;
+function carregarChartJs() {
+    if (window.Chart) return Promise.resolve();
+    if (_chartJsPromessa) return _chartJsPromessa;
+    _chartJsPromessa = new Promise((resolve, reject) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js@4.6.1/dist/chart.umd.min.js';
+        script.integrity = 'sha384-Emf5ZVIUiarAdhkgtqK+5/Z5qIvM6QoVrS+qAVtfyZVuD5lIHrac0me485+Antp0';
+        script.crossOrigin = 'anonymous';
+        script.onload = () => resolve();
+        script.onerror = () => {
+            _chartJsPromessa = null;
+            script.remove();
+            reject(new Error('Chart.js não carregou'));
+        };
+        document.head.appendChild(script);
+    });
+    return _chartJsPromessa;
+}
+
+function abrirGraficosEstatisticas() {
+    if (statsRevenueChart) return;
+    carregarChartJs().then(() => {
+        if (statsRevenueChart) return;
+        initCharts();
+        updateAdvancedStats();
+    }).catch(() => {
+        showToast('Os gráficos não carregaram. Os números continuam certos. Confira a internet e abra a aba de novo.', 'error', 6000);
+    });
+}
+
 function initAdvancedStats() {
     // Event listeners para filtros
     const periodSelect = document.getElementById('stats-period');
@@ -4525,8 +4599,6 @@ function initAdvancedStats() {
         });
     });
 
-    // Inicializar gráficos
-    initCharts();
 }
 
 function initCharts() {
@@ -7213,20 +7285,34 @@ function renderIntermedTicketsTable() {
 window.loadIntermedTickets = loadIntermedTickets;
 window.renderIntermedTicketsTable = renderIntermedTicketsTable;
 
+let _intermedioCadastros = [];
+
 async function loadIntermedioData() {
     const tbody = document.getElementById('intermedio-tbody');
     if (!tbody) return;
 
-    const search = document.getElementById('search-intermedio')?.value.toLowerCase() || '';
-
     try {
         const snapshot = await window.db.ref('cadastrosIntermedio').once('value');
         const data = snapshot.val() || {};
-        
-        let registrations = Object.entries(data).map(([id, reg]) => ({
+
+        _intermedioCadastros = Object.entries(data).map(([id, reg]) => ({
             id,
             ...reg
         })).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+        renderIntermedio();
+    } catch (error) {
+        console.error('❌ Erro ao carregar cadastros intermédio:', error);
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 20px;">Erro ao carregar dados</td></tr>';
+    }
+}
+
+function renderIntermedio() {
+    const tbody = document.getElementById('intermedio-tbody');
+    if (!tbody) return;
+
+    const search = document.getElementById('search-intermedio')?.value.toLowerCase() || '';
+    let registrations = _intermedioCadastros;
 
         // Aplicar busca
         if (search) {
@@ -7262,11 +7348,6 @@ async function loadIntermedioData() {
                 </td>
             </tr>
         `).join('');
-
-    } catch (error) {
-        console.error('❌ Erro ao carregar cadastros intermédio:', error);
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #ef4444; padding: 20px;">Erro ao carregar dados</td></tr>';
-    }
 }
 
 async function deleteIntermedio(id) {
@@ -7292,20 +7373,8 @@ function setupIntermedioListeners() {
     _intermedioListenersInitialized = true;
     const searchInput = document.getElementById('search-intermedio');
     if (searchInput) {
-        searchInput.addEventListener('input', () => loadIntermedioData());
+        searchInput.addEventListener('input', renderIntermedio);
     }
-
-    // Listener em tempo real para novos cadastros
-    let initialLoad = true;
-    window.db.ref('cadastrosIntermedio').once('value', () => {
-        initialLoad = false;
-    });
-
-    window.db.ref('cadastrosIntermedio').on('child_added', () => {
-        if (!initialLoad) loadIntermedioData();
-    });
-    window.db.ref('cadastrosIntermedio').on('child_removed', () => loadIntermedioData());
-    window.db.ref('cadastrosIntermedio').on('child_changed', () => loadIntermedioData());
 }
 
 // ═══════════════════════════════════════════════════════════════
