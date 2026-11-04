@@ -1775,31 +1775,37 @@ function saveCoupon() {
             return;
         }
 
-        // Buscar cupom existente para preservar dados
-        const existingCoupon = id ? allCoupons.find(c => c.id === id) : null;
-        console.log('📝 Cupom existente:', existingCoupon);
+        const description = maxUses === 0
+            ? `Cupom de ${value}% de cashback (ilimitado)`
+            : `Cupom de ${value}% de cashback`;
+        const agoraIso = new Date().toISOString();
 
-        const couponData = {
-            code,
-            type: 'percentage',
-            value,
-            maxUses: maxUses === 0 ? null : maxUses,
-            active: existingCoupon ? (existingCoupon.active !== false) : true,
-            usedCount: existingCoupon ? (existingCoupon.usedCount || 0) : 0,
-            minPurchase: existingCoupon ? (existingCoupon.minPurchase || 0) : 0,
-            expiresAt: (existingCoupon && existingCoupon.expiresAt) ? existingCoupon.expiresAt : null,
-            description: maxUses === 0
-                ? `Cupom de ${value}% de cashback (ilimitado)`
-                : `Cupom de ${value}% de cashback`,
-            createdAt: (existingCoupon && existingCoupon.createdAt) ? existingCoupon.createdAt : new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
+        // OS-22: editar grava só o que o formulário muda. O set() de antes trocava o cupom
+        // inteiro e apagava ownerDiscordId, coOwnerDiscordIds, isClan e o que mais houvesse.
+        const gravacao = id
+            ? window.db.ref(`coupons/${id}`).update({
+                code,
+                type: 'percentage',
+                value,
+                maxUses: maxUses === 0 ? null : maxUses,
+                description,
+                updatedAt: agoraIso
+            })
+            : window.db.ref('coupons').push().set({
+                code,
+                type: 'percentage',
+                value,
+                maxUses: maxUses === 0 ? null : maxUses,
+                active: true,
+                usedCount: 0,
+                minPurchase: 0,
+                expiresAt: null,
+                description,
+                createdAt: agoraIso,
+                updatedAt: agoraIso
+            });
 
-        console.log('📝 Dados a salvar:', couponData);
-
-        const ref = id ? window.db.ref(`coupons/${id}`) : window.db.ref('coupons').push();
-
-        ref.set(couponData)
+        gravacao
             .then(() => {
                 const action = id ? 'atualizado' : 'criado';
                 console.log(`✅ Cupom ${code} ${action}!`);
